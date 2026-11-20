@@ -5,7 +5,7 @@ import { IdbHomeDashboard } from '@data/models/idbModels/homeDashboard';
 import { readHomeDashboard, readHomeOwner } from '@data/home/home-record';
 import { HomeTemplateBlueprint, prepareHomeGraph } from '@data/home/home-template-graph';
 import { homeDashboardVisible, homeOwnerResolutionState } from '@data/home/home-references';
-import { HomeDashboardDefinition, HomeOwner, HomeOwnerState, presentedHomeOwner, resolveHomeDefault, sameHomeOwner } from '@domain/home/home-dashboard';
+import { HomeDashboardDefinition, HomeOwner, HomeOwnerState, HomeViewPreferences, presentedHomeOwner, resolveHomeDefault, sameHomeOwner } from '@domain/home/home-dashboard';
 import { AccountWorkspaceStore } from './account-workspace.store';
 import { WorkspaceCommandBoundary } from './workspace-command-boundary.service';
 import { WorkspaceWriteError } from './workspace-commands.models';
@@ -47,9 +47,9 @@ export class HomeCommands {
     if (!owner) throw new WorkspaceWriteError('validation-failed', 'Resolve this single-facility account’s facility configuration before opening Home.');
     return this.prepareInitialize(owner, blueprints);
   }
-  prepareCreate(owner: HomeOwner, blueprint: HomeTemplateBlueprint): HomeCommand {
+  prepareCreate(owner: HomeOwner, blueprint: HomeTemplateBlueprint, views?: HomeViewPreferences): HomeCommand {
     const identity = this.identity(owner);
-    return { ...identity, kind: 'create', graph: prepareHomeGraph(identity.accountGuid, owner, [blueprint]) };
+    return { ...identity, kind: 'create', graph: { ...prepareHomeGraph(identity.accountGuid, owner, [blueprint]), ...(views ? { views: structuredClone(views) } : {}) } };
   }
   prepareUpdate(record: Readonly<IdbHomeDashboard>, definition: HomeDashboardDefinition, repairPaths?: readonly string[]): HomeCommand {
     return { ...this.recordIdentity(record), kind: 'update', guid: record.guid, expectedRevision: record.revision,

@@ -15,7 +15,7 @@ import { projectVisualizationDisplaySettings, visualizationAnalysisBasisIssue } 
 import { decodeVisualizationDefinition } from '@domain/visualizations/visualization-validation';
 import { isCurrentVisualizationResponse, VisualizationSourceEvidence, VisualizationSourceRequest } from '@domain/visualizations/visualization-source-provider';
 import { visualizationChartLabel } from '../visualization-charts';
-import { PreviewIdentity, PreviewPresentation, PreviewRegistry } from './preview-registry';
+import { PreviewDateContextResolver, PreviewIdentity, PreviewPresentation, PreviewRegistry } from './preview-registry';
 import { visualizationIntentEqual } from '../editing/visualization-reconciliation';
 
 /** These fields affect provider values. Trace styling, visibility and ordering do not. */
@@ -60,19 +60,19 @@ export class PreviewController {
   readonly state = this.value.asReadonly();
   private generation = 0;
   private abort?: AbortController;
-  private context?: { definition?: VisualizationDefinition; identity?: PreviewIdentity; active: boolean };
+  private context?: { definition?: VisualizationDefinition; identity?: PreviewIdentity; active: boolean; dates?: PreviewDateContextResolver };
   private destroyed = false;
   private resolving = false;
   private deferredPresentation = false;
   private resolveSnapshot?: ReturnType<AccountWorkspaceStore['snapshot']>;
 
-  update(definition: VisualizationDefinition | undefined, identity: PreviewIdentity | undefined, active = true): void {
+  update(definition: VisualizationDefinition | undefined, identity: PreviewIdentity | undefined, active = true, dates?: PreviewDateContextResolver): void {
     const snapshot = this.workspace.snapshot();
     if (definition && snapshot?.account.guid === definition.accountGuid) {
       const reporting = resolveReportingVisualization(definition, snapshot);
       if (reporting.state !== 'ready') {
         this.cancel();
-        this.context = { definition, identity, active };
+        this.context = { definition, identity, active, dates };
         if (!this.destroyed) this.value.set(active ? reporting : { state: 'inactive', message: 'Chart is inactive.' });
         return;
       }
@@ -87,12 +87,12 @@ export class PreviewController {
       && visualizationIntentEqual(visualizationDataIntent(definition), visualizationDataIntent(previous.definition))) {
       // Let the current numerical acquisition finish and seed its existing session cache.
       // Afterwards resolve the latest presentation normally, with fresh request/evidence identities.
-      this.context = { definition: structuredClone(definition), identity: { ...identity }, active };
+      this.context = { definition: structuredClone(definition), identity: { ...identity }, active, dates };
       this.deferredPresentation = true; return;
     }
     this.cancel();
     if (this.destroyed) return;
-    this.context = { definition: definition ? structuredClone(definition) : undefined, identity: identity ? { ...identity } : undefined, active };
+    this.context = { definition: definition ? structuredClone(definition) : undefined, identity: identity ? { ...identity } : undefined, active, dates };
     if (!active) { this.value.set({ state: 'inactive', message: 'Chart is inactive.' }); return; }
     if (!definition || !identity) { this.value.set({ state: 'setup-required', message: 'Open a saved visualization.' }); return; }
     const decoded = decodeVisualizationDefinition(this.context.definition);
@@ -138,7 +138,7 @@ export class PreviewController {
 
   retry(): void {
     const context = this.context;
-    if (context && !this.destroyed) { this.cancel(); this.update(context.definition, context.identity, context.active); }
+    if (context && !this.destroyed) { this.cancel(); this.update(context.definition, context.identity, context.active, context.dates); }
   }
 
   destroy(): void { this.destroyed = true; this.cancel(); }
@@ -151,7 +151,7 @@ export class PreviewController {
     if (!this.deferredPresentation || !this.context) return false;
     const context = this.context;
     this.resolving = false;
-    this.update(context.definition, context.identity, context.active);
+    this.update(context.definition, context.identity, context.active, context.dates);
     return true;
   }
   private current(generation: number, abort: AbortController): boolean {
@@ -166,9 +166,9 @@ export class PreviewController {
         this.value.set({ state: 'missing-source', message: 'Review the missing selected facilities.', reasons: missingFacilityGuids }); return;
       }
       if (!scope.facilityGuids.length) { this.value.set({ state: 'empty', message: 'No included facilities are available.' }); return; }
-      const dateContext = Object.freeze({ ...await this.registry.dates!.resolve(definition, identity, abort.signal) });
+      const dateContext = Object.freeze({ ...await (this.context?.dates ?? this.registry.dates)!.resolve(definition, identity, abort.signal) });
       if (!this.current(generation, abort)) return;
-      if (definition.sources.some(source => source.kind === 'predictor') && definition.period.kind === 'rolling'
+      if (definition.period.kind === 'rolling'
         && definition.period.anchor === 'latest-data' && !dateContext.latestDataDate && dateContext.emptyReasons) {
         this.value.set({ state: 'empty', message: 'No eligible saved value is available for the latest-data range.', reasons: dateContext.emptyReasons }); return;
       }

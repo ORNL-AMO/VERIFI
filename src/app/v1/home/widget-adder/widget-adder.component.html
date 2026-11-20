@@ -1,7 +1,8 @@
 <section aria-labelledby="home-add-widget-title">
   <h2 id="home-add-widget-title" tabindex="-1">Add widget</h2>
-  <label>Widget type <select class="v1-select" [formControl]="form.controls.kind"><option value="note">Plain-text note</option><option value="visualization">Existing saved visualization</option><option value="shortcut">Internal shortcut</option></select></label>
+  <label>Widget type <select class="v1-select" [formControl]="form.controls.kind"><option value="built-in-chart">Built-in reporting chart</option><option value="note">Plain-text note</option><option value="visualization">Existing saved visualization</option><option value="shortcut">Internal shortcut</option></select></label>
   @switch (choice().kind) {
+    @case ('built-in-chart') { <label>Built-in chart <select class="v1-select" [formControl]="form.controls.recipe"><option value="">Choose a reporting chart</option>@for (recipe of recipes; track recipe.key) { <option [value]="recipe.key">{{ recipe.label }}</option> }</select></label><p>This chart follows the owner’s committed reporting selection and creates no library item.</p> }
     @case ('note') { <p>Add a note, then edit its plain text in the widget.</p> }
     @case ('visualization') {
       <p>Choose an existing same-account visualization. Its source scope and settings remain its own; adding a widget does not copy or change the chart.</p>

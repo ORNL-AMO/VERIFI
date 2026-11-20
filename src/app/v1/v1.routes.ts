@@ -123,6 +123,7 @@ export const V1Routes: Routes = [
           { path: '', pathMatch: 'full', redirectTo: 'home/overview' },
           { path: 'home', pathMatch: 'full', redirectTo: 'home/overview' },
           { path: 'home/dashboard/:dashboardGuid', component: HomeDashboardComponent, canActivate: [protectedNavigationPreflightGuard], canDeactivate: [homeLeaveGuard], runGuardsAndResolvers: 'always' },
+          { path: 'home/built-in/:template/:version', component: HomeDashboardComponent, canActivate: [protectedNavigationPreflightGuard], canDeactivate: [homeLeaveGuard], runGuardsAndResolvers: 'always' },
           {
             path: 'home/:detail',
             component: HomeDashboardComponent,
@@ -251,6 +252,7 @@ export const V1Routes: Routes = [
           { path: '', pathMatch: 'full', redirectTo: 'home/overview' },
           { path: 'home', pathMatch: 'full', redirectTo: 'home/overview' },
           { path: 'home/dashboard/:dashboardGuid', component: HomeDashboardComponent, canActivate: [protectedNavigationPreflightGuard], canDeactivate: [homeLeaveGuard], runGuardsAndResolvers: 'always' },
+          { path: 'home/built-in/:template/:version', component: HomeDashboardComponent, canActivate: [protectedNavigationPreflightGuard], canDeactivate: [homeLeaveGuard], runGuardsAndResolvers: 'always' },
           {
             path: 'home/:detail',
             component: HomeDashboardComponent,

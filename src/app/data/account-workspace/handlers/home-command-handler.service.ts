@@ -51,9 +51,11 @@ export class HomeCommandHandler {
         if (existing) {
           this.assertGraph(submitted.graph, submitted, false);
           if (!owner || existing.creationOperationGuid !== submitted.operationGuid || existing.revision !== 1
-            || existing.template?.automatic !== false
+            || existing.template?.automatic !== !!submitted.graph.dashboards[0].definition.builtIn
             || existing.template?.template !== submitted.graph.dashboards[0].template || existing.template.version !== submitted.graph.dashboards[0].templateVersion
-            || !sameHomeJson(existing.definition, { ...submitted.graph.dashboards[0].definition, visibility: 'always' })
+            || !sameHomeJson(existing.definition, { ...submitted.graph.dashboards[0].definition,
+              visibility: submitted.graph.dashboards[0].definition.builtIn ? submitted.graph.dashboards[0].definition.visibility : 'always' })
+            || !sameHomeJson(existing.template?.baseline, submitted.graph.dashboards[0].baseline ?? existing.definition)
             || new Date(existing.createdDate).getTime() !== new Date(submitted.graph.createdDate).getTime()) throw new HomeConflictError(owner, existing);
           for (const proposed of submitted.graph.charts) {
             const matches = await tx.getAllByIndex<IdbSavedVisualization>('savedVisualizations', 'guid', proposed.guid);
@@ -93,9 +95,21 @@ export class HomeCommandHandler {
           return { owner: await writeOwner(initialDefault(adopted, dashboards)), changed: true };
         }
         this.assertGraph(submitted.graph, submitted, submitted.kind === 'initialize');
+        const proposedViews = submitted.graph.views;
+        if (proposedViews) {
+          if (state.views && !sameHomeJson(state.views, proposedViews)
+            || decodeHomeOwnerState({ ...state, views: proposedViews }).state !== 'valid') invalid('Retain current Home view preferences when saving a layout.');
+          const refs = [...proposedViews.order, ...proposedViews.hidden, ...proposedViews.deleted, ...(proposedViews.default ? [proposedViews.default] : [])];
+          if (!state.views && refs.some(ref => ref.kind === 'saved' && !dashboards.some(record => record.guid === ref.dashboardGuid))) invalid('Home view preferences require owner-local saved dashboards.');
+        }
+        for (const item of submitted.graph.dashboards) if (item.definition.builtIn) {
+          const existing = dashboards.find(record => { const read = readHomeDashboard(record); return read.state === 'valid' && read.value.builtIn
+            && homeViewKey(read.value.builtIn) === homeViewKey(item.definition.builtIn!); });
+          if (existing) throw new HomeConflictError(owner, existing);
+        }
         const added = await this.addGraph(tx, submitted, submitted.graph, catalog, charts);
         const order = [...completeOrder(state.dashboardOrder, dashboards), ...added.map(record => record.guid)];
-        const next = { ...state, initialized: true, dashboardOrder: order };
+        const next = { ...state, initialized: true, dashboardOrder: order, ...(proposedViews ? { views: proposedViews } : {}) };
         const preferred = submitted.kind === 'initialize' ? added.find(record => record.template?.template === 'home')?.guid : undefined;
         const nextState = initialDefault(next, [...dashboards, ...added], preferred);
         return { owner: await writeOwner(nextState), dashboard: added[0], changed: true };
@@ -169,7 +183,8 @@ export class HomeCommandHandler {
             && ![...cleaned.hidden, ...cleaned.deleted].some(item => homeViewKey(item) === homeViewKey(ref))
             && !references.some(issue => issue.path === `views.order.${homeViewKey(ref)}`));
           // Shipped availability/conditional visibility is resolved on read; never skip ahead to a saved view.
-          const replacement = selected && verified(selected, 'views.default') ? fallback?.kind === 'saved' ? fallback : undefined : selected;
+          const deletedDefault = selected && (verified(selected, 'views.default') || builtIn && homeViewKey(selected) === homeViewKey(builtIn));
+          const replacement = deletedDefault ? fallback?.kind === 'saved' ? fallback : undefined : selected;
           next = { ...next, views: { ...cleaned, ...(replacement ? { default: replacement } : {}) } };
         }
         if (resolution.defaultDashboardGuid === current.guid) next = withDefault(next,
@@ -252,9 +267,11 @@ export class HomeCommandHandler {
     const used = graph.dashboards.flatMap(item => {
       const decoded = decodeHomeDashboard(item.definition);
       if (decoded.state !== 'valid' || item.template === 'blank' && decoded.value.widgets.length) invalid('Invalid Home template layout.');
+      if (item.definition.builtIn && !item.baseline) invalid('A shipped customization requires its reproducible baseline.');
+      if (item.baseline && (decodeHomeDashboard(item.baseline).state !== 'valid' || !sameHomeJson(item.baseline.builtIn, item.definition.builtIn))) invalid('Invalid shipped customization baseline.');
       return homeReferences(decoded.value).filter(ref => ref.kind === 'visualization').map(ref => ref.guid);
     });
-    if (!sameSet(used, graph.charts.map(chart => chart.guid))) invalid('Template widgets and fresh chart definitions must form a complete graph.');
+    if (!(command.kind === 'create' && graph.charts.length === 0 && graph.dashboards.every(item => !!item.definition.builtIn)) && !sameSet(used, graph.charts.map(chart => chart.guid))) invalid('Template widgets and fresh chart definitions must form a complete graph.');
     for (const chart of graph.charts) {
       const decoded = decodeVisualizationDefinition(chart.definition);
       if (!('definition' in decoded) || decoded.definition.accountGuid !== command.accountGuid) invalid('Invalid template chart definition.');
@@ -280,15 +297,17 @@ export class HomeCommandHandler {
     const added: IdbHomeDashboard[] = [];
     for (const proposal of graph.dashboards) {
       const definition: HomeDashboardDefinition = { ...proposal.definition,
-        visibility: current ? (current.definition as HomeDashboardDefinition).visibility : command.kind === 'initialize' ? proposal.definition.visibility : 'always' };
+        visibility: current ? (current.definition as HomeDashboardDefinition).visibility : command.kind === 'initialize' || proposal.definition.builtIn ? proposal.definition.visibility : 'always' };
       this.assertDefinition(definition, command, catalog, [...existingCharts, ...addedCharts]);
       const record = current ? { ...current, definition: structuredClone(definition), revision: current.revision + 1, modifiedDate: new Date() }
         : getNewIdbHomeDashboard(command.accountGuid, command.owner, definition, { guid: proposal.guid, createdDate: date, modifiedDate: date });
       if (!current) record.creationOperationGuid = command.operationGuid;
       const links = new Set(homeReferences(definition).filter(ref => ref.kind === 'visualization').map(ref => ref.guid));
+      const baseline = proposal.baseline ?? definition;
       record.template = { template: proposal.template, version: proposal.templateVersion,
-        automatic: current ? !!current.template?.automatic && current.template.template === proposal.template : command.kind === 'initialize', customized: false,
-        baseline: structuredClone(definition), chartBaselines: addedCharts.filter(chart => links.has(chart.guid)).map(chart => ({ guid: chart.guid, revision: chart.revision })) };
+        automatic: current ? !!current.template?.automatic && current.template.template === proposal.template : command.kind === 'initialize' || !!definition.builtIn,
+        customized: !!definition.builtIn && !sameHomeJson(definition, baseline),
+        baseline: structuredClone(baseline), chartBaselines: addedCharts.filter(chart => links.has(chart.guid)).map(chart => ({ guid: chart.guid, revision: chart.revision })) };
       delete record.preservation;
       if (current) await tx.put('homeDashboards', record);
       else { await this.assertUnused(tx, 'homeDashboards', record.guid); record.id = await tx.add('homeDashboards', record) as number; }
@@ -304,6 +323,7 @@ export class HomeCommandHandler {
     if (command.owner.kind === 'facility' && read.value.widgets.some(widget => widget.kind === 'map' || widget.kind === 'table' && widget.settings.view === 'facility-progress'))
       invalid('Portfolio maps and facility progress tables require an account dashboard.');
     const old = retained && readHomeDashboard(retained);
+    if (old?.state === 'valid' && !sameHomeJson(old.value.builtIn, read.value.builtIn)) invalid('A layout edit cannot change its shipped dashboard identity.');
     const oldRefs = old?.state === 'valid' ? homeReferences(old.value) : [];
     const acknowledged = command.kind === 'update' ? command.repairPaths ?? [] : [];
     const protectedIntent = (path: string, kind: HomeReferenceIssue['kind'] | HomeOwner['kind'], guid: string) => !acknowledged.includes(path)

@@ -1,3 +1,8 @@
+import { HomeLibrarySave } from '../home-library-save.service';
+import { HomeReturnService } from '../home-return.service';
+import { homeOwnerKey } from '@domain/home/home-dashboard';
+import { homeViewKey } from '@domain/home/home-views';
+import { HomeBrowseSession } from '../home-browse-session.service';
 import { DOCUMENT } from '@angular/common';
 import { InteractivityChecker } from '@angular/cdk/a11y';
 import { TemplatePortal } from '@angular/cdk/portal';
@@ -10,6 +15,9 @@ import { HomeEditor } from '../home-editor.service';
 @Component({ selector: 'app-home-dashboard', standalone: false, templateUrl: './dashboard.component.html', styleUrls: ['./dashboard.component.css'] })
 export class HomeDashboardComponent {
   readonly home = inject(HomeContext);
+  readonly library = inject(HomeLibrarySave);
+  readonly browse = inject(HomeBrowseSession);
+  readonly returns = inject(HomeReturnService);
   readonly editor = inject(HomeEditor);
   readonly printing = inject(HomePrintState);
   private readonly modal = inject(ModalPortalService);
@@ -42,6 +50,17 @@ export class HomeDashboardComponent {
       if (opener && !this.editor.confirmation()) {
         this.restoreOpener.set(undefined);
         if (opener.isConnected && this.checker.isFocusable(opener)) opener.focus();
+      }
+      const homeReturn = this.returns.focus(), account = this.home.workspace.account(), owner = this.home.owner(), selected = this.home.selected();
+      if (homeReturn && account && owner && homeReturn.ownerKey === homeOwnerKey(account.guid, owner)
+        && (!homeReturn.reference || selected && homeViewKey(selected.reference) === homeViewKey(homeReturn.reference))) {
+        this.returns.focus.set(undefined);
+        lastFocus = this.editor.focusRequest(); lastDashboard = this.home.selectedGuid();
+        const widget = [...this.element.nativeElement.querySelectorAll<HTMLElement>('[data-widget-id]')].find(item => item.dataset['widgetId'] === homeReturn.widgetId);
+        const target = widget?.querySelector<HTMLElement>('[data-home-open], h2') ?? this.element.nativeElement.querySelector<HTMLElement>('#home-title');
+        target?.focus({ preventScroll: true });
+        this.returns.restoreScroll(homeReturn.scroll);
+        return;
       }
       const focus = this.editor.focusRequest(), dashboard = this.home.selectedGuid();
       if (focus !== lastFocus || dashboard !== lastDashboard) {

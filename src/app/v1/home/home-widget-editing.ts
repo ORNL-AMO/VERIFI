@@ -1,5 +1,6 @@
 export interface HomeWidgetChoiceDraft {
-  readonly kind: 'note' | 'visualization' | 'shortcut';
+  readonly kind: 'note' | 'visualization' | 'shortcut' | 'built-in-chart';
+  readonly recipe?: string;
   readonly visualizationGuids: readonly string[];
   readonly shortcutKeys: readonly string[];
 }

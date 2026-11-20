@@ -1,7 +1,16 @@
+@let widget = view().widget;
+@if (active() && widget.kind === 'visualization') {
+  <button type="button" class="v1-btn v1-btn--quiet chart-action" data-home-open (click)="openSaved(widget.visualizationGuid)">Open or repair saved visualization</button>
+}
+@if (active() && reportingRoute(); as route) { <a class="chart-action" [routerLink]="route">Review reporting selection in Analysis</a> }
 @if (model(); as chart) {
   @if (chart.state === 'configured') {
+    @if (active() && widget.kind === 'built-in-chart') {
+      <button type="button" class="v1-btn v1-btn--quiet chart-action" [disabled]="!editor.canStart()" (click)="editor.customizeWidget(widget.id)">Customize chart in dashboard</button>
+      <button type="button" class="v1-btn v1-btn--quiet chart-action" [disabled]="library.needsProtection() || !home.workspace.canWrite()" (click)="library.begin(widget.id, chart.definition)">Save as visualization</button>
+    }
     <p class="chart-context">{{ chart.context }}</p>
-    <app-visualization-preview [definition]="chart.definition" [identity]="chart.identity" [active]="active()"/>
+    <app-visualization-preview [definition]="chart.definition" [identity]="chart.identity" [active]="active()" [dates]="dateResolver()"/>
     @if (values(); as details) {
       <div class="chart-values"><table><caption>{{ details.caption }}</caption>
         <thead><tr>@for (column of details.columns; track $index) { <th scope="col">{{ column }}</th> }</tr></thead>

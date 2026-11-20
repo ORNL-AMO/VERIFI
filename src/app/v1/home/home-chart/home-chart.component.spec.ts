@@ -43,5 +43,9 @@ describe('Home chart embedding context and lifetime', () => {
     expect(after?.state === 'configured' && after.definition.name).toBe('Committed shared edit');
     expect(after?.state === 'configured' && after.identity.definitionRevision).toBe(2);
     expect(fixture.nativeElement.textContent).toContain('committed shared edits apply here');
+    const { displaySettings: _display, ...legacyBase } = definition;
+    const legacy = { ...legacyBase, sources: definition.sources.map(source => ({ ...source, settings: { ...source.settings, energyTreatment: { kind: 'pinned' as const, value: 'source' as const } } })) };
+    store.publishCommitted({ ...store.snapshot()!, savedVisualizations: [{ ...chart, revision: 3, definition: legacy }] }, {}); fixture.detectChanges();
+    expect(fixture.nativeElement.textContent).toContain('Source energy basis');
   });
 });

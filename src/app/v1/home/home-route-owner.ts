@@ -8,7 +8,7 @@ export function homeRouteOwner(account: { readonly guid: string; readonly isSing
   const presented = presentedHomeOwner(account, facilities);
   if (!presented) return undefined;
   if (route.contextMode === 'account') return route.accountGuid === account.guid
-    && !(route.homeDashboardGuid && presented.kind !== 'account') ? presented : undefined;
+    && !((route.homeDashboardGuid || route.detail === 'built-in') && presented.kind !== 'account') ? presented : undefined;
   return facilities.some(item => item.guid === route.facilityGuid && item.accountId === account.guid)
     ? { kind: 'facility', guid: route.facilityGuid! } : undefined;
 }

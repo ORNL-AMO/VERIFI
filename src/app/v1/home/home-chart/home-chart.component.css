@@ -3,6 +3,7 @@
 .chart-values { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
 @media print {
   :host { break-inside: auto; }
+  .chart-action { display: none; }
   .chart-values { position: static; width: auto; height: auto; overflow: visible; clip-path: none; }
   table { width: 100%; table-layout: fixed; font-size: .8rem; }
   th, td { overflow-wrap: anywhere; border: 1px solid var(--v1-border); padding: .3rem; }

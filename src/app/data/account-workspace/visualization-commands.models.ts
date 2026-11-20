@@ -1,3 +1,4 @@
+import type { HomeOwner, HomeBuiltInChartReference, HomeDashboardReference } from '@domain/home/home-dashboard';
 import { VisualizationDefinition, VisualizationFacilitySelection } from '@domain/visualizations/visualization-definition';
 import { VisualizationReferenceIssue } from '@domain/visualizations/visualization-references';
 import { IdbSavedVisualization } from '@data/models/idbModels/savedVisualization';
@@ -10,10 +11,19 @@ interface VisualizationCommandIdentity {
   readonly guid: string;
 }
 
+export interface HomeVisualizationSource {
+  readonly owner: HomeOwner;
+  readonly expectedOwnerRevision: number | null;
+  readonly dashboard?: { readonly guid: string; readonly revision: number };
+  readonly view: HomeDashboardReference;
+  readonly widgetId: string;
+  readonly reference: HomeBuiltInChartReference;
+}
 export interface CreateVisualizationCommand extends VisualizationCommandIdentity {
   readonly kind: 'create';
   readonly definition: VisualizationDefinition;
   readonly createdDate: string;
+  readonly homeSource?: HomeVisualizationSource;
   readonly captureSource?: VisualizationCaptureSource;
   /** Recovery copies retain the original capture baseline rather than granting a new one. */
   readonly retainedCaptureOrigin?: VisualizationCaptureOrigin;

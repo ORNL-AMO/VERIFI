@@ -1,3 +1,9 @@
+import { HomeLibrarySave } from './home-library-save.service';
+import { HomeDisplayDefaults } from '@domain/home/home-dashboard';
+import { HomeDisplayDraft } from './display-controls/display-controls.component';
+import { HomeDashboardReference, HomeViewPreferences } from '@domain/home/home-dashboard';
+import { captureHomeViewPreferences, homeViewKey } from '@domain/home/home-views';
+import { homeEntryKey } from './home-view-resolver.service';
 import { DestroyRef, Injectable, computed, effect, inject, signal, untracked } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
@@ -17,7 +23,7 @@ import { HomeDashboardDefinition, HomeOwner, HomeTemplate, HomeWidget, homeOwner
 import { decodeHomeDashboard } from '@domain/home/home-validation';
 import { homeDashboardRoute } from '@app/v1/routing/workspace-route';
 import { UnsavedChangesService } from '@app/v1/shared/navigation/unsaved-changes.service';
-import { homeWidgetView } from './home-widget-view';
+import { availableHomeCharts, homeWidgetView } from './home-widget-view';
 import { EMPTY_HOME_WIDGET_CHOICE, HomeWidgetChoiceDraft } from './home-widget-editing';
 import { HomeContext } from './home-context.service';
 import { HomeTemplateCatalog } from './home-template-catalog.service';
@@ -30,12 +36,17 @@ export interface HomeEditSession {
   readonly mode: 'view' | 'edit' | 'create' | 'restore';
   readonly revision: number;
   readonly baseline?: Readonly<IdbHomeDashboard>;
+  readonly baselineDefinition?: HomeDashboardDefinition;
+  readonly builtIn?: Extract<HomeDashboardReference, { kind: 'built-in' }>;
+  readonly returnToDefault?: boolean;
   readonly ownerRevision?: number | null;
   readonly definition?: HomeDashboardDefinition;
   readonly blueprint?: HomeTemplateBlueprint;
   readonly recipe?: HomeTemplate;
   readonly dirty?: boolean;
   readonly widgetChoice?: HomeWidgetChoiceDraft;
+  readonly replacements?: Readonly<Record<string, string>>;
+  readonly displayDrafts?: Readonly<Record<string, HomeDisplayDraft>>;
   readonly repairPaths?: readonly string[];
   readonly saving?: boolean;
   readonly proposal?: HomeCommand;
@@ -61,6 +72,7 @@ interface HomeConfirmation {
 export class HomeEditor {
   readonly home = inject(HomeContext);
   readonly catalog = inject(HomeTemplateCatalog);
+  private readonly library = inject(HomeLibrarySave);
   private readonly commands = inject(HomeCommands);
   private readonly workspaceService = inject(AccountWorkspaceService);
   private readonly router = inject(Router);
@@ -68,7 +80,7 @@ export class HomeEditor {
   private readonly sessions = signal<ReadonlyMap<string, HomeEditSession>>(new Map());
   readonly key = computed(() => {
     const owner = this.home.owner(), account = this.home.workspace.account();
-    return owner && account ? `${homeOwnerKey(account.guid, owner)}:${JSON.stringify(this.home.context.routeState().homeDashboardGuid ?? 'overview')}` : undefined;
+    return owner && account ? `${homeOwnerKey(account.guid, owner)}:${JSON.stringify(this.home.context.routeState().homeBuiltIn ? homeEntryKey(this.home.context.routeState().homeBuiltIn!) : this.home.context.routeState().homeDashboardGuid ?? 'overview')}` : undefined;
   });
   readonly session = computed(() => { const key = this.key(); return key ? this.sessions().get(key) : undefined; });
   readonly confirmation = signal<HomeConfirmation | undefined>(undefined);
@@ -83,14 +95,14 @@ export class HomeEditor {
   private leaveResolve?: (allow: boolean) => void;
   private leavePromise?: Promise<boolean>;
   readonly saving = computed(() => [...this.sessions().values()].some(session => session.saving));
-  readonly pendingWidgetChoice = computed(() => !!this.session()?.widgetChoice?.visualizationGuids.length || !!this.session()?.widgetChoice?.shortcutKeys.length);
+  readonly pendingWidgetChoice = computed(() => Object.values(this.session()?.replacements ?? {}).some(Boolean) || !!this.session()?.widgetChoice?.recipe || !!this.session()?.widgetChoice?.visualizationGuids.length || !!this.session()?.widgetChoice?.shortcutKeys.length);
   readonly needsProtection = computed(() => this.saving() || !this.receiptDepartureAccepted() && (!!this.session()?.dirty || !!this.session()?.proposal || this.pendingWidgetChoice()));
   readonly canAct = computed(() => !!this.key() && this.home.workspace.canWrite() && !this.home.workspace.hasPending() && !this.saving());
-  readonly canStart = computed(() => this.canAct() && !this.needsProtection() && !this.session()?.proposal);
-  readonly adopted = computed(() => this.home.view()?.initialization === 'initialized');
+  readonly canStart = computed(() => !this.library.needsProtection() && this.canAct() && !this.needsProtection() && !this.session()?.proposal);
+  readonly adopted = computed(() => this.home.view()?.initialization === 'initialized' || this.home.view()?.initialization === 'new' && this.home.selected()?.reference.kind === 'built-in');
   readonly canEdit = computed(() => this.canAct() && !!this.session()?.definition && this.session()?.mode !== 'view' && !this.session()?.proposal && this.home.view()?.initialization !== 'unavailable');
   readonly canSave = computed(() => this.canEdit() && this.session()?.mode !== 'restore'
-    && !!this.session()?.dirty && !this.pendingWidgetChoice() && decodeHomeDashboard(this.session()?.definition).state === 'valid');
+    && !!this.session()?.dirty && !Object.values(this.session()?.displayDrafts ?? {}).some(draft => !draft.valid) && !this.pendingWidgetChoice() && decodeHomeDashboard(this.session()?.definition).state === 'valid');
   readonly canRetry = computed(() => this.canAct() && !!this.session()?.proposal && ['failed', 'refresh-required'].includes(this.session()?.outcome?.state ?? ''));
   readonly canRecoverPublication = computed(() => this.home.workspace.isReady() && !!this.home.workspace.account()
     && !this.home.workspace.hasPending() && !this.saving());
@@ -100,7 +112,7 @@ export class HomeEditor {
     return [...this.sessions().values()].filter(session => session.accountGuid === account.guid && session.key !== key && session.outcome?.state === 'refresh-required')
       .map(session => {
         const command = session.proposal!;
-        const name = session.definition?.name || readDefinition(session.baseline)?.name || (command.kind === 'duplicate' ? command.name
+        const name = session.definition?.name || (session.baselineDefinition ?? readDefinition(session.baseline))?.name || (command.kind === 'duplicate' ? command.name
           : command.kind === 'create' || command.kind === 'restore' || command.kind === 'upgrade' ? command.graph.dashboards[0]?.definition.name : undefined);
         const ownerName = session.owner.kind === 'account' ? account.name : this.home.workspace.facilities().find(item => item.guid === session.owner.guid)?.name ?? 'Unavailable facility';
         return { key: session.key, label: `${name || 'Home navigation change'} · ${ownerName}` };
@@ -124,7 +136,7 @@ export class HomeEditor {
   });
   readonly conflictDraftWidgets = computed(() => {
     const session = this.session(), snapshot = this.home.workspace.snapshot();
-    return session?.definition && session.baseline && snapshot ? session.definition.widgets.map(widget => homeWidgetView(session.baseline!, widget, snapshot, session.repairPaths, this.home.shortcutChoices())) : [];
+    return session?.definition && snapshot ? session.definition.widgets.map(widget => homeWidgetView(session.baseline ?? { accountId: session.accountGuid }, widget, snapshot, session.repairPaths, this.home.shortcutChoices())) : [];
   });
   readonly conflictFieldChanges = computed(() => homeDefinitionChanges(this.conflictDefinition(), this.session()?.definition));
   readonly conflictOwnerChoices = computed(() => {
@@ -164,7 +176,7 @@ export class HomeEditor {
       const session = this.session(), enabled = this.canEdit();
       this.form.patchValue({ name: session?.definition?.name ?? '', recipe: session?.recipe ?? 'blank' }, { emitEvent: false });
       const nameEnabled = enabled && session?.mode !== 'restore';
-      const recipeEnabled = enabled && session?.mode !== 'edit';
+      const recipeEnabled = enabled && session?.mode !== 'edit' && !session?.builtIn;
       nameEnabled ? this.form.controls.name.enable({ emitEvent: false }) : this.form.controls.name.disable({ emitEvent: false });
       recipeEnabled ? this.form.controls.recipe.enable({ emitEvent: false }) : this.form.controls.recipe.disable({ emitEvent: false });
     });
@@ -188,29 +200,35 @@ export class HomeEditor {
   beginEdit(): void {
     const session = this.current(), selected = this.home.selected();
     if (!session || !selected || selected.read.state !== 'valid' || !this.canStart() || this.confirmation() || !this.adopted()) return;
-    this.put({ ...session, mode: 'edit', baseline: structuredClone(selected.record), ownerRevision: this.home.view()?.record?.revision ?? null,
+    const builtIn = selected.read.value.builtIn ?? (selected.reference.kind === 'built-in' ? selected.reference : undefined);
+    const blueprint = builtIn && !selected.record ? this.catalog.buildBuiltIn(builtIn, session.accountGuid, session.owner) : undefined;
+    this.put({ ...session, mode: 'edit', returnToDefault: undefined, builtIn, blueprint, baselineDefinition: structuredClone(selected.read.value), baseline: selected.record && structuredClone(selected.record), ownerRevision: this.home.view()?.record?.revision ?? null,
       definition: structuredClone(selected.read.value), dirty: false, message: undefined });
     this.focus('name');
   }
+  customizeWidget(id: string): void { this.beginEdit(); if (this.session()?.mode === 'edit') this.focus('widget-editor', id); }
   beginCreate(): void {
     const session = this.current();
     if (!session || !this.canStart() || this.confirmation() || this.home.view()?.initialization === 'unavailable') return;
     const blueprint = this.catalog.build('blank', session.accountGuid, session.owner);
-    this.put({ ...session, mode: 'create', recipe: 'blank', blueprint, baseline: undefined,
+    this.put({ ...session, mode: 'create', builtIn: undefined, baselineDefinition: undefined, returnToDefault: undefined, recipe: 'blank', blueprint, baseline: undefined,
       ownerRevision: this.home.view()?.record?.revision ?? null, definition: { ...blueprint.dashboard, name: '' }, dirty: false, message: undefined });
     this.focus('name');
   }
   beginRestore(): void {
     const session = this.current(), selected = this.home.selected();
     if (!session || !selected || selected.read.state !== 'valid' || !this.canStart() || this.confirmation() || !this.adopted()) return;
-    const blueprint = this.catalog.build('blank', session.accountGuid, session.owner);
-    this.put({ ...session, mode: 'restore', baseline: structuredClone(selected.record), ownerRevision: this.home.view()?.record?.revision ?? null,
-      recipe: 'blank', blueprint, definition: blueprint.dashboard, dirty: false, message: undefined });
+    const builtIn = selected.read.value.builtIn ?? (selected.reference.kind === 'built-in' ? selected.reference : undefined);
+    let blueprint: HomeTemplateBlueprint;
+    try { blueprint = builtIn ? this.catalog.buildBuiltIn(builtIn, session.accountGuid, session.owner) : this.catalog.build('blank', session.accountGuid, session.owner); }
+    catch (error) { this.put({ ...session, message: message(error) }); return; }
+    this.put({ ...session, mode: 'restore', returnToDefault: undefined, builtIn, baselineDefinition: structuredClone(selected.read.value), baseline: selected.record && structuredClone(selected.record), ownerRevision: this.home.view()?.record?.revision ?? null,
+      recipe: blueprint.template, blueprint, definition: blueprint.dashboard, dirty: false, message: undefined });
     this.focus('recipe');
   }
   chooseRecipe(recipe: HomeTemplate): void {
     const session = this.session();
-    if (!session || !this.canEdit() || !['create', 'restore'].includes(session.mode) || session.recipe === recipe) return;
+    if (!session || session.builtIn || !this.canEdit() || !['create', 'restore'].includes(session.mode) || session.recipe === recipe) return;
     try {
       const blueprint = this.catalog.build(recipe, session.accountGuid, session.owner);
       this.put({ ...session, recipe, blueprint, definition: { ...blueprint.dashboard,
@@ -220,8 +238,22 @@ export class HomeEditor {
   changeDefinition(definition: HomeDashboardDefinition): void {
     const session = this.session();
     if (!session || !this.canEdit() || sameHomeJson(definition, session.definition)) return;
-    this.put({ ...session, definition: structuredClone(definition), dirty: session.mode === 'create' || !!session.repairPaths?.length || !sameHomeJson(definition, readDefinition(session.baseline)),
+    this.put({ ...session, definition: structuredClone(definition), dirty: session.mode === 'create' || !!session.repairPaths?.length || !sameHomeJson(definition, session.baselineDefinition ?? readDefinition(session.baseline)),
       revision: session.revision + 1, message: undefined });
+  }
+  saveDisplayDefaults(defaults: HomeDisplayDefaults): Promise<void> {
+    if (!this.canStart()) return Promise.resolve();
+    this.beginEdit();
+    const definition = this.session()?.definition;
+    if (!definition) return Promise.resolve();
+    this.changeDefinition({ ...definition, defaults });
+    return this.save();
+  }
+  setWidgetDisplay(id: string, draft: HomeDisplayDraft): void {
+    const session = this.session(), widget = session?.definition?.widgets.find(widget => widget.id === id);
+    if (!session || !widget || !this.canEdit() || (widget.kind !== 'visualization' && widget.kind !== 'built-in-chart')) return;
+    this.put({ ...session, displayDrafts: { ...session.displayDrafts, [id]: draft }, dirty: true, revision: session.revision + 1 });
+    if (draft.valid) this.updateWidget({ ...widget, overrides: draft.value, inherit: draft.inherit });
   }
   setWidgetChoice(choice: HomeWidgetChoiceDraft): void {
     const session = this.session();
@@ -244,6 +276,22 @@ export class HomeEditor {
     if (repairPaths.length) this.put({ ...session, repairPaths: [...new Set([...(session.repairPaths ?? []), ...repairPaths])], dirty: true, revision: session.revision + 1 });
     this.changeDefinition({ ...session.definition, widgets: session.definition.widgets.map(item => item.id === widget.id ? widget : item) });
   }
+  chooseReplacement(widgetId: string, guid: string): void {
+    const session = this.session();
+    if (session && this.canEdit()) this.put({ ...session, replacements: { ...session.replacements, [widgetId]: guid }, revision: session.revision + 1 });
+  }
+  replaceChart(widgetId: string): void {
+    const session = this.session(), snapshot = this.home.workspace.snapshot(), guid = session?.replacements?.[widgetId];
+    const widget = session?.definition?.widgets.find(widget => widget.id === widgetId);
+    if (!session?.definition || !snapshot || !guid || !widget || !this.canEdit() || (widget.kind !== 'visualization' && widget.kind !== 'built-in-chart')
+      || !availableHomeCharts(snapshot).some(chart => chart.guid === guid)) return;
+    const { id, title, templateKey, size, visibility, inherit, overrides } = widget;
+    const replacement: HomeWidget = { id, ...(title !== undefined ? { title } : {}), ...(templateKey !== undefined ? { templateKey } : {}), size, visibility, inherit, overrides, kind: 'visualization', visualizationGuid: guid };
+    const repairPaths = session.baseline?.preservation?.references.filter(ref => ref.path.startsWith(`widgets.${widgetId}.`)).map(ref => ref.path) ?? [];
+    this.put({ ...session, replacements: { ...session.replacements, [widgetId]: '' },
+      repairPaths: [...new Set([...(session.repairPaths ?? []), ...repairPaths])], dirty: true, revision: session.revision + 1 });
+    this.changeDefinition({ ...session.definition, widgets: session.definition.widgets.map(widget => widget.id === widgetId ? replacement : widget) });
+  }
   moveWidget(id: string, to: number): void {
     const session = this.session();
     if (!session?.definition || session.mode !== 'edit' || !this.canEdit()) return;
@@ -265,7 +313,7 @@ export class HomeEditor {
     if (!session || !this.canSave()) { this.form.markAllAsTouched(); return; }
     try {
       const definition = { ...session.definition!, name: session.definition!.name.trim() };
-      const prepared = session.mode === 'create' ? this.commands.prepareCreate(session.owner, { ...session.blueprint!, dashboard: definition })
+      const prepared = session.mode === 'create' || !session.baseline && session.builtIn ? this.commands.prepareCreate(session.owner, { ...session.blueprint!, dashboard: definition }, this.viewPreferences())
         : this.commands.prepareUpdate(session.baseline!, definition, session.repairPaths);
       this.put({ ...session, proposal: { ...prepared, expectedOwnerRevision: session.ownerRevision ?? null } });
       await this.execute(session.key);
@@ -275,39 +323,75 @@ export class HomeEditor {
     if (!this.canStart() || this.home.view()?.initialization !== 'legacy' || !this.home.view()?.records.length) return;
     await this.start(() => this.commands.prepareInitialize(this.home.owner()!, []));
   }
-  duplicate(): Promise<void> {
-    const record = this.home.selected()?.record;
-    return record && this.adopted() ? this.start(() => this.commands.prepareDuplicate(record)) : Promise.resolve();
-  }
-  setDefault(guid: string): Promise<void> {
+  private viewPreferences(): HomeViewPreferences | undefined {
     const view = this.home.view();
-    if (!view?.state || !this.adopted() || !this.home.entries().some(entry => entry.record.guid === guid && entry.read.state === 'valid')) return Promise.resolve();
-    const repairPaths = view.record?.preservation?.references.some(ref => ref.kind === 'dashboard' && ref.path === 'defaultDashboardGuid') ? ['defaultDashboardGuid'] : undefined;
-    return this.start(() => this.commands.prepareConfigure(this.home.owner()!, { ...view.state, dashboardOrder: completeOrder(view), defaultDashboardGuid: guid }, repairPaths));
+    if (view?.state?.views) return structuredClone(view.state.views);
+    if (view?.initialization !== 'new') return undefined;
+    const choices = this.home.resolved()?.choices ?? [];
+    if (!choices.some(entry => entry.reference.kind === 'built-in')) return undefined;
+    const selected = this.home.selected()?.reference;
+    return captureHomeViewPreferences(choices.map(entry => ({ reference: entry.reference, available: entry.available, visible: entry.visible })), selected);
   }
-  async moveDashboard(guid: string, offset: -1 | 1): Promise<void> {
+  duplicate(): Promise<void> {
+    const entry = this.home.selected();
+    if (!entry || entry.read.state !== 'valid' || !this.adopted()) return Promise.resolve();
+    if (entry.record) return this.start(() => this.commands.prepareDuplicate(entry.record!));
+    const { builtIn: _builtIn, ...definition } = entry.read.value;
+    return this.start(() => this.commands.prepareCreate(this.home.owner()!, { template: entry.reference.kind === 'built-in' ? entry.reference.template : 'home', version: entry.reference.kind === 'built-in' ? entry.reference.version : 1,
+      dashboard: { ...definition, name: `${definition.name} (Copy)` }, charts: [] }, this.viewPreferences()));
+  }
+  setDefault(key: string): Promise<void> {
+    const view = this.home.view(), entry = this.home.entries().find(entry => entry.key === key && entry.read.state === 'valid');
+    if (!entry || !this.adopted()) return Promise.resolve();
+    const state = view?.state ?? { version: 1 as const, initialized: true, dashboardOrder: [], deletedStarters: [] };
+    const preferences = this.viewPreferences();
+    if (preferences) return this.start(() => this.commands.prepareConfigure(this.home.owner()!, { ...state, initialized: true, views: { ...preferences, default: entry.reference } }));
+    if (entry.reference.kind !== 'saved' || !view?.state) return Promise.resolve();
+    const repairPaths = view.record?.preservation?.references.some(ref => ref.kind === 'dashboard' && ref.path === 'defaultDashboardGuid') ? ['defaultDashboardGuid'] : undefined;
+    return this.start(() => this.commands.prepareConfigure(this.home.owner()!, { ...view.state!, dashboardOrder: completeOrder(view), defaultDashboardGuid: entry.reference.kind === 'saved' ? entry.reference.dashboardGuid : undefined }, repairPaths));
+  }
+  async moveDashboard(key: string, offset: -1 | 1): Promise<void> {
     const view = this.home.view(), entries = this.home.entries();
-    const index = entries.findIndex(entry => entry.record.guid === guid), target = entries[index + offset];
-    if (!view?.state || !this.adopted() || index < 0 || !target) return;
-    const order = completeOrder(view), from = order.indexOf(guid), to = order.indexOf(target.record.guid);
-    [order[from], order[to]] = [order[to], order[from]];
-    const key = this.key();
-    await this.start(() => this.commands.prepareConfigure(this.home.owner()!, { ...view.state!, dashboardOrder: order }));
-    if (this.key() === key && !this.session()?.proposal) this.focus('dashboard-order', guid);
+    const index = entries.findIndex(entry => entry.key === key), target = entries[index + offset];
+    if (!this.adopted() || index < 0 || !target) return;
+    const preferences = this.viewPreferences();
+    if (preferences) {
+      const order = [...preferences.order];
+      for (const entry of entries) if (!order.some(ref => homeViewKey(ref) === homeViewKey(entry.reference))) order.push(entry.reference);
+      const from = order.findIndex(ref => homeEntryKey(ref) === key), to = order.findIndex(ref => homeEntryKey(ref) === target.key);
+      [order[from], order[to]] = [order[to], order[from]];
+      const state = view?.state ?? { version: 1 as const, initialized: true, dashboardOrder: [], deletedStarters: [] };
+      await this.start(() => this.commands.prepareConfigure(this.home.owner()!, { ...state, initialized: true, views: { ...preferences, order } }));
+    } else {
+      if (!view?.state) return;
+      const order = completeOrder(view), from = order.indexOf(key), to = order.indexOf(target.key);
+      [order[from], order[to]] = [order[to], order[from]];
+      await this.start(() => this.commands.prepareConfigure(this.home.owner()!, { ...view.state!, dashboardOrder: order }));
+    }
+    if (!this.session()?.proposal) this.focus('dashboard-order', key);
   }
   requestDelete(): void {
     const session = this.current(), selected = this.home.selected();
     if (!session || !selected || !this.canStart() || this.confirmation() || !this.adopted()) return;
-    this.put({ ...session, baseline: structuredClone(selected.record) });
+    this.put({ ...session, baseline: selected.record && structuredClone(selected.record), returnToDefault: true });
     this.confirmation.set({ key: session.key, revision: session.revision, kind: 'delete', title: `Delete “${selected.name}”?`,
-      detail: `Delete this dashboard from ${this.home.ownerName()}. Linked saved visualizations and source data will remain.`, label: 'Delete dashboard', command: this.commands.prepareDelete(selected.record) });
+      detail: `Delete this dashboard from ${this.home.ownerName()}. Linked saved visualizations and source data will remain.`, label: 'Delete dashboard', command: selected.record ? this.commands.prepareDelete(selected.record) : this.deleteBuiltIn(selected.reference) });
+  }
+  private deleteBuiltIn(reference: HomeDashboardReference): HomeCommand {
+    const view = this.home.view(), preferences = this.viewPreferences();
+    if (!preferences) throw new Error('This dashboard preference is unavailable.');
+    const { default: chosen, ...rest } = preferences;
+    const views = { ...rest, deleted: [...preferences.deleted, reference],
+      ...(chosen && homeViewKey(chosen) !== homeViewKey(reference) ? { default: chosen } : {}) };
+    return this.commands.prepareConfigure(this.home.owner()!, { ...(view?.state ?? { version: 1 as const, dashboardOrder: [], deletedStarters: [] }), initialized: true, views });
   }
   requestRestore(): void {
     const session = this.session();
     if (!session || session.mode !== 'restore' || !this.canEdit()) return;
     try {
-      const command = { ...this.commands.prepareTemplateReplacement(session.baseline!, session.blueprint!), expectedOwnerRevision: session.ownerRevision ?? null };
-      this.confirmation.set({ key: session.key, revision: session.revision, kind: 'restore', title: `Restore “${readDefinition(session.baseline)?.name}” from ${session.definition!.name}?`,
+      const command = { ...(session.baseline ? this.commands.prepareTemplateReplacement(session.baseline, session.blueprint!)
+        : this.commands.prepareCreate(session.owner, session.blueprint!, this.viewPreferences())), expectedOwnerRevision: session.ownerRevision ?? null };
+      this.confirmation.set({ key: session.key, revision: session.revision, kind: 'restore', title: `Restore “${(session.baselineDefinition ?? readDefinition(session.baseline))?.name}” from ${session.definition!.name}?`,
         detail: `For ${this.home.ownerName()}, replace the dashboard’s name, layout, widgets and saved defaults. Its identity, sidebar position, visibility and selected-default choices remain. ${session.blueprint!.charts.length ? 'Fresh template visualizations will be created; every former chart will remain.' : 'This template creates no saved visualizations; every former chart will remain.'}`,
         label: 'Restore dashboard', command });
     } catch (error) { this.patch(session.key, { message: message(error) }); }
@@ -334,6 +418,9 @@ export class HomeEditor {
       const widgets = session.definition!.widgets, index = widgets.findIndex(widget => widget.id === confirmation.widgetId);
       if (index < 0) return;
       const remaining = widgets.filter(widget => widget.id !== confirmation.widgetId);
+      const displayDrafts = { ...session.displayDrafts }, replacements = { ...session.replacements };
+      delete displayDrafts[confirmation.widgetId!]; delete replacements[confirmation.widgetId!];
+      this.put({ ...session, displayDrafts, replacements });
       this.changeDefinition({ ...session.definition!, widgets: remaining });
       this.patch(session.key, { message: 'Widget removed from draft. Save the dashboard to keep the removal.' });
       const next = remaining[Math.min(index, remaining.length - 1)];
@@ -390,20 +477,20 @@ export class HomeEditor {
     try {
       const result = await this.workspaceService.reloadActiveWorkspace(false);
       if (result === 'published' && this.home.workspace.account()?.guid === session.accountGuid) this.patch(session.key, { conflictLoaded: true,
-        reviewedDashboard: this.home.workspace.homeDashboards().find(record => record.guid === session.baseline?.guid), reviewedOwner: this.home.view()?.record, message: 'Saved state loaded. Review both versions before keeping the draft or discarding it.' });
+        reviewedDashboard: session.baseline ? this.home.workspace.homeDashboards().find(record => record.guid === session.baseline!.guid) : session.builtIn ? this.home.selected()?.record : undefined, reviewedOwner: this.home.view()?.record, message: 'Saved state loaded. Review both versions before keeping the draft or discarding it.' });
     } catch (error) { this.patch(session.key, { message: message(error) }); }
     finally { this.patch(session.key, { saving: false }); }
   }
   keepReviewedDraft(): void {
     const session = this.session();
     if (!session?.conflictLoaded || !session.definition || !this.canAct() || !['edit', 'create'].includes(session.mode)) return;
-    const current = session.baseline && this.home.workspace.homeDashboards().find(record => record.guid === session.baseline!.guid && record.accountId === session.accountGuid);
+    const current = session.baseline ? this.home.workspace.homeDashboards().find(record => record.guid === session.baseline!.guid && record.accountId === session.accountGuid) : session.builtIn ? this.home.selected()?.record : undefined;
     if ((this.home.view()?.record?.revision ?? null) !== (session.reviewedOwner?.revision ?? null)
       || session.mode === 'edit' && current?.revision !== session.reviewedDashboard?.revision) {
       this.patch(session.key, { conflictLoaded: false, message: 'Saved state changed again. Load and review it before continuing.' }); return;
     }
-    if (session.mode === 'edit' && (!current || !sameHomeOwner(homeRecordOwner(current), session.owner) || readHomeDashboard(current).state !== 'valid')) return;
-    this.put({ ...session, baseline: session.reviewedDashboard, ownerRevision: session.reviewedOwner?.revision ?? null,
+    if (session.mode === 'edit' && (current ? !sameHomeOwner(homeRecordOwner(current), session.owner) || readHomeDashboard(current).state !== 'valid' : !session.builtIn)) return;
+    this.put({ ...session, baseline: session.reviewedDashboard, baselineDefinition: readDefinition(session.reviewedDashboard) ?? session.baselineDefinition, ownerRevision: session.reviewedOwner?.revision ?? null,
       repairPaths: session.repairPaths?.filter(path => session.reviewedDashboard?.preservation?.references.some(ref => ref.path === path)),
       proposal: undefined, outcome: undefined, conflictLoaded: false, dirty: true, revision: session.revision + 1,
       message: 'Draft retained against the reviewed saved version. Save to replace that version’s layout and settings.' });
@@ -432,11 +519,11 @@ export class HomeEditor {
           this.complete(key, 'Saved.');
           if (this.key() === key && this.navigationEpoch === navigationEpoch && this.viewEpoch === viewEpoch) {
             const guid = outcome.value.dashboard?.guid;
-            if ((command.kind === 'create' || command.kind === 'duplicate') && guid) {
+            if ((command.kind === 'create' || command.kind === 'duplicate') && guid && !session.builtIn) {
               const destinationKey = `${homeOwnerKey(command.accountGuid, command.owner)}:${JSON.stringify(guid)}`;
               this.put({ key: destinationKey, accountGuid: command.accountGuid, owner: command.owner, mode: 'view', revision: 0, message: 'Dashboard saved.' });
               if (!await this.router.navigate(homeDashboardRoute(command.owner, guid))) this.patch(key, { message: 'Saved. Open the dashboard from Home navigation.' });
-            } else if (command.kind === 'delete') await this.router.navigate(this.home.defaultRoute(), { replaceUrl: true });
+            } else if (command.kind === 'delete' || session.returnToDefault) await this.router.navigate(this.home.defaultRoute(), { replaceUrl: true });
             else this.focus('heading');
           }
         } else this.patch(key, { message: outcome.state === 'refresh-required' ? 'Saved, but the workspace could not refresh. Refresh the saved change without saving again.'

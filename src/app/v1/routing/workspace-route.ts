@@ -1,4 +1,5 @@
-import type { HomeOwner } from '@domain/home/home-dashboard';
+import { HOME_STARTERS } from '@domain/home/home-dashboard';
+import type { HomeOwner, HomeDashboardReference } from '@domain/home/home-dashboard';
 import type { NavigationMotion } from '@app/v1/shared/navigation/navigation-motion/navigation-motion.directive';
 import type { ReportStageId } from '@app/v1/reports/shared/workbench/report-workbench.models';
 
@@ -33,6 +34,7 @@ export interface RouteState {
   readonly reportGuid?: string;
   readonly visualizationGuid?: string;
   readonly homeDashboardGuid?: string;
+  readonly homeBuiltIn?: Extract<HomeDashboardReference, { kind: 'built-in' }>;
   readonly reportStage?: 'setup' | 'data-checks' | 'report';
   readonly analysisGuid?: string;
   readonly analysisGroupGuid?: string;
@@ -89,6 +91,15 @@ export function homeOwnerRoute(owner: HomeOwner): string[] {
 }
 export function homeDashboardRoute(owner: HomeOwner, dashboardGuid: string): string[] {
   return [...homeOwnerRoute(owner).slice(0, -1), 'dashboard', dashboardGuid];
+}
+export function homeBuiltInRoute(owner: HomeOwner, template: string, version: number): string[] {
+  return [...homeOwnerRoute(owner).slice(0, -1), 'built-in', template, String(version)];
+}
+function homeBuiltInReference(parts: readonly string[]): Extract<HomeDashboardReference, { kind: 'built-in' }> | undefined {
+  const template = parts[5], version = Number(parts[6]);
+  return parts[3] === 'home' && parts[4] === 'built-in' && parts.length === 7 && HOME_STARTERS.includes(template as any)
+    && Number.isSafeInteger(version) && version > 0 && String(version) === parts[6]
+    ? { kind: 'built-in', template: template as typeof HOME_STARTERS[number], version } : undefined;
 }
 
 export function accountRoute(accountGuid: string): Array<string> {
@@ -276,6 +287,7 @@ export function parseWorkspaceRoute(url: string): RouteState {
       section,
       detail,
       homeDashboardGuid: section === 'home' && detail === 'dashboard' && routeParts[5] ? safeDecodeRoutePart(routeParts[5]) : undefined,
+      homeBuiltIn: homeBuiltInReference(routeParts),
       visualizationGuid: section === 'visualization' && detail === 'workbench' && routeParts[5] ? safeDecodeRoutePart(routeParts[5]) : undefined,
       reportGuid: section === 'reports' && detail === 'workbench' && routeParts[5] ? safeDecodeRoutePart(routeParts[5]) : undefined,
       reportStage: section === 'reports' && detail === 'workbench' && routeParts[5]
@@ -334,6 +346,7 @@ export function parseWorkspaceRoute(url: string): RouteState {
     section,
     detail: routeParts[4] || DEFAULT_DETAILS[section],
     homeDashboardGuid: section === 'home' && routeParts[4] === 'dashboard' && routeParts[5] ? safeDecodeRoutePart(routeParts[5]) : undefined,
+    homeBuiltIn: homeBuiltInReference(routeParts),
     visualizationGuid: section === 'visualization' && routeParts[4] === 'workbench' && routeParts[5] ? safeDecodeRoutePart(routeParts[5]) : undefined,
     reportGuid: section === 'reports' && routeParts[4] === 'workbench' && routeParts[5] ? safeDecodeRoutePart(routeParts[5]) : undefined,
     reportStage: section === 'reports' && routeParts[4] === 'workbench' && routeParts[5]

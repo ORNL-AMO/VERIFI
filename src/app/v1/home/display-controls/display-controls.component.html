@@ -1,0 +1,26 @@
+<fieldset [formGroup]="form" [attr.aria-describedby]="id + '-help'">
+  <legend>{{ state()?.inherit ? 'Widget display settings' : 'Dashboard browsing settings' }}</legend>
+  <p [id]="id + '-help'">Only opted-in widgets inherit dashboard settings. Sources and included facilities stay fixed. Unsupported requests explain why they cannot render.</p>
+  @if (state()?.inherit) {
+    <fieldset><legend>Follow dashboard</legend>
+      <label><input type="checkbox" formControlName="inheritPeriod"> Dates</label>
+      <label><input type="checkbox" formControlName="inheritUnits"> Units</label>
+      <label><input type="checkbox" formControlName="inheritEnergy"> Site/Source</label>
+      <label><input type="checkbox" formControlName="inheritEmissions"> Market/Location</label>
+    </fieldset>
+    <p>Explicit settings below take precedence over inheritance. Base settings leave that setting unchanged.</p>
+  }
+  <label>Dates <select class="v1-select" formControlName="period"><option value="base">Base settings</option><option value="all-history">All history</option><option value="fixed">Selected months</option><option value="rolling-latest">Last 12 months · latest eligible data</option><option value="rolling-calendar">Last 12 completed calendar months</option>@if (retainedPeriod()) { <option value="retained">Retain existing period</option> }</select></label>
+  @if (raw().period === 'fixed') {
+    <label>Start month <input type="month" [attr.aria-invalid]="!!feedback()" formControlName="start" [attr.aria-describedby]="id + '-error'"></label>
+    <label>End month <input type="month" [attr.aria-invalid]="!!feedback()" formControlName="end" [attr.aria-describedby]="id + '-error'"></label>
+  }
+  @for (option of unitOptions; track option.quantity) {
+    <label>{{ option.quantity === 'energy' ? 'Energy units' : 'Volume / water units' }}
+      <select class="v1-select" [formControlName]="option.quantity"><option value="">Base settings</option><option value="owner">Follow owner</option>@for (unit of option.values; track unit) { <option [value]="unit">{{ unit }}</option> }</select>
+    </label>
+  }
+  <label>Utility energy basis <select class="v1-select" formControlName="energyTreatment"><option value="">Base settings</option><option value="owner">Follow owner</option><option value="site">Site</option><option value="source">Source</option></select></label>
+  <label>Emissions treatment <select class="v1-select" formControlName="emissionsTreatment"><option value="">Base settings</option><option value="market">Market</option><option value="location">Location</option></select></label>
+  @if (feedback()) { <p role="alert" [id]="id + '-error'">{{ feedback() }}</p> }
+</fieldset>

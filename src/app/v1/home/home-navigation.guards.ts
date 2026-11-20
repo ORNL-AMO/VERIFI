@@ -1,9 +1,9 @@
+import { HomeViewResolver } from './home-view-resolver.service';
+import { homeEntryKey } from './home-view-resolver.service';
 import { inject } from '@angular/core';
 import { CanActivateFn, CanDeactivateFn, Router } from '@angular/router';
 import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
-import { HomeCommands } from '@data/account-workspace/home-commands.service';
-import { homeDashboardVisible } from '@data/home/home-references';
-import { homeDashboardRoute, parseWorkspaceRoute } from '@app/v1/routing/workspace-route';
+import { parseWorkspaceRoute } from '@app/v1/routing/workspace-route';
 import { homeRouteOwner } from './home-route-owner';
 import { HomeEditor } from './home-editor.service';
 
@@ -14,8 +14,8 @@ export const homeDefaultGuard: CanActivateFn = (_route, state) => {
   const route = parseWorkspaceRoute(state.url);
   const owner = homeRouteOwner(account, store.facilities(), route);
   if (!owner || route.detail !== 'overview') return true;
-  const view = inject(HomeCommands).ownerView(owner);
-  const guid = view.defaultDashboardGuid ?? view.records.find(record => homeDashboardVisible(record, { account, meters: store.meters() }))?.guid;
-  return guid ? inject(Router).createUrlTree(homeDashboardRoute(owner, guid)) : true;
+  const resolved = inject(HomeViewResolver).resolve(owner);
+  const entry = resolved.default && resolved.entries.find(item => item.key === homeEntryKey(resolved.default!));
+  return entry ? inject(Router).createUrlTree(entry.route) : true;
 };
 export const homeLeaveGuard: CanDeactivateFn<unknown> = () => inject(HomeEditor).resolveLeave();

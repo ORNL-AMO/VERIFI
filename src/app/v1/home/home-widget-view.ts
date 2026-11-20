@@ -76,7 +76,7 @@ export function availableHomeCharts(snapshot: AccountWorkspaceSnapshot) {
 }
 
 /** Future renderers can replace deferred content while keeping structure, saved intent and state labels. */
-export function homeWidgetView(record: Readonly<IdbHomeDashboard>, widget: HomeWidget, snapshot: AccountWorkspaceSnapshot, acknowledged: readonly string[] = [], shortcuts?: readonly HomeShortcutChoice[]): HomeWidgetView {
+export function homeWidgetView(record: Readonly<Pick<IdbHomeDashboard, 'accountId' | 'preservation'>>, widget: HomeWidget, snapshot: AccountWorkspaceSnapshot, acknowledged: readonly string[] = [], shortcuts?: readonly HomeShortcutChoice[]): HomeWidgetView {
   const base = { widget, title: widget.title || HOME_WIDGET_LABELS[widget.kind] };
   const references = homeReferences({ version: 1, name: 'Widget', visibility: 'always', defaults: {}, widgets: [widget] });
   const blockedPaths = (record.preservation?.references ?? []).filter(issue => !acknowledged.includes(issue.path)

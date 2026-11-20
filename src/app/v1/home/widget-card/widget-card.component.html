@@ -26,6 +26,12 @@
         </select></label>
         <p>Choosing a destination explicitly reviews that target. Other edits keep unavailable relationships unchanged.</p>
       }
+      @if (widget.kind === 'visualization' || widget.kind === 'built-in-chart') {
+        <label>Replace with saved visualization <select class="v1-select" [formControl]="replacement"><option value="">Keep current chart</option>@for (chart of charts(); track chart.guid) { <option [value]="chart.guid">{{ chart.label }} · {{ chart.context }}</option> }</select></label>
+        @if (replacement.value) { <p>The selected chart keeps its own source scope. This replaces only this widget’s link; other widgets and charts remain.</p><button type="button" class="v1-btn" [disabled]="!enabled()" (click)="editor.replaceChart(widget.id)">Use selected chart</button> }
+        <app-home-display-controls [context]="{ key: widget.id, value: widget.overrides, inherit: widget.inherit, draft: editor.session()?.displayDrafts?.[widget.id], disabled: !enabled() }" (changed)="editor.setWidgetDisplay(widget.id, $event)"/>
+        <button type="button" class="v1-btn v1-btn--quiet" [disabled]="!enabled()" (click)="editor.setWidgetDisplay(widget.id, {raw: {period: 'base', start: '', end: '', energy: '', volume: '', energyTreatment: '', emissionsTreatment: '', inheritPeriod: false, inheritUnits: false, inheritEnergy: false, inheritEmissions: false}, valid: true, value: {}, inherit: []})">Use base settings</button>
+      }
     </div>
   }
   @if (model.context) { <p class="widget-context">{{ model.context }}</p> }

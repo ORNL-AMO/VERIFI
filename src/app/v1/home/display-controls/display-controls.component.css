@@ -1,0 +1,5 @@
+:host { display: block; }
+fieldset { border: 1px solid var(--v1-border); padding: 0.75rem; }
+label { display: inline-flex; gap: 0.4rem; align-items: center; flex-wrap: wrap; margin: 0.3rem 0.75rem 0.3rem 0; }
+select, input { max-width: 100%; }
+@media print { :host { display: none; } }
