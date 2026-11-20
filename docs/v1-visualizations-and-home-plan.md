@@ -44,7 +44,7 @@ These are implementation/acceptance relationships, not claims about remote issue
 | Vis10: integrated acceptance | [#2911](https://github.com/ORNL-AMO/VERIFI/issues/2911) | After Vis1–Vis9; source/chart coverage and integrated journeys. |
 | Home1: content/templates | [#2912](https://github.com/ORNL-AMO/VERIFI/issues/2912) | Specification delivered in the [Home specification](v1-home-dashboard-spec.md) and [source inventory](v1-home-content-map.md); human review/issue acceptance remains separate. Runtime implementation follows in Home2–Home6. |
 | Home2: storage | [#2913](https://github.com/ORNL-AMO/VERIFI/issues/2913) | After Home1/Vis2; layout/default/widget references, copy/delete/backup/remapping and recovery. |
-| Home3: navigation/layout | [#2914](https://github.com/ORNL-AMO/VERIFI/issues/2914) | After Home1/Home2; dashboard lifecycle, template reset, keyboard reorder/resize and responsive reading order. |
+| Home3: navigation/layout | [#2914](https://github.com/ORNL-AMO/VERIFI/issues/2914) | Navigation/layout editing implemented in the [Home workspace](v1-home-workspace.md); complete recipes and numerical renderers remain later phases. Human acceptance remains separate. |
 | Home4: linked embedding | [#2915](https://github.com/ORNL-AMO/VERIFI/issues/2915) | After Home2/Home3/Vis9; explicit compatible overrides, open/return, loss/retry and canceled obsolete demand. |
 | Home5: summary widgets | [#2916](https://github.com/ORNL-AMO/VERIFI/issues/2916) | After Home1/Home3/Vis5; existing goals, analysis/readiness and setup actions. |
 | Home6: templates/parity | [#2917](https://github.com/ORNL-AMO/VERIFI/issues/2917) | After Home1–Home5/Vis10; template instantiation and retained v0 content acceptance. |

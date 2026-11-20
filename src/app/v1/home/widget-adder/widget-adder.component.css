@@ -1,0 +1,5 @@
+:host { display: block; padding: 1rem; border: 1px solid var(--v1-border); border-top: 0; background: var(--v1-surface); min-width: 0; }
+h2 { font-size: 1.2rem; }
+label { display: grid; gap: .25rem; }
+.widget-add-actions { display: flex; flex-wrap: wrap; gap: .5rem; margin-top: .75rem; }
+@media print { :host { display: none; } }

@@ -20,7 +20,7 @@ Async completions check captured ownership and component lifetime before navigat
 
 Home uses account/facility-qualified dashboard URLs under `home/dashboard/:dashboardGuid`; `home/overview` opens the current owner's resolved default. The Home rail and owner switching enter that owner's default, falling back in saved visible order. Missing, hidden or foreign dashboard URLs show explicit recovery without retargeting ownership. Stale account routes cannot read the newly active owner's dashboards.
 
-The Home section lists independent owner sets from committed workspace signals, preserving saved order, unavailable records and conditional Water/Emissions visibility. A valid flagged single-facility account exposes only the sole facility set; invalid configurations retain recovery. Entry never initializes Home records or hidden analysis pairs, including when an initialized owner is deliberately empty. Complete starter initialization remains Home6. Home's persistence contract is owned by [Home persistence](v1-home-persistence.md).
+The Home section lists independent owner sets from committed workspace signals, preserving saved order, unavailable records and conditional Water/Emissions visibility. A valid flagged single-facility account exposes only the sole facility set; invalid configurations retain recovery. Entry never initializes Home records or hidden analysis pairs, including when an initialized owner is deliberately empty. Complete starter initialization remains Home6. [Home workspace](v1-home-workspace.md) owns dashboard/widget editing, protected transitions, recovery and responsive/print behavior; [Home persistence](v1-home-persistence.md) owns storage.
 
 ## Browse restoration and Recents
 

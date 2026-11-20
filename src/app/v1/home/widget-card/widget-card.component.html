@@ -1,0 +1,35 @@
+<article [attr.aria-labelledby]="headingId">
+  @let model = view();
+  @let widget = model.widget;
+  <header><h2 [id]="headingId" tabindex="-1">{{ model.title }}</h2></header>
+  @if (editing()) {
+    <div class="widget-controls">
+      <button type="button" class="v1-btn v1-btn--quiet" cdkDragHandle [disabled]="!enabled()" [attr.aria-label]="'Drag ' + model.title + ' to reorder'">Drag to move</button>
+      <button type="button" class="v1-btn v1-btn--quiet" [disabled]="!enabled() || index() === 0" [attr.aria-label]="'Move ' + model.title + ' earlier'" (click)="moved.emit(-1)">Move earlier</button>
+      <button type="button" class="v1-btn v1-btn--quiet" [disabled]="!enabled() || index() === count() - 1" [attr.aria-label]="'Move ' + model.title + ' later'" (click)="moved.emit(1)">Move later</button>
+      <button type="button" class="v1-btn v1-btn--danger" [disabled]="!enabled()" [attr.aria-label]="'Remove ' + model.title" (click)="removed.emit()">Remove widget</button>
+    </div>
+    <div class="widget-settings">
+      <label>Widget title <input type="text" data-widget-title [formControl]="title" autocomplete="off"></label>
+      <fieldset class="widget-sizes"><legend>Widget size</legend>
+        <label><input type="radio" [name]="headingId + '-size'" value="half" [formControl]="size"> Half</label>
+        <label><input type="radio" [name]="headingId + '-size'" value="full" [formControl]="size"> Full</label>
+        <button type="button" class="v1-btn v1-btn--quiet widget-resize" [disabled]="!enabled()" [attr.aria-label]="'Drag to resize ' + model.title + '; Half and Full radio controls are also available'" (pointerdown)="resizeStart($event)">Drag to resize</button>
+      </fieldset>
+      <p class="widget-hint">Drag right for Full or left for Half. Use Move earlier/Move later and Half/Full with the keyboard.</p>
+      @if (resizing()) { <p role="status">Release after dragging right for Full or left for Half.</p> }
+      @if (widget.kind === 'note') { <label>Note text <textarea data-note-field rows="5" [formControl]="text"></textarea></label> }
+      @if (widget.kind === 'shortcut') {
+        <label>Internal destination <select class="v1-select" [formControl]="destination">
+          @if (targetUnavailable()) { <option value="__unavailable__" disabled>Unavailable saved destination — preserved</option> }
+          @for (choice of shortcuts(); track choice.key) { <option [value]="choice.key">{{ choice.label }}</option> }
+        </select></label>
+        <p>Choosing a destination explicitly reviews that target. Other edits keep unavailable relationships unchanged.</p>
+      }
+    </div>
+  }
+  @if (model.context) { <p class="widget-context">{{ model.context }}</p> }
+  @if (widget.kind === 'note') { <p class="home-note">{{ widget.text }}</p> }
+  @else if (model.shortcut && model.state === 'ready') { <a [routerLink]="model.shortcut.route" [queryParams]="model.shortcut.queryParams">{{ widget.title || model.shortcut.label }}</a> }
+  @else { <p [attr.role]="model.state === 'deferred' ? null : 'status'">{{ model.message }}</p> }
+</article>

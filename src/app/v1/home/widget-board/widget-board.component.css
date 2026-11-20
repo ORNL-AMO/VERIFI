@@ -1,0 +1,8 @@
+:host { display: block; min-width: 0; container-type: inline-size; container-name: home-layout; }
+.home-widget-grid { display: grid; grid-template-columns: minmax(0, 1fr); gap: 0; grid-auto-flow: row; }
+.widget-empty { margin: 0; padding: 1rem; border: 1px solid var(--v1-border); border-top: 0; background: var(--v1-surface); }
+/* Each column retains 24rem after the card's 2rem padding and 2px border. Never use dense packing. */
+@container home-layout (min-width: calc(52rem + 4px)) { .home-widget-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } app-home-widget-card.home-widget--full { grid-column: 1 / -1; } }
+.cdk-drag-placeholder { opacity: .35; }
+.cdk-drag-preview { box-sizing: border-box; border: 2px solid var(--v1-focus); background: var(--v1-surface); }
+@media print { .home-widget-grid { display: block; } app-home-widget-card { width: 100%; } }

@@ -1,0 +1,38 @@
+import { Component, computed, effect, inject } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { FormControl, FormGroup } from '@angular/forms';
+import { getNewIdbEntry } from '@data/models/idbModels/idbEntry';
+import { HomeEditor } from '../home-editor.service';
+import { EMPTY_HOME_WIDGET_CHOICE } from '../home-widget-editing';
+import { availableHomeCharts } from '../home-widget-view';
+
+@Component({ selector: 'app-home-widget-adder', standalone: false, templateUrl: './widget-adder.component.html', styleUrls: ['./widget-adder.component.css'] })
+export class HomeWidgetAdderComponent {
+  readonly editor = inject(HomeEditor);
+  readonly form = new FormGroup({ kind: new FormControl<'note' | 'visualization' | 'shortcut'>('note', { nonNullable: true }),
+    visualizationGuids: new FormControl<string[]>([], { nonNullable: true }), shortcutKeys: new FormControl<string[]>([], { nonNullable: true }) });
+  readonly choice = computed(() => this.editor.session()?.widgetChoice ?? EMPTY_HOME_WIDGET_CHOICE);
+  readonly charts = computed(() => { const snapshot = this.editor.home.workspace.snapshot(); return snapshot ? availableHomeCharts(snapshot) : []; });
+  readonly shortcuts = this.editor.home.shortcutChoices;
+  readonly chartOptions = computed(() => this.charts().map(chart => ({ guid: chart.guid, label: chart.label, detail: chart.context })));
+  readonly shortcutOptions = computed(() => this.shortcuts().map(choice => ({ guid: choice.key, label: choice.label })));
+  readonly canAdd = computed(() => this.editor.canEdit() && (this.choice().kind === 'note'
+    || this.choice().kind === 'visualization' && this.choice().visualizationGuids.length === 1 && this.charts().some(chart => chart.guid === this.choice().visualizationGuids[0])
+    || this.choice().kind === 'shortcut' && this.choice().shortcutKeys.length === 1 && this.shortcuts().some(choice => choice.key === this.choice().shortcutKeys[0])));
+  constructor() {
+    this.form.valueChanges.pipe(takeUntilDestroyed()).subscribe(() => this.editor.setWidgetChoice(this.form.getRawValue()));
+    effect(() => {
+      const choice = this.choice(), enabled = this.editor.canEdit();
+      this.form.setValue({ kind: choice.kind, visualizationGuids: [...choice.visualizationGuids], shortcutKeys: [...choice.shortcutKeys] }, { emitEvent: false });
+      enabled ? this.form.enable({ emitEvent: false }) : this.form.disable({ emitEvent: false });
+    });
+  }
+  add(): void {
+    if (!this.canAdd()) return;
+    const id = getNewIdbEntry().guid, base = { id, size: 'full' as const, visibility: 'always' as const }, choice = this.choice();
+    if (choice.kind === 'note') this.editor.addWidget({ ...base, kind: 'note', text: '' });
+    if (choice.kind === 'visualization') this.editor.addWidget({ ...base, kind: 'visualization', visualizationGuid: choice.visualizationGuids[0], inherit: [], overrides: {} });
+    if (choice.kind === 'shortcut') this.editor.addWidget({ ...base, kind: 'shortcut', destination: this.shortcuts().find(target => target.key === choice.shortcutKeys[0])!.destination });
+  }
+  cancel(): void { this.editor.setWidgetChoice(EMPTY_HOME_WIDGET_CHOICE); }
+}

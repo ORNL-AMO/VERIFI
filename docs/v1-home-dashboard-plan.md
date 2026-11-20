@@ -6,7 +6,7 @@ Delivery tracker for [Home1 #2912](https://github.com/ORNL-AMO/VERIFI/issues/291
 
 - The [Home dashboard specification](v1-home-dashboard-spec.md) owns the accepted intended templates, layouts, bindings, filters, lifecycle, future interface requirements and acceptance scenarios.
 - The [Home content map](v1-home-content-map.md) owns source-backed legacy dispositions and adapter gaps.
-- Current runtime behavior remains owned by existing visualization, workspace, status, calculation and persistence references. Home1 has delivered a specification; [Home2 persistence](v1-home-persistence.md) implements storage and compatibility contracts. Home3–Home6 remain pending. Human review/QA and issue closure are separate from specification delivery.
+- Current runtime behavior remains owned by existing visualization, workspace, status, calculation and persistence references. Home1 has delivered a specification; [Home2 persistence](v1-home-persistence.md) implements storage and compatibility contracts. [Home3 workspace](v1-home-workspace.md) implements navigation/layout editing; Home4–Home6 remain pending. Human review/QA and issue closure are separate from specification delivery.
 - Implement the new overview experience before migrating overview reports. Overview reports have not been migrated; their formats and creation flow remain later Reports work. Home must not advertise an unavailable v1 overview-report action.
 
 As phases land, move their implemented contracts into the appropriate current references and retire completed planning material after preserving unique invariants and open acceptance. Do not use this tracker as a competing behavior specification.
@@ -37,10 +37,7 @@ Home6 supplies complete starter recipes through these commands. No incomplete Ho
 
 [Issue #2914](https://github.com/ORNL-AMO/VERIFI/issues/2914). Depends on Home1 and Home2.
 
-- [ ] Add dashboard sidebar entries, owner navigation, user-selected default, and empty creation state.
-- [ ] Implement dashboard creation/rename/reorder/duplicate/delete/restore controls and template selection without changing shipped templates.
-- [ ] Implement editable layout, keyboard reorder/resize, responsive reading order, plain-text notes, and internal shortcuts.
-- [ ] Cover focus restoration, canceled confirmations, long names, conditional visibility, saved preferences, and narrow desktop windows.
+Implemented contracts are owned by [Home workspace](v1-home-workspace.md): owner-local navigation/defaults/order and empty recovery, dashboard lifecycle, complete-recipe catalog boundary, protected typed drafts and publication-only recovery, note/shortcut/saved-chart widget structure, keyboard/pointer layout controls, and responsive/committed print order. Blank and existing persisted dashboards are functional. Complete shipped recipes/initialization remain Home6; numerical chart and data-widget content remain Home4/Home5. Human review/QA and issue acceptance remain separate.
 
 ### Home4 linked visualization embedding
 
