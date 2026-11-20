@@ -1,25 +1,8 @@
 <aside class="v1-nav" aria-label="Section navigation">
-  @let contextMode = navigation.contextMode();
-  @let selectedFacility = navigation.facility();
   @let account = navigation.account();
   <app-workspace-context></app-workspace-context>
   @switch (navigation.activeSection()) {
-    @case ('home') {
-      @if (account) {
-        <section class="v1-nav__group" aria-labelledby="v1-home-nav-title">
-          <span id="v1-home-nav-title" class="v1-nav__label">{{ homeTitle() }}</span>
-          <a class="v1-nav__link"
-            [class.active]="true"
-            [routerLink]="contextMode === 'facility' && selectedFacility
-              ? navigation.facilityRoute(selectedFacility.guid)
-              : navigation.accountRoute(account.guid)"
-            aria-current="page">
-            <app-ui-icon name="overview"></app-ui-icon>
-            Overview
-          </a>
-        </section>
-      }
-    }
+    @case ('home') { <app-home-nav></app-home-nav> }
     @case ('settings') { <app-settings-nav></app-settings-nav> }
     @case ('data') { <app-data-nav></app-data-nav> }
     @case ('imports') { <app-imports-nav></app-imports-nav> }

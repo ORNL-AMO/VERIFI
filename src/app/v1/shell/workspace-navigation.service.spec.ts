@@ -636,6 +636,18 @@ describe('WorkspaceNavigationService', () => {
     );
   });
 
+  it.each([
+    ['account/account-a/analysis/dashboard', 'account', 'account-a'],
+    ['account/account-a/settings/profile', 'account', 'account-a'],
+    ['account/account-a/data/portfolio/meters?facility=facility-b', 'facility', 'facility-b'],
+    ['facility/facility-a/analysis/dashboard', 'facility', 'facility-a']
+  ])('opens effective-owner Home from %s instead of retaining the current section', async (path, kind, guid) => {
+    const url = `/v1/workspace/${path}`;
+    router.events.next(new NavigationEnd(1, url, url));
+    await service.openSection('home');
+    expect(router.navigate).toHaveBeenCalledWith(['/v1', 'workspace', kind, guid, 'home', 'overview']);
+  });
+
   it('opens settings from the active workspace context', async () => {
     await service.openSection('settings');
 

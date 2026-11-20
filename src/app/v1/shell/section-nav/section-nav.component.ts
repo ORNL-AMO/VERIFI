@@ -1,4 +1,4 @@
-import { Component, computed, inject } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { WorkspaceNavigationService } from '../workspace-navigation.service';
 import { SectionNavDisclosureService } from './section-nav-disclosure.service';
 
@@ -11,5 +11,4 @@ import { SectionNavDisclosureService } from './section-nav-disclosure.service';
 })
 export class SectionNavComponent {
   readonly navigation = inject(WorkspaceNavigationService);
-  readonly homeTitle = computed(() => this.navigation.isSingleSiteWorkspace() ? 'Home' : this.navigation.contextMode() === 'facility' ? 'Facility Home' : 'Account Home');
 }

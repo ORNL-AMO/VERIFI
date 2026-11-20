@@ -1,0 +1,5 @@
+:host { display: block; min-width: 0; }
+h1, h2 { overflow-wrap: anywhere; }
+.home-widget { padding: 1rem; border: 1px solid var(--v1-border); background: var(--v1-surface); }
+.home-widget + .home-widget { border-top: 0; }
+.home-note { white-space: pre-wrap; overflow-wrap: anywhere; }

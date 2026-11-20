@@ -1,4 +1,5 @@
 import { ReportsNavComponent } from './reports-nav/reports-nav.component';
+import { HomeModule } from '@app/v1/home/home.module';
 import { CommonModule } from '@angular/common';
 import { NgModule } from '@angular/core';
 import { ReactiveFormsModule } from '@angular/forms';
@@ -18,7 +19,7 @@ import { RecentItemsNavComponent } from './recent-items-nav/recent-items-nav.com
 
 @NgModule({
   declarations: [ReportsNavComponent, SectionNavComponent, WorkspaceContextComponent, SettingsNavComponent, DataNavComponent, ImportsNavComponent, AnalysisNavComponent, ResourceNavGroupComponent, RecentItemsNavComponent],
-  imports: [CommonModule, ReactiveFormsModule, RouterModule, IconsModule, ImportStepperComponent, AnalysisStageNavigationComponent, StatusAttentionComponent],
+  imports: [HomeModule, CommonModule, ReactiveFormsModule, RouterModule, IconsModule, ImportStepperComponent, AnalysisStageNavigationComponent, StatusAttentionComponent],
   exports: [SectionNavComponent]
 })
 export class SectionNavModule { }

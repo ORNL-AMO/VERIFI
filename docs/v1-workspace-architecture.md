@@ -16,6 +16,12 @@ Path exits from Data inventory leaves and Analysis use registration-backed leave
 
 Async completions check captured ownership and component lifetime before navigation, output, error, or focus effects. Durable commits are not undone when their view disappears. Successful creation/copy releases blocking state, closes the parent drawer, then opens the committed record; failed navigation must not offer to create it again.
 
+## Home navigation
+
+Home uses account/facility-qualified dashboard URLs under `home/dashboard/:dashboardGuid`; `home/overview` opens the current owner's resolved default. The Home rail and owner switching enter that owner's default, falling back in saved visible order. Missing, hidden or foreign dashboard URLs show explicit recovery without retargeting ownership. Stale account routes cannot read the newly active owner's dashboards.
+
+The Home section lists independent owner sets from committed workspace signals, preserving saved order, unavailable records and conditional Water/Emissions visibility. A valid flagged single-facility account exposes only the sole facility set; invalid configurations retain recovery. Entry never initializes Home records or hidden analysis pairs, including when an initialized owner is deliberately empty. Complete starter initialization remains Home6. Home's persistence contract is owned by [Home persistence](v1-home-persistence.md).
+
 ## Browse restoration and Recents
 
 [`BrowseStateService`](../src/app/v1/shared/navigation/browse-state/browse-state.service.ts) keys filters, page, detail, overrides, scroll, and focus by account, inventory kind, and optional facility GUID. Hydrate destination filters before restoring its page. Restore scroll and resource focus only after feature readiness and Angular rendering. Native browser anchoring handles ordinary card expansion; no card-grid measurements govern restoration.

@@ -1,4 +1,5 @@
 import { NavigationMotionDirective } from '@app/v1/shared/navigation/navigation-motion/navigation-motion.directive';
+import { HomeContext } from '@app/v1/home/home-context.service';
 import { CommonModule } from '@angular/common';
 import { ScrollingModule, CdkScrollable } from '@angular/cdk/scrolling';
 import { NgModule, signal } from '@angular/core';
@@ -90,6 +91,7 @@ describe('WorkspaceShellComponent', () => {
     TestBed.configureTestingModule({
       imports: [WorkspaceShellTestModule],
       providers: [
+        { provide: HomeContext, useValue: { entries: () => [], owner: () => undefined, ownerRoute: () => ['/v1'], selectedGuid: () => undefined, view: () => undefined } },
         { provide: CommandNotificationBridgeService, useValue: {} },
         { provide: VisualizationImportNotificationBridgeService, useValue: {} },
         { provide: WorkspaceNavigationService, useValue: navigation },

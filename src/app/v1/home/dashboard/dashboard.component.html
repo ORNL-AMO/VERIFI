@@ -1,0 +1,29 @@
+<article aria-labelledby="home-title">
+  <header class="v1-section-header">
+    <p class="v1-eyebrow">{{ home.owner()?.kind === 'facility' ? 'Facility Home' : 'Account Home' }} · {{ home.ownerName() }}</p>
+    <h1 id="home-title" tabindex="-1">{{ home.definition()?.name || 'Home' }}</h1>
+  </header>
+  @if (!home.workspace.isReady()) {
+    <p role="status">{{ home.workspace.status() === 'error' ? 'Home could not be loaded. Reopen this account to retry.' : 'Loading Home…' }}</p>
+  } @else if (!home.owner()) {
+    <p role="alert">Home is unavailable for this owner. Check the account and its single-facility configuration in Settings.</p>
+  } @else if (home.missing()) {
+    <section class="v1-alert v1-alert--warning"><p>This dashboard is missing, hidden, or belongs to another owner.</p><a [routerLink]="home.defaultRoute()">Open this owner’s Home</a></section>
+  } @else if (home.selected(); as entry) {
+    @if (entry.read.state !== 'valid') {
+      <p role="alert">{{ entry.read.message }} Your saved dashboard is preserved.</p>
+    } @else {
+      @if (!home.widgets().length) { <p>This dashboard has no widgets.</p> }
+      @for (shell of home.widgetShells(); track shell.widget.id) {
+        @let widget = shell.widget;
+        <section class="home-widget" [attr.aria-label]="widget.title || widget.kind">
+          <h2>{{ widget.title || widget.kind }}</h2>
+          @if (widget.kind === 'note') { <p class="home-note">{{ widget.text }}</p> }
+          @else { <p>{{ shell.message }}</p> }
+        </section>
+      }
+    }
+  } @else {
+    <section class="home-widget"><h2>No dashboards</h2><p>Create a Blank dashboard to start your own layout. Starter templates will be available when their complete recipes ship.</p></section>
+  }
+</article>

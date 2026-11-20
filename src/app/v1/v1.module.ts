@@ -13,9 +13,8 @@ import { PortalModule } from '@angular/cdk/portal';
 import { ScrollingModule } from '@angular/cdk/scrolling';
 
 import { DataModule } from '@app/v1/data/data.module';
-import { AccountHomeComponent } from '@app/v1/account/home/account-home.component';
+import { HomeModule } from '@app/v1/home/home.module';
 import { AccountSettingsModule } from '@app/v1/account/settings/account-settings.module';
-import { FacilityHomeComponent } from '@app/v1/facility/home/facility-home.component';
 import { FacilitySettingsModule } from '@app/v1/facility/settings/facility-settings.module';
 import { ShellHeaderComponent } from '@app/v1/shell/header/shell-header.component';
 import { PrimaryRailComponent } from '@app/v1/shell/primary-rail/primary-rail.component';
@@ -38,12 +37,11 @@ import { WelcomeComponent } from '@app/v1/welcome/welcome.component';
     FacilityPickerComponent,
     WorkspaceShellComponent,
     PrimaryRailComponent,
-    SupportPanelComponent,
-    AccountHomeComponent,
-    FacilityHomeComponent
+    SupportPanelComponent
   ],
   imports: [
     CommonModule,
+    HomeModule,
     SectionNavModule,
     StatusEvaluationMessageComponent,
     StatusFindingActionComponent,
