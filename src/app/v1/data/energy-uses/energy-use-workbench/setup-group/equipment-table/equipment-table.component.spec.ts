@@ -44,7 +44,7 @@ describe('Manage energy-use items', () => {
   it('keeps supported actions visible and disabled until items are selected, with icons beside item links', () => {
     const { fixture, component } = setup();
     const buttons = [...(fixture.nativeElement as HTMLElement).querySelectorAll<HTMLButtonElement>('.bulk-actions__buttons button')];
-    expect(buttons.map(button => button.textContent?.trim())).toEqual(['Add energy use', 'Add year', 'Delete selected']);
+    expect(buttons.map(button => button.textContent?.trim())).toEqual(['Add energy use', 'Add year', 'Transfer energy use', 'Delete selected']);
     expect(buttons.every(button => button.disabled)).toBe(true);
     expect(fixture.nativeElement.querySelector('tbody th a app-ui-icon')).not.toBeNull();
     component.selectAllControl.setValue(true); fixture.detectChanges();

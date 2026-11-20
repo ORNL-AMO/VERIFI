@@ -1,6 +1,6 @@
 import { AnalysisReportEditor } from '../analysis/editing/analysis-report-editor.service';
 import { WorkspaceCalendarizationService } from '@app/v1/shared/calendarization/workspace-calendarization.service';
-import { mergeFacilityAnalysisSettings, mergeFacilityDataQualitySettings } from '@data/account-workspace/facility-report-setup.models';
+import { mergeFacilityAnalysisSettings, mergeFacilityDataQualitySettings, mergeFacilityModelingSettings } from '@data/account-workspace/facility-report-setup.models';
 import { resolveDataQualitySelection } from '@domain/reports/data-quality-report-selection';
 import { AccountReportActionsService } from '@app/v1/reports/account/account-report-actions.service';
 import { Component, Provider, computed, inject, signal } from '@angular/core';
@@ -37,6 +37,7 @@ export async function setupReportWorkbench(reports = [reportFixture(), reportFix
   const updateSetup = vi.fn(async (_facility, guid, changes) => {
     const current = store.facilityReports().find(item => item.guid === guid)!;
     const report = { ...current, ...(changes.name !== undefined ? { name: changes.name.trim() } : {}),
+      ...(changes.modelingReportSettings ? { modelingReportSettings: mergeFacilityModelingSettings(current.modelingReportSettings, changes.modelingReportSettings) } : {}),
       ...(changes.analysisItemId !== undefined ? { analysisItemId: changes.analysisItemId ?? undefined } : {}),
       ...(changes.analysisReportSettings ? { analysisReportSettings: mergeFacilityAnalysisSettings(current.analysisReportSettings, changes.analysisReportSettings) } : {}) };
     if (current.facilityReportType === 'dataQuality') {

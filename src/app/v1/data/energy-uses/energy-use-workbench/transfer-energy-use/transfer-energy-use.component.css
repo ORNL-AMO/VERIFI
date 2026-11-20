@@ -1,2 +1,24 @@
 @import '../../../../shared/creation-flow/creation-flow.css';
 :host { display: contents; }
+fieldset { display: grid; gap: .875rem; }
+h3 { margin: 0; font-size: 1.1rem; font-weight: 650; }
+h3:focus { outline: none; }
+.transfer-step { margin: 0 0 -.5rem; color: var(--v1-muted); font-size: .8rem; }
+.transfer-equipment { margin-bottom: 1.25rem; overflow: hidden; border: 1px solid var(--v1-border); border-radius: var(--v1-radius-sm); background: var(--v1-surface); }
+.transfer-equipment summary { padding: .65rem .75rem; color: var(--v1-muted); font-size: .85rem; font-weight: 650; cursor: pointer; }
+.transfer-equipment__count { display: inline-flex; justify-content: center; min-width: 1.5rem; margin-left: .35rem; padding: .1rem .35rem; border-radius: var(--v1-radius-sm); background: var(--v1-surface-muted); color: var(--v1-text); }
+.transfer-equipment__items { max-height: 11rem; overflow: auto; border-top: 1px solid var(--v1-divider); }
+.transfer-equipment__item { display: flex; align-items: center; gap: .7rem; padding: .75rem; }
+.transfer-equipment__item + .transfer-equipment__item { border-top: 1px solid var(--v1-divider); }
+.transfer-equipment__icon { display: grid; place-items: center; flex: 0 0 2.4rem; width: 2.4rem; height: 2.4rem; border-radius: var(--v1-radius-sm); background: var(--v1-surface-muted); color: var(--v1-action); }
+.transfer-equipment__item > div { display: grid; gap: .2rem; min-width: 0; overflow-wrap: anywhere; }
+.transfer-equipment__item strong { font-size: .9rem; font-weight: 650; }
+.transfer-equipment__item div > span { color: var(--v1-muted); font-size: .8rem; }
+.transfer-review { margin: 0; line-height: 1.6; overflow-wrap: anywhere; }
+.transfer-footer { display: grid; gap: .85rem; width: 100%; min-width: 0; }
+.transfer-copy-option { display: block; padding-bottom: .8rem; border-bottom: 1px solid var(--v1-divider); }
+label.transfer-copy { display: flex; align-items: center; gap: .6rem; margin: 0; cursor: pointer; }
+.transfer-copy input { flex: 0 0 auto; width: 1rem; height: 1rem; margin: 0; accent-color: var(--v1-action); }
+.transfer-copy-option p { margin: .3rem 0 0 1.6rem; color: var(--v1-muted); font-size: .8rem; }
+.transfer-footer__confirm { display: flex; justify-content: flex-end; align-items: center; gap: .5rem; flex-wrap: wrap; }
+.transfer-equipment summary:focus-visible, .transfer-equipment__items:focus-visible { outline: 2px solid var(--v1-focus); outline-offset: -3px; }

@@ -1,3 +1,4 @@
+import type { AccountAnalysisAutosaveState } from '../editing/account-analysis-autosave.service';
 import { DestroyRef, Injectable, computed, effect, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { NavigationEnd, Router } from '@angular/router';
@@ -147,7 +148,7 @@ export function accountAnalysisNavigationRequirement(
   statusState: StatusEvaluationState,
   setupComplete: boolean,
   selectionsComplete: boolean,
-  autosaveState: import('../editing/account-analysis-autosave.service').AccountAnalysisAutosaveState = 'saved',
+  autosaveState: AccountAnalysisAutosaveState = 'saved',
   facilitySelection: {
     readonly facilityCount: number;
     readonly facilityName?: string;

@@ -1,3 +1,4 @@
+import type { FacilityScope } from '@app/v1/routing/workspace-route';
 import { OverlayModule } from '@angular/cdk/overlay';
 import { TestBed } from '@angular/core/testing';
 import { ReactiveFormsModule } from '@angular/forms';
@@ -107,7 +108,7 @@ describe('FacilityPickerComponent', () => {
     component.selectedFacility = component.facilities[0];
     fixture.detectChanges();
 
-    let emittedGuid: import('@app/v1/routing/workspace-route').FacilityScope | undefined;
+    let emittedGuid: FacilityScope | undefined;
     component.facilitySelected.subscribe(guid => (emittedGuid = guid));
 
     const element: HTMLElement = fixture.nativeElement;

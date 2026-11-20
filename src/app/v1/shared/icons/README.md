@@ -92,6 +92,10 @@ The facility analysis report uses `facilityAnalysisReport`, combining that same
 page outline with the analysis microscope in
 [`facility-analysis-report.svg`](../../../../assets/icons/facility-analysis-report.svg).
 
+The facility Modeling report uses `modelingReport`, pairing the report page with
+a mathematical function symbol in
+[`modeling-report.svg`](../../../../assets/icons/modeling-report.svg).
+
 Use `reportIcon(report)` when preparing report cards, sidebar entries, switcher
 options, linked-report rows, or workflow stages. It returns the current `report`
 page icon when the report has no custom icon, its saved type is unrecognized, or

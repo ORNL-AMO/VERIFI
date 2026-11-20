@@ -1,11 +1,14 @@
+<app-transfer-energy-use #transferPanel [ownerKey]="context.key()" [focusFallback]="itemTable" [items]="transferItems()" [canAct]="canOpen() && selection.canAct()" (completed)="transferCompleted($event)"/>
 <div class="bulk-actions" role="group" aria-label="Selected energy use actions">
   <span role="status">{{ selection.selected().length }} selected</span>
   <div class="bulk-actions__buttons">
-    <button type="button" class="v1-btn v1-btn--action" [disabled]="!canCreate()" (click)="createRequested.emit()"><app-ui-icon name="add"/>Add energy use</button>
+    <button type="button" class="v1-btn v1-btn--action" [disabled]="!canCreate() || transferPanel.blocked()" (click)="createRequested.emit()"><app-ui-icon name="add"/>Add energy use</button>
     <button type="button" class="v1-btn v1-btn--secondary" [disabled]="!canAct() || !selection.selected().length" (click)="startOperation('add')"><app-ui-icon name="add"/>Add year</button>
+    <button type="button" class="v1-btn v1-btn--secondary" [disabled]="!canAct() || !selection.selected().length" (click)="transferPanel.open()"><app-ui-icon name="transfer"/>Transfer energy use</button>
     <button type="button" class="v1-btn v1-btn--danger" [disabled]="!canAct() || !selection.selected().length" (click)="startOperation('delete')"><app-ui-icon name="delete"/>Delete selected</button>
   </div>
 </div>
+@if (transferResult(); as result) { <p role="status">{{ result.items.length }} {{ result.items.length === 1 ? 'energy use' : 'energy uses' }} {{ result.mode === 'copy' ? 'copied' : 'transferred' }}. <a [routerLink]="destinationRoute()">Open destination</a></p> }
 <div #itemTable class="manage-items__table" tabindex="0" role="region" aria-label="Energy use equipment table">
   <table>
     <caption class="visually-hidden">Energy use equipment in this group</caption>

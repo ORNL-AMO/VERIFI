@@ -1,0 +1,6 @@
+:host { display: block; min-width: 0; }
+figure { margin: 0; padding: .75rem .9rem; border-left: .25rem solid var(--v1-content-control); background: color-mix(in srgb, var(--v1-content-control) 8%, var(--v1-surface)); }
+p { display: flex; flex-wrap: wrap; align-items: baseline; gap: .3em; margin: 0; color: var(--v1-text); font-family: "Cambria Math", "STIX Two Math", Georgia, serif; font-size: clamp(1.15rem, 1.6vw, 1.45rem); line-height: 1.35; }
+.model-equation__label { font-style: italic; font-weight: 700; white-space: nowrap; }
+.model-equation__equals { color: var(--v1-content-control); font-weight: 800; }
+strong { min-width: 0; font-weight: 600; overflow-wrap: anywhere; }
