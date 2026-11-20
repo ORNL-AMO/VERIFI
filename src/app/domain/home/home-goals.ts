@@ -33,9 +33,12 @@ export function homeGoalResult(value: AnalysisVisualizationResults, target?: num
     .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
   const latest = monthly.find(row => Number.isFinite(row.rolling12MonthImprovement));
   if (!latest) return { state: 'empty' as const, message: 'No eligible rolling improvement result is available.' };
-  const partial = !!latest.missingValueWarning || !!latest.missingPredictors?.length;
+  const through = new Date(latest.date), lastMonth = through.getFullYear() * 12 + through.getMonth();
+  const window = monthly.filter(row => { const date = new Date(row.date), month = date.getFullYear() * 12 + date.getMonth(); return month <= lastMonth && month > lastMonth - 12; });
+  const coveredMonths = new Set(window.map(row => { const date = new Date(row.date); return date.getFullYear() * 12 + date.getMonth(); })).size;
+  const partial = coveredMonths !== 12 || window.some(row => !!row.missingValueWarning || !!row.missingPredictors?.length);
   const improvement = latest.rolling12MonthImprovement;
-  return { state: 'ready' as const, improvement, through: new Date(latest.date), partial,
+  return { state: 'ready' as const, improvement, through, partial, coveredMonths,
     horizon: monthly[0] ? new Date(monthly[0].date) : undefined,
     towardTarget: !partial && Number.isFinite(target) && target! > 0 && target! <= 100 ? improvement / target! * 100 : undefined,
     units: value.analysis.analysisCategory === 'water' ? value.analysis.waterUnit : value.analysis.energyUnit,

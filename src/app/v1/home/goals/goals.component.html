@@ -13,7 +13,7 @@
       @if (result.state === 'ready') {
         <dl><dt>Rolling 12-month improvement</dt><dd>{{ result.improvement | number:'1.0-2' }}%</dd>
           <dt>Through</dt><dd>{{ result.through | date:'MMM yyyy' }}</dd><dt>Units / basis</dt><dd>{{ result.units }} · {{ result.basis }}</dd>
-          <dt>Calculation</dt><dd>Current committed inputs · {{ result.partial ? 'Partial input coverage' : 'No missing-input warning' }}</dd>
+          <dt>Rolling input months</dt><dd>{{ result.coveredMonths }} / 12 returned months · {{ result.partial ? 'Partial coverage' : 'Complete warning-free window' }}</dd><dt>Calculation</dt><dd>Current committed inputs · {{ result.partial ? 'Partial input coverage' : 'No missing-input warning' }}</dd>
           @if (result.towardTarget !== undefined) { <dt>Percent toward target</dt><dd>{{ result.towardTarget | number:'1.0-2' }}%</dd> }
         </dl>
         @if (result.horizon && result.horizon.getTime() !== result.through.getTime()) { <p>Later returned months have no finite improvement; the latest eligible result is shown.</p> }

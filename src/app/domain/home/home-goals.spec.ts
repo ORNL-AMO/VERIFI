@@ -27,13 +27,13 @@ describe('Home goals', () => {
   it.each([0, -12, 50])('preserves improvement %s and unbounded target attainment', improvement => {
     const fixture = analysisFixture(), calculated = calculateFacilityAnalysisResults(fixture.request);
     const value: FacilityVisualizationResults = {scope: 'facility', analysis: fixture.analysis, facility: fixture.facility, annual: [], groups: [], groupOnly: false,
-      monthly: [{...calculated.monthlyAnalysisSummaryData[0], date: new Date(2024, 3, 1), rolling12MonthImprovement: improvement, missingValueWarning: false, missingPredictors: []}]};
+      monthly: Array.from({length: 12}, (_, index) => ({...calculated.monthlyAnalysisSummaryData[0], date: new Date(2023, 4 + index, 1), rolling12MonthImprovement: improvement, missingValueWarning: false, missingPredictors: []}))};
     expect(homeGoalResult(value, 25)).toMatchObject({state: 'ready', improvement, towardTarget: improvement * 4});
     expect(homeGoalResult(value, 0)).toMatchObject({towardTarget: undefined});
     expect(homeGoalResult(value, 150)).toMatchObject({towardTarget: undefined});
-    value.monthly[0].missingValueWarning = true;
+    value.monthly[2].missingValueWarning = true; // Earlier contributing month, with a complete final month.
     expect(homeGoalResult(value, 25)).toMatchObject({partial: true, towardTarget: undefined});
-    value.monthly[0].rolling12MonthImprovement = NaN;
+    value.monthly.forEach(row => row.rolling12MonthImprovement = NaN);
     expect(homeGoalResult(value, 25).state).toBe('empty');
   });
 });
