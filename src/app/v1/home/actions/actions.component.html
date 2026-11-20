@@ -1,0 +1,19 @@
+<p>{{ home.ownerName() }} · Current owner actions</p>
+@if (status.state() === 'ready') {
+  @if (!items().length) { <p role="status">No actions for this owner.</p> }
+  <ol>
+    @for (item of visible(); track item.id) {
+      <li><strong>{{ item.severity === 'error' ? 'Error' : 'Warning' }} · {{ item.title }}</strong>
+        <p>{{ item.entity.name }} · {{ item.description }}</p>
+        @if (item.destination.kind !== 'unavailable') { <button type="button" class="v1-btn v1-btn--quiet" (click)="status.navigateTo(item)">{{ item.actionLabel || 'Review' }}</button> }
+        @else { <p>{{ item.unavailableReason || 'This destination is unavailable.' }}</p> }
+      </li>
+    }
+  </ol>
+  <app-pagination [collectionSize]="items().length" [pageSize]="24" [page]="page()" ariaLabel="Home action pages" (pageChange)="requestedPage.set($event)"/>
+} @else if (status.state() === 'error') {
+  <p role="alert">Actions could not be evaluated. Open To-dos for evaluation details and recovery.</p>
+} @else { <p role="status">Evaluating actions…</p> }
+<p>Warning preferences and status checks are managed in the existing To-dos and Settings workflows.</p>
+
+<button type="button" class="v1-btn v1-btn--quiet" (click)="navigation.openTodos()">Open To-dos</button>

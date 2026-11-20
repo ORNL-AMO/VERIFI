@@ -12,6 +12,7 @@ describe('Home durable intent', () => {
     { ...base, kind: 'owner-summary', settings: { scope: 'owner' } },
     { ...base, kind: 'shortcut', destination: { area: 'data', owner: { kind: 'facility', guid: 'facility-a' }, resource: { kind: 'meter', guid: 'meter-a' } } },
     { ...base, kind: 'table', settings: { view: 'facility-progress', measure: 'energy', period: 'latest-result' } },
+    { ...base, kind: 'table', settings: { view: 'facility-progress', measure: 'energy', categories: ['energy', 'water'], period: 'latest-result' } },
     { ...base, kind: 'table', settings: { view: 'utility-detail', measure: 'cost', period: 'utility-window' } },
     { ...base, kind: 'table', settings: { view: 'utility-summary', measure: 'water', period: 'all-years' } },
     { ...base, kind: 'table', settings: { view: 'equipment-summary', measure: 'emissions', period: 'latest-equipment-year' } },

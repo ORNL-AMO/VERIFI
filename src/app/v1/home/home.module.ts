@@ -1,3 +1,6 @@
+import { HomeActionsComponent } from './actions/actions.component';
+import { HomeGoalsComponent } from './goals/goals.component';
+import { PaginationComponent } from '@app/v1/shared/pagination/pagination.component';
 import { HomeDateContext } from './home-date-context.service';
 import { HomeDisplayControlsComponent } from './display-controls/display-controls.component';
 import { HomeChartComponent } from './home-chart/home-chart.component';
@@ -17,5 +20,5 @@ import { RouterModule } from '@angular/router';
 import { HomeDashboardComponent } from './dashboard/dashboard.component';
 import { HomeNavComponent } from './home-nav/home-nav.component';
 
-@NgModule({ providers: [HomeDateContext], declarations: [HomeDisplayControlsComponent, HomeChartComponent, HomeDashboardComponent, HomeNavComponent, HomeWidgetCardComponent, HomeWidgetAdderComponent, HomeWidgetBoardComponent], imports: [VisualizationRuntimeModule, PreviewModule, DragDropModule, ResourcePickerModule, CommonModule, RouterModule, ReactiveFormsModule, PortalModule, ConfirmationDialogComponent], exports: [HomeDashboardComponent, HomeNavComponent] })
+@NgModule({ providers: [HomeDateContext], declarations: [HomeActionsComponent, HomeGoalsComponent, HomeDisplayControlsComponent, HomeChartComponent, HomeDashboardComponent, HomeNavComponent, HomeWidgetCardComponent, HomeWidgetAdderComponent, HomeWidgetBoardComponent], imports: [PaginationComponent, VisualizationRuntimeModule, PreviewModule, DragDropModule, ResourcePickerModule, CommonModule, RouterModule, ReactiveFormsModule, PortalModule, ConfirmationDialogComponent], exports: [HomeDashboardComponent, HomeNavComponent] })
 export class HomeModule { }

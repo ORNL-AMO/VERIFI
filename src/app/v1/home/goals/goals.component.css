@@ -1,0 +1,3 @@
+:host { display: block; overflow-wrap: anywhere; } section { border-block-start: 1px solid var(--v1-border); padding-block: .75rem; } h3 { font-size: 1rem; } dl { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: .25rem .75rem; } dd { margin: 0; } @media print { button { display: none; } section { break-inside: avoid; } }
+
+.table-region { overflow-x: auto; } table { width: 100%; border-collapse: collapse; } th, td { text-align: start; vertical-align: top; padding: .75rem; border: 1px solid var(--v1-border); } @media print { .table-region { overflow: visible; } }

@@ -55,7 +55,7 @@ export type HomeWidget = HomeWidgetBase & (
   | { readonly kind: 'goal'; readonly binding: HomeAnalysisBinding }
   | { readonly kind: 'actions' | 'owner-summary'; readonly settings: { readonly scope: 'owner' } }
   | { readonly kind: 'table'; readonly settings: { readonly view: 'facility-progress' | 'utility-detail' | 'utility-summary' | 'equipment-summary';
-      readonly measure: 'energy' | 'cost' | 'emissions' | 'water'; readonly period: 'utility-window' | 'all-years' | 'latest-result' | 'latest-equipment-year' } }
+      readonly categories?: readonly ('energy' | 'water')[]; readonly measure: 'energy' | 'cost' | 'emissions' | 'water'; readonly period: 'utility-window' | 'all-years' | 'latest-result' | 'latest-equipment-year' } }
   | { readonly kind: 'map'; readonly settings: { readonly measure: 'energy' | 'cost' | 'emissions' | 'water' } }
 );
 export interface HomeDashboardDefinition {
