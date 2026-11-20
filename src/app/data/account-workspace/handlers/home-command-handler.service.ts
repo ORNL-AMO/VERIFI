@@ -135,6 +135,8 @@ export class HomeCommandHandler {
         }
         const remaining = references.filter(ref => !acknowledged.has(ref.path)
           && !(ref.path === 'defaultDashboardGuid' && read.value.defaultDashboardGuid !== state.defaultDashboardGuid)
+          && !(ref.path === 'views.default' && !sameHomeJson(state.views?.default, read.value.views?.default))
+          && !previousViews.some(previous => previous.path === ref.path && !nextViews.some(next => next.path === ref.path))
           && !state.dashboardOrder.some(guid => ref.path === `dashboardOrder.${guid}` && !read.value.dashboardOrder.includes(guid)));
         const revision = owner?.revision, configured = await writeOwner(read.value, remaining);
         return { owner: configured, changed: configured.revision !== revision };
