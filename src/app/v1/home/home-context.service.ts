@@ -19,7 +19,8 @@ export class HomeContext {
     if (!this.workspace.isReady() || !account || route.section !== 'home') return undefined;
     const presented = presentedHomeOwner(account, this.workspace.facilities());
     if (!presented) return undefined;
-    if (route.contextMode === 'account') return route.accountGuid === account.guid ? presented : undefined;
+    if (route.contextMode === 'account') return route.accountGuid === account.guid
+      && !(route.homeDashboardGuid && presented.kind !== 'account') ? presented : undefined;
     return this.workspace.facilities().some(item => item.guid === route.facilityGuid && item.accountId === account.guid)
       ? { kind: 'facility', guid: route.facilityGuid! } : undefined;
   });
