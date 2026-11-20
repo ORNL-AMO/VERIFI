@@ -1,6 +1,6 @@
 :host { display: block; min-width: 0; }
-.v1-eyebrow { font-size: .85rem; font-weight: 800; line-height: 1.2; letter-spacing: normal; text-transform: none; color: var(--v1-muted); margin: 0 0 .25rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-ol { display: flex; align-items: center; gap: .25rem; min-width: 0; margin: 0 0 .25rem; padding: 0; list-style: none; color: var(--v1-muted); font-size: .85rem; font-weight: 800; line-height: 1.2; }
+.v1-eyebrow { font-size: 1rem; font-weight: 800; line-height: 1.2; letter-spacing: normal; text-transform: none; color: var(--v1-muted); margin: 0 0 .25rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+ol { display: flex; align-items: center; gap: .25rem; min-width: 0; margin: 0 0 .25rem; padding: 0; list-style: none; color: var(--v1-muted); font-size: 1rem; font-weight: 800; line-height: 1.2; }
 li { display: inline-flex; min-width: 0; }
 .page-identity__crumb { flex: 0 1 auto; }
 a, button, li > span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }

@@ -8,8 +8,8 @@
               <li aria-hidden="true"><app-ui-icon name="chevronRight"></app-ui-icon></li>
             }
             <li>
-              @if (crumb.route) { <a [routerLink]="crumb.route">{{ crumb.label }}</a> }
-              @else { <span>{{ crumb.label }}</span> }
+              @if (crumb.route) { <a [routerLink]="crumb.route">@if (crumb.icon) { <app-ui-icon [name]="crumb.icon"/> }{{ crumb.label }}</a> }
+              @else { <span>@if (crumb.icon) { <app-ui-icon [name]="crumb.icon"/> }{{ crumb.label }}</span> }
             </li>
           }
         </ol>

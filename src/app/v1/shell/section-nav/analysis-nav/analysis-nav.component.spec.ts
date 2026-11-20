@@ -236,19 +236,22 @@ describe('AnalysisNavComponent', () => {
     expect(workflow.querySelector('.is-current')?.textContent).toContain('Results');
     expect(fixture.nativeElement.textContent).toContain('Active for Reporting');
     expect(fixture.nativeElement.textContent).toContain('Portfolio Water');
+    expect(fixture.debugElement.queryAll(By.css('.v1-nav__analysis-link app-ui-icon'))
+      .map(element => element.componentInstance.name)).toEqual(['accountAnalysis', 'accountAnalysis']);
     expect(workflow.querySelectorAll('a')).toHaveLength(3);
     expect(workflow.querySelector('[aria-disabled="true"]')?.textContent).toContain('Results');
   });
 
-  it('uses neutral account navigation labels and icons until both categories apply', () => {
+  it('keeps account item icons consistent while category labels adapt and Dashboard retains its microscope', () => {
     state.activeSection.set('analysis'); state.contextMode.set('account');
     state.accountAnalyses.set([analysisNav('a', 'Annual plan', 'energy')]);
     const fixture = TestBed.createComponent(AnalysisNavComponent); fixture.detectChanges();
     expect(fixture.nativeElement.querySelector('.v1-nav__sublabel').textContent.trim()).toBe('Analyses');
-    expect(fixture.debugElement.query(By.css('.v1-nav__analysis-link app-ui-icon')).componentInstance.name).toBe('analysis');
+    expect(fixture.debugElement.query(By.css('.v1-nav__analysis-link app-ui-icon')).componentInstance.name).toBe('accountAnalysis');
+    expect(fixture.debugElement.query(By.css('a.v1-nav__link:not(.v1-nav__analysis-link) app-ui-icon')).componentInstance.name).toBe('analysis');
     state.facilityMeters.set([{ guid: 'water', name: 'Water', source: 'Water Intake' }]); fixture.detectChanges();
     expect(fixture.nativeElement.querySelector('.v1-nav__sublabel').textContent.trim()).toBe('Energy');
-    expect(fixture.debugElement.query(By.css('.v1-nav__analysis-link app-ui-icon')).componentInstance.name).toBe('energy');
+    expect(fixture.debugElement.query(By.css('.v1-nav__analysis-link app-ui-icon')).componentInstance.name).toBe('accountAnalysis');
   });
 
   it('shows facility group warnings without blocking completion and distinguishes unavailable status', () => {

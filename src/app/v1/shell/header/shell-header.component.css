@@ -9,7 +9,6 @@
   padding: .7rem clamp(.85rem, 2vw, 1.25rem);
   border-bottom: 1px solid var(--v1-border);
   background: color-mix(in srgb, var(--v1-surface) 94%, transparent);
-  box-shadow: 0 .55rem 1.5rem var(--v1-shadow);
 }
 
 .v1-workspace__backdrop {
@@ -56,7 +55,7 @@
 .v1-workspace__spacer { flex: 1 1 auto; }
 .v1-workspace__context { display: flex; align-items: center; gap: .5rem; min-width: 0; flex: 1 1 auto; padding-inline-start: .85rem; border-inline-start: 1px solid var(--v1-border); }
 .v1-workspace__context app-facility-picker { min-width: 0; }
-.v1-workspace__account-link { display: inline-flex; align-items: center; gap: .55rem; min-width: 0; max-width: 24rem; padding: .3rem .45rem; border: 1px solid transparent; border-radius: var(--v1-radius-sm); background: transparent; color: var(--v1-text); font-size: .9rem; font-weight: 700; line-height: 1.2; cursor: pointer; }
+.v1-workspace__account-link { display: inline-flex; align-items: center; gap: .55rem; min-width: 0; max-width: 24rem; padding: .3rem .45rem; border: 1px solid transparent; border-radius: var(--v1-radius-sm); background: transparent; color: var(--v1-text); font-size: 1.1rem; font-weight: 700; line-height: 1.2; cursor: pointer; }
 .v1-workspace__account-link > span { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .v1-workspace__account-icon { display: inline-flex; align-items: center; justify-content: center; flex: 0 0 1.9rem; height: 1.9rem; border-radius: var(--v1-radius-sm); background: color-mix(in srgb, var(--v1-account) 10%, var(--v1-surface)); color: var(--v1-account); font-size: 1.1rem; }
 .v1-workspace__account-link:hover { background: var(--v1-surface-muted); border-color: var(--v1-border); }
@@ -291,6 +290,6 @@
   .v1-header-backup__tooltip { left: 0; right: auto; }
 }
 
-.v1-workspace__single-identity { display: inline-flex; align-items: center; gap: var(--v1-space-2); min-width: 0; font-weight: 750; }
+.v1-workspace__single-identity { display: inline-flex; align-items: center; gap: var(--v1-space-2); min-width: 0; font-size: 1.1rem; font-weight: 750; line-height: 1.2; }
 .v1-workspace__single-identity > span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .v1-workspace__single-identity app-ui-icon { flex: 0 0 auto; }

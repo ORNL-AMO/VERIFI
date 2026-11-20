@@ -4,6 +4,7 @@ import { OverlayModule } from '@angular/cdk/overlay';
 import { ReactiveFormsModule } from '@angular/forms';
 import { ShellHeaderTestModule } from './shell-header.testing';
 import { signal } from '@angular/core';
+import { By } from '@angular/platform-browser';
 import { ManualBackupDownloadService } from '@app/v1/shared/backup/manual-backup-download.service';
 import { CommonModule } from '@angular/common';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
@@ -14,6 +15,23 @@ import { WorkspaceNavigationService } from '../workspace-navigation.service';
 import { ShellHeaderComponent } from './shell-header.component';
 
 describe('ShellHeaderComponent', () => {
+  it('shows the panel action icon for the current visibility and preserves the toggle state', () => {
+    const { fixture, navigation } = setup(true);
+    const toggle = fixture.debugElement.query(By.css('[aria-label="Toggle support panel"]'));
+    const icon = () => toggle.query(By.directive(IconComponent)).componentInstance as IconComponent;
+    expect(icon().name).toBe('sidePanelCollapse');
+    expect(toggle.nativeElement.getAttribute('aria-pressed')).toBe('true');
+    toggle.nativeElement.click();
+    expect(navigation.toggleSupportPanel).toHaveBeenCalledWith(true);
+
+    navigation.isSupportPanelOpen.set(false);
+    fixture.detectChanges();
+    expect(icon().name).toBe('sidePanelOpen');
+    expect(toggle.nativeElement.getAttribute('aria-pressed')).toBe('false');
+    toggle.nativeElement.click();
+    expect(navigation.toggleSupportPanel).toHaveBeenLastCalledWith(false);
+  });
+
   it('shows one static facility identity and restores account scope controls after conversion', () => {
     const { fixture, navigation } = setup(true);
     navigation.singleFacilityContext.set(facility({ name: 'Plant identity' })); fixture.detectChanges();

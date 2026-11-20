@@ -7,7 +7,9 @@ describe('facility context breadcrumbs', () => {
     const inventory = { label: resource, route: ['/account', resource] };
     expect(facilityContextBreadcrumbs(true, account, facility, inventory)).toEqual([inventory]);
   });
-  it('preserves portfolio account and owning-facility ancestors', () => {
-    expect(facilityContextBreadcrumbs(false, account, facility, { label: 'Meters' })).toEqual([account, facility]);
+  it('preserves portfolio account and owning-facility ancestors with their context icons', () => {
+    expect(facilityContextBreadcrumbs(false, account, facility, { label: 'Meters' })).toEqual([
+      { ...account, icon: 'account' }, { ...facility, icon: 'facility' }
+    ]);
   });
 });

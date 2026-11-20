@@ -2,7 +2,7 @@ import type { AnalysisCategory } from '@data/models/analysis';
 export type AnalysisNavItem = {
   readonly guid: string;
   readonly label: string;
-  readonly icon: 'energy' | 'droplet' | 'analysis';
+  readonly icon: 'energy' | 'droplet' | 'analysis' | 'accountAnalysis';
   readonly route: readonly string[];
   readonly expanded: boolean;
 };
@@ -19,11 +19,12 @@ export function buildAnalysisNavGroups(
   selection: { selectedEnergyAnalysisId?: string; selectedWaterAnalysisId?: string },
   activeAnalysisGuid: string | undefined,
   route: (guid: string) => readonly string[],
-  showCategory = true
+  showCategory = true,
+  scope: 'account' | 'facility' = 'facility'
 ): readonly AnalysisNavGroup[] {
   const analyses = source.map(analysis => ({
     guid: analysis.guid, label: analysis.name || 'Untitled analysis', category: analysis.analysisCategory,
-    icon: !showCategory ? 'analysis' as const : analysis.analysisCategory === 'water' ? 'droplet' as const : 'energy' as const,
+    icon: scope === 'account' ? 'accountAnalysis' as const : !showCategory ? 'analysis' as const : analysis.analysisCategory === 'water' ? 'droplet' as const : 'energy' as const,
     route: route(analysis.guid), expanded: analysis.guid === activeAnalysisGuid
   }));
   const active = [

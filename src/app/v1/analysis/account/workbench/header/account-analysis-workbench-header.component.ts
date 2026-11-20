@@ -1,10 +1,11 @@
 import { analysisDependencyMessage } from '@app/v1/shared/analysis-results/analysis-dependency-message';
 import { Component, computed, inject } from '@angular/core';
 import { ReportAnalysisReturnService } from '@app/v1/reports/shared/analysis-inspection/report-analysis-return.service';
-import { Router, RouterLink } from '@angular/router';
+import { Router } from '@angular/router';
 import { DataWorkbenchFactsToggleComponent } from '@app/v1/shared/data-workbench/data-workbench-facts-toggle.component';
 import { DataWorkbenchResourceSwitcherComponent } from '@app/v1/shared/data-workbench/data-workbench-resource-switcher.component';
 import { IconComponent } from '@app/v1/shared/icons/icon.component';
+import { PageBreadcrumb, PageIdentityComponent } from '@app/v1/shared/page-identity/page-identity.component';
 import { WorkspaceNavigationService } from '@app/v1/shell/workspace-navigation.service';
 import { AccountAnalysisWorkbenchContext } from '../account-analysis-workbench-context.service';
 import { AccountAnalysisAutosaveService, AccountAnalysisAutosaveState } from '../editing/account-analysis-autosave.service';
@@ -18,7 +19,7 @@ import { AccountAnalysisResultsService, AccountAnalysisResultState } from '../re
 @Component({
   selector: 'app-account-analysis-workbench-header',
   standalone: true,
-  imports: [RouterLink, IconComponent, DataWorkbenchFactsToggleComponent, DataWorkbenchResourceSwitcherComponent, AnalysisStatusNotesComponent],
+  imports: [PageIdentityComponent, IconComponent, DataWorkbenchFactsToggleComponent, DataWorkbenchResourceSwitcherComponent, AnalysisStatusNotesComponent],
   templateUrl: './account-analysis-workbench-header.component.html',
   styleUrls: ['./account-analysis-workbench-header.component.css']
 })
@@ -29,6 +30,10 @@ export class AccountAnalysisWorkbenchHeaderComponent {
   readonly results = inject(AccountAnalysisResultsService);
   readonly autosave = inject(AccountAnalysisAutosaveService);
   readonly reportReturn = inject(ReportAnalysisReturnService, { optional: true });
+  readonly breadcrumbs = computed<readonly PageBreadcrumb[]>(() => {
+    const account = this.context.account();
+    return account ? [{ label: account.name || 'Account', icon: 'account', route: this.navigation.accountAnalysisRoute(account.guid) }] : [];
+  });
   readonly analysisResources = computed(() => this.context.analyses().map(analysis => ({
     id: analysis.guid,
     label: analysis.name || 'Untitled analysis',

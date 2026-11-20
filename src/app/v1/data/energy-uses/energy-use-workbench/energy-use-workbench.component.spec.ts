@@ -91,8 +91,8 @@ describe('energy use workbench routes', () => {
     const workbench = await harness.navigateByUrl(path('energy-a'), EnergyUseWorkbenchComponent);
     const portfolio = workbench.breadcrumbs();
     expect(portfolio).toEqual([
-      { label: 'Example account', route: ['/inventory'] },
-      { label: 'North plant', route: ['/inventory'], queryParams: { facility: 'facility-a' } }
+      { label: 'Example account', icon: 'account', route: ['/inventory'] },
+      { label: 'North plant', icon: 'facility', route: ['/inventory'], queryParams: { facility: 'facility-a' } }
     ]);
     const breadcrumb = () => harness.routeNativeElement?.querySelector('app-page-identity nav');
     expect(breadcrumb()?.textContent).not.toContain('Energy Uses');

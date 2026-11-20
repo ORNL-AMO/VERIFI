@@ -35,7 +35,7 @@ class CheckFeedbackHost {
 class CheckFeedbackTestModule {}
 
 describe('workspace data-check feedback in Chromium', () => {
-  it('keeps navigation and header controls still, with accessible themed feedback and focused To-dos', async () => {
+  it('keeps navigation and the panel toggle still without reserving an empty status slot, with accessible feedback and focused To-dos', async () => {
     const state = setupSectionNavTest();
     const backups = { available: signal(true), preparing: signal(false), reminder: signal({ tone: 'recommended', label: 'Backup recommended', detail: '' }) };
     TestBed.configureTestingModule({ imports: [CheckFeedbackTestModule], providers: [
@@ -87,7 +87,6 @@ describe('workspace data-check feedback in Chromium', () => {
         const header = root.querySelector<HTMLElement>('header')!;
         const headerHeight = header.getBoundingClientRect().height;
         const toggleLeft = toggle().getBoundingClientRect().left;
-        const backupLeft = root.querySelector('.v1-header-backup')!.getBoundingClientRect().left;
         for (const section of ['data', 'analysis']) {
           state.activeSection.set(section); await settle();
           const link = root.querySelector<HTMLElement>('app-section-nav .v1-nav__link')!;
@@ -97,7 +96,10 @@ describe('workspace data-check feedback in Chromium', () => {
             expect(link.getBoundingClientRect().top).toBeCloseTo(top, 3);
             expect(header.getBoundingClientRect().height).toBeCloseTo(headerHeight, 3);
             expect(toggle().getBoundingClientRect().left).toBeCloseTo(toggleLeft, 3);
-            expect(root.querySelector('.v1-header-backup')!.getBoundingClientRect().left).toBeCloseTo(backupLeft, 3);
+            const settingsRight = header.querySelector('.v1-settings')!.getBoundingClientRect().right;
+            const nextButtonLeft = (indicator() ?? toggle()).getBoundingClientRect().left;
+            const gap = parseFloat(getComputedStyle(header.querySelector('.v1-workspace__actions')!).columnGap);
+            expect(Math.abs(nextButtonLeft - settingsRight - gap)).toBeLessThan(1);
             expect(root.querySelector('app-section-nav app-status-evaluation-message')).toBeNull();
             expect(header.scrollWidth).toBeLessThanOrEqual(header.clientWidth + 1);
           }
