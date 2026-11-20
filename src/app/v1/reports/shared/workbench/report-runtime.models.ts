@@ -16,6 +16,9 @@ export interface ReportEditor extends ReportWorkbenchEditor {
   readonly setupValid: Signal<boolean>;
   readonly canEdit: Signal<boolean>;
   flush(): Promise<boolean>;
+  beginDeletion(): Promise<boolean>;
+  cancelDeletion(): void;
+  completeDeletion(): void;
 }
 
 export interface ReportRuntime {

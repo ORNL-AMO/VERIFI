@@ -1,0 +1,19 @@
+<div class="report-setup-delete">
+  <button #deleteButton type="button" class="v1-btn v1-btn--danger" [disabled]="!canDelete()" (click)="request()"><app-ui-icon name="delete"/>Delete report</button>
+</div>
+<ng-template #confirmation>
+  @if (session(); as current) {
+    <app-confirmation-dialog [title]="committed() ? 'Report deleted' : 'Delete report?'"
+      titleId="delete-setup-report-title" cancelAriaLabel="Cancel report deletion"
+      [confirmLabel]="committed() ? 'Return to Reports' : 'Delete report'"
+      [confirmIcon]="committed() ? 'refresh' : 'delete'" confirmClass="v1-btn--danger"
+      [busy]="busy()" [disabled]="busy()" [hideCancel]="committed()"
+      [confirmDisabled]="!committed() && workspaceUnavailable()"
+      (confirmed)="confirm()" (cancelled)="cancel()">
+      <p>Permanently delete <strong>{{ current.reportName }}</strong> from {{ current.ownerName }}?</p>
+      <p>This cannot be undone. Any unsaved edits will also be removed. Analyses, source data, and other reports will remain available.</p>
+      @if (!committed() && workspaceUnavailable()) { <p role="status">Waiting for the workspace to finish saving before deletion is available.</p> }
+      @if (error(); as message) { <div class="v1-alert v1-alert--danger" role="alert">{{ message }}</div> }
+    </app-confirmation-dialog>
+  }
+</ng-template>

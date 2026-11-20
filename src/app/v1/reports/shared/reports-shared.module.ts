@@ -1,3 +1,4 @@
+import { ReportSetupDeleteComponent } from './deletion/report-setup-delete/report-setup-delete.component';
 import { ReportAnalysisChecksStageComponent } from './analysis-checks/analysis-checks-stage/analysis-checks-stage.component';
 import { AnalysisDataChecksComponent } from './analysis-checks/analysis-data-checks/analysis-data-checks.component';
 import { AnalysisChecksAcknowledgmentComponent } from './analysis-checks/analysis-checks-acknowledgment/analysis-checks-acknowledgment.component';
@@ -25,7 +26,7 @@ import { ReportPresentationComponent } from './presentation/report-presentation/
 import { ModalFocusTrapDirective } from '@app/v1/shared/a11y/modal-focus-trap.directive';
 
 @NgModule({
-  declarations: [ReportPresentationComponent, ReportAnalysisChecksStageComponent, ReportOutputActionsComponent, ReportAnalysisSelectionComponent, AnalysisChecksAcknowledgmentComponent,
+  declarations: [ReportSetupDeleteComponent, ReportPresentationComponent, ReportAnalysisChecksStageComponent, ReportOutputActionsComponent, ReportAnalysisSelectionComponent, AnalysisChecksAcknowledgmentComponent,
     AnalysisDataChecksComponent, ReportWorkbenchHeaderComponent, ReportWorkbenchShellComponent, ReportStageOutletComponent, PendingReportStageComponent],
   imports: [ModalFocusTrapDirective, AnalysisResultNumberPipe, CommonModule, ReactiveFormsModule, RouterModule, IconComponent, WorkspaceSlideoutComponent,
     ConfirmationDialogComponent, DataEmptyStateComponent, AnalysisStageNavigationComponent, DataWorkbenchResourceSwitcherComponent,

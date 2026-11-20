@@ -31,4 +31,7 @@ export class FacilityReportEditor {
   discard(): void { this.controller.discard(); }
   pauseAutosave(): void { this.controller.pauseAutosave(); }
   resumeAutosave(): void { this.controller.resumeAutosave(); }
+  beginDeletion(): Promise<boolean> { return this.controller.beginDeletion(); }
+  cancelDeletion(): void { this.controller.cancelDeletion(); }
+  completeDeletion(): void { this.controller.completeDeletion(); }
 }

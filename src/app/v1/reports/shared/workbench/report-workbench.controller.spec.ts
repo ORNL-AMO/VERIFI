@@ -64,6 +64,9 @@ class TestReportEditor implements ReportEditor {
   discard(): void { this.autosave.discard(); }
   pauseAutosave(): void { this.autosave.pauseAutosave(); }
   resumeAutosave(): void { this.autosave.resumeAutosave(); }
+  beginDeletion(): Promise<boolean> { return this.autosave.beginDeletion(); }
+  cancelDeletion(): void { this.autosave.cancelDeletion(); }
+  completeDeletion(): void { this.autosave.completeDeletion(); }
 }
 
 @Injectable()

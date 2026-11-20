@@ -8,10 +8,9 @@ import { AnalysisDetailsSlideoutComponent } from '@app/v1/analysis/facility/deta
 import { ConfirmationDialogComponent } from '@app/v1/shared/a11y/confirmation-dialog.component';
 import { ReportsSharedModule } from '../../shared/reports-shared.module';
 import { AccountReportAnalysisSelectionComponent } from './analysis-selection/account-report-analysis-selection.component';
-import { AccountReportDeleteComponent } from '../workbench/delete/account-report-delete.component';
 
-@NgModule({ declarations: [AccountReportAnalysisSelectionComponent, AccountReportDeleteComponent],
+@NgModule({ declarations: [AccountReportAnalysisSelectionComponent],
   imports: [CommonModule, ReactiveFormsModule, RouterModule, IconComponent, ReportsSharedModule, ConfirmationDialogComponent,
     AccountAnalysisDetailsSlideoutComponent, AnalysisDetailsSlideoutComponent],
-  exports: [AccountReportAnalysisSelectionComponent, AccountReportDeleteComponent] })
+  exports: [AccountReportAnalysisSelectionComponent] })
 export class AccountReportSharedModule { }

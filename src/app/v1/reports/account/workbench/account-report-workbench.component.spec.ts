@@ -54,7 +54,7 @@ describe('account report workbench', () => {
         'Report information', ...(['performance', 'analysis', 'accountSavings'].includes(value) ? ['Analysis *'] : []), 'Report-specific settings'
       ]);
       for (const heading of headings) expect(heading.parentElement!.getAttribute('aria-labelledby')).toBe(heading.id);
-      expect(harness.routeNativeElement!.querySelector('.report-setup > app-account-report-delete')).not.toBeNull();
+      expect(harness.routeNativeElement!.querySelector('main > app-report-setup-delete')).not.toBeNull();
     }
     expect(harness.routeNativeElement!.querySelector('nav a')?.getAttribute('href')).toContain('/account-a/reports/dashboard');
     expect(harness.routeNativeElement!.querySelector('nav a')?.textContent?.trim()).toBe(snapshot.account.name);

@@ -1,0 +1,9 @@
+:host { display: block; }
+.report-setup-delete {
+  display: flex;
+  justify-content: flex-end;
+  padding: clamp(1rem, 3vw, 1.5rem);
+  border: 1px solid var(--v1-border);
+  border-top: 0;
+  background: var(--v1-surface);
+}
