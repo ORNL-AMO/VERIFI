@@ -115,17 +115,17 @@ export class HomeCommandHandler {
           ...(['order', 'hidden', 'deleted'] as const).flatMap(collection => value.views![collection].map(ref => ({ ref, path: `views.${collection}.${homeViewKey(ref)}` }))),
           ...(value.views.default ? [{ ref: value.views.default, path: 'views.default' }] : [])] : [];
         const previousViews = viewRefs(state), nextViews = viewRefs(read.value);
-        const viewAvailable = (ref: import('@domain/home/home-dashboard').HomeDashboardReference) => ref.kind === 'saved'
-          ? visible(dashboards).includes(ref.dashboardGuid)
+        const viewAvailable = (ref: import('@domain/home/home-dashboard').HomeDashboardReference, selectingDefault = false) => ref.kind === 'saved'
+          ? selectingDefault ? visible(dashboards).includes(ref.dashboardGuid) : dashboards.some(record => record.guid === ref.dashboardGuid)
           : !!read.value.views?.catalog.some(item => homeViewKey(item) === homeViewKey(ref));
         const acknowledged = new Set(submitted.repairPaths ?? []), references = owner?.preservation?.references ?? [];
-        for (const { ref, path } of nextViews) if (!viewAvailable(ref)
+        for (const { ref, path } of nextViews) if (!viewAvailable(ref, path === 'views.default')
           && !previousViews.some(previous => previous.path === path && sameHomeJson(previous.ref, ref))) invalid('Choose an available owner-local Home view.');
         for (const path of acknowledged) {
           const ref = references.find(ref => ref.path === path && ref.kind === 'dashboard');
           if (path.startsWith('views.')) {
             const next = nextViews.find(item => item.path === path);
-            if (!ref || next && !viewAvailable(next.ref)) invalid('Review an available Home view before acknowledging it.');
+            if (!ref || next && !viewAvailable(next.ref, path === 'views.default')) invalid('Review an available Home view before acknowledging it.');
             continue;
           }
           if (!ref || (path === 'defaultDashboardGuid'

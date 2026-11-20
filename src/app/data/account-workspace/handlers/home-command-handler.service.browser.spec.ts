@@ -82,6 +82,25 @@ describe('Home atomic native commands and workspace publication', () => {
     expect(commands.ownerView(homeAccountOwner).state?.views).toEqual(views);
     expect(commands.ownerView({ kind: 'facility', guid: facility.guid }).state).toBeUndefined();
   });
+  it('conflicts and recovers explicit view preferences without replaying committed configuration', async () => {
+    const ref = { kind: 'built-in' as const, template: 'home' as const, version: 1 };
+    const state: HomeOwnerState = { version: 1, initialized: true, dashboardOrder: [], deletedStarters: [],
+      views: { version: 1, catalog: [ref], order: [ref], default: ref, hidden: [], deleted: [] } };
+    const stale = commands.prepareConfigure(homeAccountOwner, state);
+    const proposal = commands.prepareConfigure(homeAccountOwner, state);
+    const execute = vi.spyOn(TestBed.inject(HomeCommandHandler), 'execute');
+    vi.spyOn(workspace, 'reloadActiveWorkspace').mockRejectedValueOnce(new Error('View preferences publication unavailable'));
+    expect((await commands.submit(proposal)).state).toBe('refresh-required');
+    expect((await commands.submit(proposal)).state).toBe('refresh-required');
+    expect(execute).toHaveBeenCalledTimes(1);
+    await commands.recover(account.guid, proposal.operationGuid);
+    expect((await commands.submit(proposal)).state).toBe('committed');
+    expect(execute).toHaveBeenCalledTimes(1);
+    expect(commands.ownerView(homeAccountOwner).state).toEqual(state);
+    expect((await commands.submit(stale)).state).toBe('conflict');
+    expect(store.savedVisualizations()).toEqual([]);
+    expect(await harness.getAll('homeOwners')).toEqual(store.homeOwners());
+  });
 
   it('initializes once, shares starter charts, hydrates after restart and publishes one complete graph', async () => {
     const committed = vi.fn(); TestBed.inject(WorkspaceCommandBoundary).committedChange$.subscribe(committed);
