@@ -68,7 +68,8 @@ import { AccountAnalysisAnnualComponent } from '@app/v1/analysis/account/workben
 import { AccountAnalysisMonthlyTableComponent } from '@app/v1/analysis/account/workbench/results/monthly-table/account-analysis-monthly-table.component';
 import { AccountAnalysisMonthlyChartComponent } from '@app/v1/analysis/account/workbench/results/monthly-chart/account-analysis-monthly-chart.component';
 import { AccountAnalysisFacilityDetailsComponent } from '@app/v1/analysis/account/workbench/results/facility-details/account-analysis-facility-details.component';
-import { AccountAnalysisUsedByComponent } from '@app/v1/analysis/account/workbench/used-by/account-analysis-used-by.component';
+import { AnalysisUsedByComponent } from '@app/v1/analysis/used-by/analysis-used-by/analysis-used-by.component';
+import { analysisUsageLeaveGuard } from '@app/v1/analysis/used-by/analysis-usage-leave.guard';
 import { FacilityAnalysisWorkbenchComponent } from '@app/v1/analysis/facility/workbench/facility-analysis-workbench.component';
 import { singleFacilityAnalysisPairGuard } from '@app/v1/analysis/single-facility-analysis-pair.guard';
 import { FacilityAnalysisSetupComponent } from '@app/v1/analysis/facility/workbench/analysis-setup/facility-analysis-setup.component';
@@ -138,7 +139,7 @@ describe('V1Routes facility data meters routes', () => {
       expect.objectContaining({ path: 'setup', component: AccountAnalysisSetupComponent }),
       expect.objectContaining({ path: 'select-items', component: AccountAnalysisSelectFacilityItemsComponent }),
       expect.objectContaining({ path: 'results', component: AccountAnalysisResultsShellComponent }),
-      expect.objectContaining({ path: 'used-by', component: AccountAnalysisUsedByComponent }),
+      expect.objectContaining({ path: 'used-by', component: AnalysisUsedByComponent, canDeactivate: [analysisUsageLeaveGuard], data: { accountAnalysisStage: 'used-by' } }),
       expect.objectContaining({ path: '**', redirectTo: 'setup' })
     ]));
     const accountResults = accountWorkbench?.children?.find(route => route.path === 'results')?.children ?? [];
@@ -162,7 +163,7 @@ describe('V1Routes facility data meters routes', () => {
       expect.objectContaining({ path: 'setup', component: FacilityAnalysisSetupComponent }),
       expect.objectContaining({ path: 'group/:groupGuid', component: FacilityAnalysisGroupShellComponent }),
       expect.objectContaining({ path: 'facility', component: FacilityAnalysisResultsShellComponent }),
-      expect.objectContaining({ path: 'used-by' })
+      expect.objectContaining({ path: 'used-by', component: AnalysisUsedByComponent, canDeactivate: [analysisUsageLeaveGuard], data: { analysisScope: 'used-by' } })
     ]));
     expect(workbench?.children?.find(route => route.path === 'group/:groupGuid')?.providers).toBeUndefined();
 
