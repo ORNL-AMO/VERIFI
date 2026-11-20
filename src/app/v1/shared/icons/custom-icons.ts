@@ -33,6 +33,16 @@ export const ModelingReportIcon = [
   ['path', { d: 'M 20.00125 18 C 19.43965 18 19.04365 18.644 18.77965 18.968 C 18.39565 19.472 17.9635 20.025 17.49805 20', stroke: 'currentColor', strokeWidth: 1.25, strokeLinecap: 'round', strokeLinejoin: 'round' }]
 ] as const satisfies IconSvgObject;
 
+/** Design source: src/assets/icons/emissions-factors-report.svg. Keep geometry in sync. */
+export const EmissionsFactorsReportIcon = [
+  ['path', { fill: 'none', stroke: 'currentColor', strokeWidth: 1.75, strokeLinecap: 'round', strokeLinejoin: 'round', d: 'M13 2.5V3C13 5.82843 13 7.24264 13.8787 8.12132C14.7574 9 16.1716 9 19 9H19.5M20 10.6569V11M8 22C5 22 4 20.5 4 17V9.45584C4 6.21082 4 4.58831 4.88607 3.48933C5.06508 3.26731 5.26731 3.06508 5.48933 2.88607C6.58831 2 8.21082 2 11.4558 2C12.1614 2 12.5141 2 12.8372 2.11401C12.9044 2.13772 12.9702 2.165 13.0345 2.19575C13.3436 2.34355 13.593 2.593 14.0919 3.09188L18.8284 7.82843C19.4065 8.40649 19.6955 8.69552 19.8478 9.06306C20 9.4306 20 9.83935 20 10.6569' }],
+  ['path', { fill: 'none', stroke: 'currentColor', strokeWidth: 1.25, strokeLinecap: 'round', strokeLinejoin: 'round', d: 'M7.5 8.75h2m-2 3.25H9' }],
+  ['path', { fill: 'none', stroke: 'currentColor', strokeWidth: 0.85, strokeLinecap: 'round', strokeLinejoin: 'round', d: 'M12.2711 18.8776L14.2864 17.5836 M12.7898 19.6854L14.8051 18.3914 M16.8949 15.9086L18.9102 14.6146 M17.4136 16.7164L19.4289 15.4224' }],
+  ['circle', { fill: 'none', stroke: 'currentColor', strokeWidth: 1.3, strokeLinecap: 'round', strokeLinejoin: 'round', cx: 11.1, cy: 20.2, r: 1.5 }],
+  ['circle', { fill: 'currentColor', stroke: 'none', strokeWidth: 1.75, strokeLinecap: 'round', strokeLinejoin: 'round', cx: 15.85, cy: 17.15, r: 1.35 }],
+  ['circle', { fill: 'none', stroke: 'currentColor', strokeWidth: 1.3, strokeLinecap: 'round', strokeLinejoin: 'round', cx: 20.6, cy: 14.1, r: 1.5 }]
+] as const satisfies IconSvgObject;
+
 /** Design source: src/assets/icons/pump.svg. Keep geometry in sync. */
 export const PumpIcon = [
   ['path', { d: 'M4 4.5V12.5C4 16.8 7.5 19.5 12.5 19.5C17.3 19.5 21 16.6 21 12.2C21 8 17.6 5 13.3 5C11 5 8.9 5.9 7.5 7.5V4.5', stroke: 'currentColor', strokeWidth: 1.75, strokeLinecap: 'round', strokeLinejoin: 'round' }],
@@ -187,6 +197,7 @@ export const CUSTOM_ICONS = {
   betterPlantsReport: BetterPlantsReportIcon,
   facilityAnalysisReport: FacilityAnalysisReportIcon,
   modelingReport: ModelingReportIcon,
+  emissionsFactorsReport: EmissionsFactorsReportIcon,
   pump: PumpIcon,
   fan: FanIcon,
   processHeating: ProcessHeatingIcon,

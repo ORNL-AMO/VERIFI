@@ -8,7 +8,8 @@ describe('report icon selection', () => {
     expect(reportIcon({ reportType: value })).toBe(value === 'betterPlants' ? 'betterPlantsReport' : 'report');
   });
   it.each(FACILITY_REPORT_TYPES)('uses the custom icon or page fallback for facility $value', ({ value }) => {
-    expect(reportIcon({ facilityReportType: value })).toBe(value === 'analysis' ? 'facilityAnalysisReport' : value === 'modeling' ? 'modelingReport' : 'report');
+    expect(reportIcon({ facilityReportType: value })).toBe(value === 'analysis' ? 'facilityAnalysisReport' : value === 'modeling' ? 'modelingReport'
+      : value === 'emissionFactors' ? 'emissionsFactorsReport' : 'report');
   });
   it.each(['unknown', '', 'toString', '__proto__'])('falls back for unrecognized saved report type %s', value => {
     expect(reportIcon({ reportType: value as ReportType })).toBe('report');
