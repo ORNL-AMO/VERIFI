@@ -327,9 +327,10 @@ export class HomeEditor {
     const view = this.home.view();
     if (view?.state?.views) return structuredClone(view.state.views);
     if (view?.initialization !== 'new') return undefined;
-    if (!this.home.entries().some(entry => entry.reference.kind === 'built-in')) return undefined;
+    const choices = this.home.resolved()?.choices ?? [];
+    if (!choices.some(entry => entry.reference.kind === 'built-in')) return undefined;
     const selected = this.home.selected()?.reference;
-    return captureHomeViewPreferences(this.home.entries().map(entry => ({ reference: entry.reference, available: entry.available, visible: entry.visible })), selected);
+    return captureHomeViewPreferences(choices.map(entry => ({ reference: entry.reference, available: entry.available, visible: entry.visible })), selected);
   }
   duplicate(): Promise<void> {
     const entry = this.home.selected();

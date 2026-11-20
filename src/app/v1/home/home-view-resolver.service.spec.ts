@@ -1,3 +1,5 @@
+import { HomeEditor } from './home-editor.service';
+import { HomeCommands } from '@data/account-workspace/home-commands.service';
 import { TestBed } from '@angular/core/testing';
 import { getNewIdbHomeOwner } from '@data/models/idbModels/homeOwner';
 import { HomeTemplateCatalog, HOME_COMPLETE_RECIPES } from './home-template-catalog.service';
@@ -25,6 +27,20 @@ describe('read-only built-in Home resolution', () => {
     expect(home.entries()).toEqual([]);
     store.publish({ ...snapshot, homeDashboards: [homeRecord('imported')] });
     route.set(parseWorkspaceRoute('/v1/workspace/account/account-a/home/overview')); expect(home.selectedGuid()).toBe('imported');
+  });
+  it('freezes conditionally hidden built-ins too, so later Water/Emissions eligibility is not deleted by the first explicit choice', async () => {
+    TestBed.overrideProvider(HOME_COMPLETE_RECIPES, { useValue: ['home', 'water', 'emissions'].map(template => ({ template, label: template, description: 'Complete boundary fixture', complete: true,
+      build: () => ({ template, version: 1, charts: [], dashboard: { ...homeDefinition(), visibility: template === 'home' ? 'always' : template } }) })) });
+    const { store, snapshot } = setupHome(); store.publish({ ...snapshot, account: { ...snapshot.account, displayEmissions: false } });
+    const home = TestBed.inject(HomeContext), commands = TestBed.inject(HomeCommands), editor = TestBed.inject(HomeEditor);
+    const submit = vi.spyOn(commands, 'submit').mockImplementation(async command => ({ state: 'failed', command, error: new Error('Retained for review') }));
+    expect(home.entries()).toHaveLength(1); expect(home.resolved()?.choices).toHaveLength(3);
+    await editor.setDefault(home.entries()[0].key);
+    const command = submit.mock.calls[0][0]; expect(command.kind).toBe('configure');
+    if (command.kind !== 'configure') return;
+    expect(command.state.views?.catalog.map(ref => ref.template)).toEqual(['home', 'water', 'emissions']);
+    store.publishCommitted({ ...store.snapshot()!, account: { ...snapshot.account, displayEmissions: true }, homeOwners: [getNewIdbHomeOwner('account-a', homeAccountOwner, command.state)] }, {});
+    expect(home.entries().map(entry => entry.reference)).toContainEqual({ kind: 'built-in', template: 'emissions', version: 1 });
   });
   it('uses saved customization once, preserves unavailable catalog versions, and never refills deleted built-ins', () => {
     const { store, snapshot } = setup(), home = TestBed.inject(HomeContext);

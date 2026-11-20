@@ -35,7 +35,7 @@ import { homeAccountOwner, homeDefinition } from '@domain/home/testing/home-fixt
 import { homeDisplayDraft, homeDisplayRaw } from './display-controls/display-controls.component';
 import { homeOwnerRoute } from '@app/v1/routing/workspace-route';
 
-@Component({ standalone: false, template: '<div [attr.inert]="modal.workspaceBlocked() ? &quot;&quot; : null"><router-outlet/></div><ng-template [cdkPortalOutlet]="modal.activePortal()"/>' })
+@Component({ standalone: false, template: '<div class="v1-workspace__main" style="height: 450px; overflow: auto" [attr.inert]="modal.workspaceBlocked() ? &quot;&quot; : null"><router-outlet/></div><ng-template [cdkPortalOutlet]="modal.activePortal()"/>' })
 class HomeInteractionHost { readonly modal = inject(ModalPortalService); }
 @Component({ standalone: true, template: '<h1>Saved visualization</h1>' })
 class SavedDestination {}
@@ -155,8 +155,9 @@ describe('Home4 explicit preferences, library save and return in Chromium', () =
     const browse = TestBed.inject(HomeBrowseSession), navigation = TestBed.inject(VisualizationNavigationService), home = TestBed.inject(HomeContext);
     const draft = homeDisplayDraft({ ...homeDisplayRaw({}), period: 'all-history' }, {}); browse.update(draft);
     const token = { accountGuid: account.guid, owner: homeAccountOwner, reference, widgetId: widget.id, chartGuid: 'chart-a' };
+    const main = fixture.nativeElement.querySelector('.v1-workspace__main') as HTMLElement; main.scrollTop = 180; const scroll = main.scrollTop; expect(scroll).toBeGreaterThan(0);
     expect(await navigation.openFromHome(token)).toBe(true); await settle(); expect(router.url).toContain('workbench/chart-a');
-    expect(await navigation.returnToDashboard(account.guid)).toBe(true); await settle(); expect(browse.current()?.draft).toEqual(draft);
+    expect(await navigation.returnToDashboard(account.guid)).toBe(true); await settle(); expect(browse.current()?.draft).toEqual(draft); expect(Math.abs(main.scrollTop - scroll)).toBeLessThan(2);
     expect(document.activeElement?.closest('[data-widget-id]')?.getAttribute('data-widget-id')).toBe(widget.id);
     await navigation.openFromHome(token); await settle();
     const commands = TestBed.inject(HomeCommands);

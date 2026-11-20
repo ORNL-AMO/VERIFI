@@ -13,7 +13,7 @@ import { homeDisplayDraft, homeDisplayRaw } from './display-controls/display-con
 describe('shared Home inherited latest-data anchor', () => {
   it('unions eligible histories without retargeting scopes and leaves an empty window explained', async () => {
     let empty = false;
-    const resolve = vi.fn(async (definition) => ({ calendarDate: '2026-11-20', latestDataDate: empty ? undefined : definition.name === 'Lagging' ? '2024-03-31' : '2024-08-31' }));
+    const resolve = vi.fn(async (definition) => ({ calendarDate: '2026-11-20', latestDataDate: empty ? undefined : definition.name === 'Lagging' ? '2024-03-31' : '2024-08-31', monthlyRange: { start: '2023-04-01', end: '2024-03-31' } }));
     TestBed.overrideProvider(PreviewRegistry, { useValue: { dates: { resolve }, provider: () => ({ describe: utilityCapabilities }) } });
     const { store, snapshot } = setupHome();
     const base = utilityVisualizationFixture();
@@ -28,9 +28,10 @@ describe('shared Home inherited latest-data anchor', () => {
     const identity = { accountGuid: 'account-a', workspaceRevision: store.revision(), definitionGuid: 'home-a', definitionRevision: 1 };
     const result = await dates.resolve(definition, identity, new AbortController().signal);
     expect(result.latestDataDate).toBe('2024-08-31');
+    expect(result.monthlyRange).toEqual({ start: '2023-09-01', end: '2024-08-31' });
     expect(resolve.mock.calls.every(([definition]) => definition.facilitySelection.kind === 'all')).toBe(true);
     empty = true;
     const missing = await dates.resolve(definition, identity, new AbortController().signal);
-    expect(missing.latestDataDate).toBeUndefined(); expect(missing.emptyReasons?.join()).toContain('No eligible');
+    expect(missing.latestDataDate).toBeUndefined(); expect(missing.monthlyRange).toBeUndefined(); expect(missing.emptyReasons?.join()).toContain('No eligible');
   });
 });

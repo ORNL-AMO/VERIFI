@@ -18,7 +18,7 @@ export class HomeViewResolver {
   private readonly catalog = inject(HomeTemplateCatalog);
   resolve(owner: HomeOwner) {
     const view = this.commands.ownerView(owner), snapshot = this.workspace.snapshot();
-    if (!snapshot) return { view, entries: [], default: undefined };
+    if (!snapshot) return { view, choices: [], entries: [], default: undefined };
     const saved = view.records.map(record => {
       const read = readHomeDashboard(record);
       const reference: HomeDashboardReference = read.state === 'valid' && read.value.builtIn && view.state?.views?.catalog.some(ref => homeViewKey(ref) === homeViewKey(read.value.builtIn!)) ? read.value.builtIn : { kind: 'saved', dashboardGuid: record.guid };
@@ -43,12 +43,13 @@ export class HomeViewResolver {
     const resolved = resolveHomeViews({ initialization: view.initialization as 'new' | 'legacy' | 'initialized' | 'unavailable',
       preferences: state?.views, candidates, legacyOrder: state?.dashboardOrder ?? [], legacyDefault: state?.defaultDashboardGuid,
       deletedStarters: state?.deletedStarters ?? [] });
-    const entries = resolved.entries.filter(item => item.visible && !state?.views?.hidden.some(ref => homeViewKey(ref) === homeViewKey(item.reference))).map(item => {
+    const choices = resolved.entries.map(item => {
       const candidate = candidates.find(candidate => candidate === item)!;
       const key = homeEntryKey(candidate.reference);
       return { ...candidate, key, route: candidate.reference.kind === 'saved' ? homeDashboardRoute(owner, candidate.reference.dashboardGuid)
         : homeBuiltInRoute(owner, candidate.reference.template, candidate.reference.version) };
     });
-    return { view, entries, default: resolved.default };
+    const entries = choices.filter(item => item.visible && !state?.views?.hidden.some(ref => homeViewKey(ref) === homeViewKey(item.reference)));
+    return { view, choices, entries, default: resolved.default };
   }
 }

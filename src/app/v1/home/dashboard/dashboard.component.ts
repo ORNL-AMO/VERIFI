@@ -59,7 +59,7 @@ export class HomeDashboardComponent {
         const widget = [...this.element.nativeElement.querySelectorAll<HTMLElement>('[data-widget-id]')].find(item => item.dataset['widgetId'] === homeReturn.widgetId);
         const target = widget?.querySelector<HTMLElement>('[data-home-open], h2') ?? this.element.nativeElement.querySelector<HTMLElement>('#home-title');
         target?.focus({ preventScroll: true });
-        if (this.document.scrollingElement) this.document.scrollingElement.scrollTop = homeReturn.scroll;
+        this.returns.restoreScroll(homeReturn.scroll);
         return;
       }
       const focus = this.editor.focusRequest(), dashboard = this.home.selectedGuid();

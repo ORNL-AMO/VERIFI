@@ -22,8 +22,10 @@ export class HomeReturnService {
     effect(() => { const next = this.workspace.account()?.guid; const revision = this.workspace.sessionRevision(); if (account !== next || session !== revision) { account = next; session = revision; this.token = undefined; this.focus.set(undefined); } });
   }
   remember(token: Omit<HomeReturnToken, 'scroll'>): void {
-    this.token = { ...structuredClone(token), session: this.workspace.sessionRevision(), scroll: this.document.scrollingElement?.scrollTop ?? 0 };
+    this.token = { ...structuredClone(token), session: this.workspace.sessionRevision(), scroll: this.scrollContainer()?.scrollTop ?? 0 };
   }
+  private scrollContainer(): Element | null { return this.document.querySelector('.v1-workspace__main') ?? this.document.scrollingElement; }
+  restoreScroll(scroll: number): void { const container = this.scrollContainer(); if (container) container.scrollTop = scroll; }
   clear(): void { this.token = undefined; }
   available(accountGuid: string): boolean {
     return this.token?.session === this.workspace.sessionRevision() && this.token?.accountGuid === accountGuid && this.workspace.account()?.guid === accountGuid
