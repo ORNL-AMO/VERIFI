@@ -141,6 +141,17 @@ class PdfDocumentRenderer {
   }
 
   private table(section: TableSection): void {
+    if (section.equation) {
+      this.pdf.setFont('times', 'normal'); this.pdf.setFontSize(12);
+      const lines = this.pdf.splitTextToSize(`${section.equation.label} = ${section.equation.expression}`, this.contentWidth - 8) as string[];
+      for (const line of lines) {
+        this.ensureSpace(9); this.markSectionStart();
+        this.pdf.setFillColor(240, 246, 251); this.pdf.rect(MARGIN, this.currentY - 5, this.contentWidth, 8, 'F');
+        this.pdf.setFillColor(...this.color); this.pdf.rect(MARGIN, this.currentY - 5, 1, 8, 'F');
+        this.pdf.setTextColor(35, 45, 55); this.pdf.text(line, MARGIN + 4, this.currentY); this.currentY += 8;
+      }
+      this.currentY += GAP;
+    }
     const columnCount = Math.max(0, ...section.rows.map(row => row.length),
       section.headers.reduce((sum, cell) => sum + (typeof cell === 'string' ? 1 : cell.colSpan ?? 1), 0));
     const bands = tableColumnBands(columnCount, this.options.strictAssets ? Math.max(3, Math.floor(this.contentWidth / 27)) : Math.max(2, columnCount));

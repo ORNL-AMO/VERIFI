@@ -1,0 +1,24 @@
+@import '../document/report-document-surface.css';
+:host { display: block; min-width: 0; }
+.document-section { border-bottom: 0; }
+.report-title { text-align: center; font-weight: 800; overflow-wrap: anywhere; }
+.section-heading { margin: 0 0 1.5rem; color: var(--v1-text); text-align: center; font-size: 1.5rem; font-weight: 800; line-height: 1.3; overflow-wrap: anywhere; }
+h4 { padding: 0; border: 0; letter-spacing: normal; text-align: center; font-weight: 800; line-height: 1.35; overflow-wrap: anywhere; }
+.method-heading { margin: 1.25rem 0 .75rem; font-size: 1.125rem; }
+.group-heading { margin: 1.5rem 0 .75rem; font-size: 1.25rem; }
+.model-validation:first-of-type .group-heading { margin-block-start: 0; }
+.report-notice { flex-direction: column; width: 100%; margin-block: 1.5rem; padding: 1rem; border-radius: 0; text-align: center; font-weight: 400; overflow-wrap: anywhere; }
+.report-notice__heading { display: flex; align-items: center; justify-content: center; gap: .5rem; font-weight: 800; }
+.report-notice p { margin: 0; }
+.report-notice:last-child { margin-block-end: 0; }
+.table-scroll { max-width: 100%; overflow-x: auto; margin-block: 1rem; }
+table { width: 100%; border-collapse: collapse; font-size: .875rem; }
+caption { caption-side: top; color: var(--v1-text); text-align: center; font-size: 1rem; font-weight: 800; padding-block: .5rem; }
+th, td { padding: .6rem; border: 1px solid var(--v1-border); text-align: left; vertical-align: top; }
+thead, tfoot { background: var(--v1-surface-muted); }
+.failed { color: var(--v1-danger); font-weight: 700; }
+.formula { min-width: 12rem; overflow-wrap: anywhere; }
+.model-note { display: block; font-size: .8rem; }
+.model-validation + .model-validation { margin-top: 1.5rem; border-top: 1px solid var(--v1-border); }
+.model-validation app-model-equation, .model-validation app-analysis-model-comparison-chart { display: block; margin-block: 2.5rem; }
+.model-validation > .report-notice { margin-block: 2.5rem; }

@@ -1,3 +1,4 @@
+import type { EnergyUseTransferRequest } from './energy-use-command.models';
 import { energyUseYearChange, seedEnergyUseYear } from '@app/v1/data/energy-uses/models/energy-use-year-draft.models';
 import { reviewEnergyUseBatch } from '@app/v1/data/energy-uses/models/energy-use-batch.models';
 import { AccountWorkspaceStore } from '../account-workspace.store';
@@ -24,6 +25,13 @@ describe('Energy Uses native commands', () => {
   const group = { ...getNewIdbFacilityEnergyUseGroup(account.guid, facility.guid), guid: 'group-a', name: 'Production' };
   const item = { ...getNewIdbFacilityEnergyUseEquipment(group, 2025), guid: 'energy-a', name: 'Pump' };
   const identity = { ...owner, energyUseGuid: item.guid };
+  async function transferRequest(saved: typeof item, targetGuid = saved.energyUseGroupId, mode: 'move' | 'copy' = 'move'): Promise<EnergyUseTransferRequest> {
+    const facilities = await harness.getAll<typeof facility>('facilities');
+    const groups = await harness.getAll<typeof group>('facilityEnergyUseGroups');
+    return { accountGuid: account.guid, mode, sources: [{ item: saved, facility: facilities.find(row => row.guid === saved.facilityId)! }],
+      destinationFacility: facilities.find(row => row.guid === groups.find(row => row.guid === targetGuid)?.facilityId) ?? facilities[0],
+      destinationGroup: { kind: 'existing', group: groups.find(row => row.guid === targetGuid)! }, copyIdentities: mode === 'copy' ? [getNewIdbEntry()] : [] };
+  }
   beforeEach(async () => {
     TestBed.configureTestingModule({ providers: [{ provide: LocalStorageService, useValue: { retrieve: () => null, store: () => {}, clear: () => {} } }] });
     harness = await IndexedDbTestHarness.create('energy-use-commands'); await harness.seed({ accounts: [account], facilities: [facility] });
@@ -39,7 +47,7 @@ describe('Energy Uses native commands', () => {
     const committed = vi.fn(), sub = TestBed.inject(WorkspaceCommandBoundary).committedChange$.subscribe(committed);
     try {
       const destination = store.energyUseGroups().find(group => group.guid === target.guid)!;
-      const result = await actions.transfer(identity, saved, destination);
+      const result = (await actions.transferItems(await transferRequest(saved, destination.guid))).items[0];
       expect(result).toEqual({ ...saved, energyUseGroupId: target.guid, modifiedDate: expect.any(Date) });
       expect(committed).toHaveBeenCalledTimes(1);
       expect(store.energyUseEquipment()).toEqual([result]);
@@ -53,10 +61,12 @@ describe('Energy Uses native commands', () => {
     await harness.seed({ facilityEnergyUseGroups: [{ ...group, guid: 'destination', facilityId: change === 'foreign' ? 'foreign-facility' : facility.guid }] });
     const groups = await harness.getAll<any>('facilityEnergyUseGroups');
     const target = groups.find(group => group.guid === 'destination');
+    const request = await transferRequest(saved, change === 'same' ? group.guid : target.guid);
+    if (change === 'missing') request.destinationGroup.group.guid = 'missing';
     if (change === 'item') await handler.saveItem(identity, saved, { ...saved, notes: 'Changed' }, false);
     if (change === 'target') await handler.saveGroupSettings({ ...owner, energyUseGroupGuid: target.guid }, target, { name: 'Renamed', notes: '' });
     const before = await harness.getAll('facilityEnergyUseEquipment');
-    await expect(handler.transferItem(identity, saved, change === 'same' ? groups.find(row => row.guid === group.guid) : change === 'missing' ? { ...target, guid: 'missing' } : target)).rejects.toThrow();
+    await expect(handler.transferItems(request)).rejects.toThrow();
     await harness.reopen(); expect(await harness.getAll('facilityEnergyUseEquipment')).toEqual(before);
   });
   it('recovers a committed transfer without repeating the move', async () => {
@@ -66,8 +76,8 @@ describe('Energy Uses native commands', () => {
     const store = TestBed.inject(AccountWorkspaceStore), actions = TestBed.inject(EnergyUseActionsService);
     const target = store.energyUseGroups().find(group => group.guid === 'destination')!;
     vi.spyOn(workspace, 'reloadActiveWorkspace').mockRejectedValueOnce(new Error('Refresh failed'));
-    const write = vi.spyOn(handler, 'transferItem');
-    await expect(actions.transfer(identity, saved, target)).rejects.toMatchObject({ persistenceCommitted: true });
+    const write = vi.spyOn(handler, 'transferItems');
+    await expect(actions.transferItems(await transferRequest(saved, target.guid))).rejects.toMatchObject({ persistenceCommitted: true });
     await actions.recoverPublication(account.guid);
     expect(write).toHaveBeenCalledTimes(1);
     expect(store.energyUseEquipment()[0]).toMatchObject({ ...saved, energyUseGroupId: target.guid, modifiedDate: expect.any(Date) });
@@ -246,19 +256,19 @@ describe('Energy Uses native commands', () => {
     const before = await harness.getAll('facilityEnergyUseEquipment');
     const committed = vi.fn(), subscription = TestBed.inject(WorkspaceCommandBoundary).committedChange$.subscribe(committed);
     try {
-      await expect(TestBed.inject(EnergyUseActionsService).copy(identity)).rejects.toThrow('changed');
+      await expect(TestBed.inject(EnergyUseActionsService).transferItems(await transferRequest(saved, saved.energyUseGroupId, 'copy'))).rejects.toThrow('changed');
       expect(committed).not.toHaveBeenCalled();
       await harness.reopen();
       expect(await harness.getAll('facilityEnergyUseEquipment')).toEqual(before);
       expect(await harness.getAll('facilityEnergyUseGroups')).toHaveLength(1);
     } finally { subscription.unsubscribe(); }
   });
-  it('copies a current source and accepts a matching retry without duplicating its history', async () => {
+  it('copies a current source and rejects a replay without duplicating its history', async () => {
     const handler = TestBed.inject(EnergyUseCommandHandler), saved = await handler.createItem(owner, item, group);
     await TestBed.inject(AccountWorkspaceService).selectAccount(account.guid);
-    const actions = TestBed.inject(EnergyUseActionsService), request = getNewIdbEntry();
-    const copy = await actions.copy(identity, request);
-    expect(await actions.copy(identity, request)).toEqual(copy);
+    const actions = TestBed.inject(EnergyUseActionsService), request = await transferRequest(saved, saved.energyUseGroupId, 'copy');
+    const copy = (await actions.transferItems(request)).items[0];
+    await expect(actions.transferItems(request)).rejects.toThrow('already exists');
     expect(copy).toMatchObject({ name: 'Pump (copy)', selected: false, operatingConditionsData: saved.operatingConditionsData });
     await harness.reopen();
     expect(await harness.getAll('facilityEnergyUseEquipment')).toEqual([saved, copy]);

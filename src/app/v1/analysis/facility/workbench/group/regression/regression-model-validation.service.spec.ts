@@ -1,5 +1,6 @@
 import { AnalysisGroup, JStatRegressionModel } from '@data/models/analysis';
-import { groupWithGeneratedModel, modelPeriodMonthCount, userDefinedValidationMessage } from './regression-model-validation.service';
+import { modelPeriodMonthCount, userDefinedValidationMessage } from './regression-model-validation.service';
+import { groupWithGeneratedModel } from '@shared/shared-analysis/calculations/regression-model-projection';
 
 describe('regression model validation helpers', () => {
   const validGroup = {

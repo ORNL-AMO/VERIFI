@@ -2,3 +2,4 @@
 @import '../editing/report-setup.css';
 :host { display: block; min-width: 0; }
 .report-analysis-heading h2 { margin: 0; color: var(--v1-ink); font-size: 1.02rem; font-weight: 800; line-height: 1.2; }
+.report-setup-section .report-analysis-filters { margin-inline-start: auto; }

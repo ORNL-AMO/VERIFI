@@ -1,0 +1,12 @@
+<app-report-presentation [title]="report.context.report()?.name ?? 'Modeling report'" [content]="reportContent" [available]="canPresent()"/>
+<ng-template #reportContent>
+@if (report.view(); as view) {
+  <app-modeling-report [title]="report.context.report()?.name ?? 'Modeling report'" [view]="view"/>
+} @else {
+  @let state = report.state();
+  <section class="report-section" [attr.aria-busy]="state.state === 'loading' || state.state === 'waiting'">
+    <p role="status">{{ state.message ?? 'Preparing the modeling report…' }}</p>
+    @if (state.state === 'error') { <button type="button" class="v1-btn v1-btn--secondary" (click)="report.retry()">Retry report</button> }
+  </section>
+}
+</ng-template>
