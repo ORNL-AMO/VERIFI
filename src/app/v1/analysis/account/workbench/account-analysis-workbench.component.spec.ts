@@ -1,3 +1,4 @@
+import { AnalysisUsageService } from '../../used-by/analysis-usage.service';
 import { signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
@@ -16,7 +17,7 @@ describe('AccountAnalysisWorkbenchComponent', () => {
     };
     TestBed.overrideComponent(AccountAnalysisWorkbenchComponent, {
       set: {
-        providers: [
+        providers: [{ provide: AnalysisUsageService, useValue: { dirty: signal(false), saving: signal(false) } },
           { provide: AccountAnalysisWorkbenchContext, useValue: context },
           { provide: AccountAnalysisWorkbenchNavigationService, useValue: {} },
           {

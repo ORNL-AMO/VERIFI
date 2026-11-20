@@ -1,3 +1,4 @@
+import { facilityReportAnalysisGuid } from '@data/account-workspace/analysis-usage.models';
 import { AnalysisCategory, AnnualAnalysisSummary } from '@data/models/analysis';
 import { IdbAccountAnalysisItem } from '@data/models/idbModels/accountAnalysisItem';
 import { IdbAnalysisItem } from '@data/models/idbModels/analysisItem';
@@ -69,7 +70,7 @@ export function buildFacilityAnalysisCards(input: BuildFacilityAnalysisCardsInpu
         link.facilityId === analysis.facilityId && link.analysisItemId === analysis.guid
       )
     );
-    const linkedReports = input.reports.filter(report => report.analysisItemId === analysis.guid);
+    const linkedReports = input.reports.filter(report => facilityReportAnalysisGuid(report) === analysis.guid);
     const bankingSource = input.analyses.find(item => item.guid === analysis.bankedAnalysisItemId);
     const bankingConsumers = input.analyses.filter(item => item.bankedAnalysisItemId === analysis.guid);
     const isActiveForReporting = analysis.analysisCategory === 'water'

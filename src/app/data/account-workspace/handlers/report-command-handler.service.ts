@@ -2,13 +2,14 @@
  * Handler for facility-report, account-report, and report group/facility cascade commands.
  */
 import { Injectable } from '@angular/core';
+import { analysisReportCompatible } from '../analysis-usage.models';
 import { firstValueFrom } from 'rxjs';
 import { AccountReportDbService } from '@data/indexedDB/account-report-db.service';
 import { FacilityReportsDbService } from '@data/indexedDB/facility-reports-db.service';
 import { AccountWorkspaceStore } from '../account-workspace.store';
 import { IdbAccountReport } from '@data/models/idbModels/accountReport';
 import { IdbFacilityReport } from '@data/models/idbModels/facilityReport';
-import { IndexedDbTransactionService } from '@data/indexedDB/indexed-db-transaction.service';
+import { IndexedDbTransactionContext, IndexedDbTransactionService } from '@data/indexedDB/indexed-db-transaction.service';
 import { WorkspaceWriteError } from '../workspace-commands.models';
 import { AccountReportSetupChanges, AccountReportSetupResult, accountReportAnalysisGuid, accountReportAnalysisIsEligible, accountReportAnalysisSetupKey } from '../account-report-setup.models';
 import { IdbAccount } from '@data/models/idbModels/account';
@@ -46,7 +47,13 @@ export class ReportCommandHandler {
 
   async updateFacilityReportSetup(facilityGuid: string, reportGuid: string, changes: FacilityReportSetupChanges,
     accountGuid: string): Promise<IdbFacilityReport> {
-    return this.transactions.runTransaction(['accounts', 'facilities', 'facilityReports', 'analysisItems', 'utilityMeter', 'predictor'], 'readwrite', async tx => {
+    return this.transactions.runTransaction(['accounts', 'facilities', 'facilityReports', 'analysisItems', 'utilityMeter', 'predictor'], 'readwrite',
+      tx => this.applyFacilityReportSetup(tx, facilityGuid, reportGuid, changes, accountGuid));
+  }
+
+  /** Transaction-bound adapter for atomic creation with an initial analysis selection. */
+  async applyFacilityReportSetup(tx: IndexedDbTransactionContext, facilityGuid: string, reportGuid: string,
+    changes: FacilityReportSetupChanges, accountGuid: string): Promise<IdbFacilityReport> {
       const account = (await tx.getAll<IdbAccount>('accounts')).find(item => item.guid === accountGuid);
       const facility = (await tx.getAllByIndex<IdbFacility>('facilities', 'accountId', accountGuid)).find(item => item.guid === facilityGuid);
       const report = (await tx.getAllByIndex<IdbFacilityReport>('facilityReports', 'accountId', accountGuid))
@@ -69,12 +76,13 @@ export class ReportCommandHandler {
         throw new WorkspaceWriteError('validation-failed', 'These settings belong to a facility Modeling report.');
       }
       if (changes.analysisItemId !== undefined || changes.analysisReportSettings !== undefined || changes.modelingReportSettings !== undefined) {
-        if (!['analysis', 'modeling'].includes(report.facilityReportType)) throw new WorkspaceWriteError('validation-failed', 'These settings require an Analysis or Modeling report.');
+        if (!['analysis', 'modeling', 'savings', 'costSavings'].includes(report.facilityReportType)) throw new WorkspaceWriteError('validation-failed', 'This report does not use an analysis selection.');
         if (changes.analysisItemId !== undefined) {
           if (changes.analysisItemId !== null) {
             const analysis = (await tx.getAllByIndex<IdbAnalysisItem>('analysisItems', 'accountId', accountGuid))
               .find(item => item.guid === changes.analysisItemId && item.facilityId === facilityGuid && ['energy', 'water'].includes(item.analysisCategory));
             if (!analysis) throw new WorkspaceWriteError('validation-failed', 'Choose an available analysis belonging to this facility.');
+            if (!analysisReportCompatible('facility', report.facilityReportType, analysis)) throw new WorkspaceWriteError('validation-failed', 'Choose a compatible analysis belonging to this facility.');
           }
           updated = { ...updated, analysisItemId: changes.analysisItemId ?? undefined };
         }
@@ -108,7 +116,6 @@ export class ReportCommandHandler {
         await tx.put('facilityReports', updated);
       }
       return updated;
-    });
   }
 
   async deleteFacilityReport(report: IdbFacilityReport, activeAccountGuid: string): Promise<number> {
@@ -148,7 +155,13 @@ export class ReportCommandHandler {
 
   /** Read the latest records and commit a report edit and its optional hidden pair together. */
   async updateAccountReportSetup(reportGuid: string, changes: AccountReportSetupChanges, accountGuid: string): Promise<AccountReportSetupResult> {
-    return this.transactions.runTransaction(['accounts', 'facilities', 'accountReports', 'accountAnalysisItems', 'analysisItems'], 'readwrite', async transaction => {
+    return this.transactions.runTransaction(['accounts', 'facilities', 'accountReports', 'accountAnalysisItems', 'analysisItems'], 'readwrite',
+      transaction => this.applyAccountReportSetup(transaction, reportGuid, changes, accountGuid));
+  }
+
+  /** Runs only inside the caller's declared native transaction. */
+  async applyAccountReportSetup(transaction: IndexedDbTransactionContext, reportGuid: string,
+    changes: AccountReportSetupChanges, accountGuid: string): Promise<AccountReportSetupResult> {
       const account = (await transaction.getAll<IdbAccount>('accounts')).find(item => item.guid === accountGuid);
       const reports = await transaction.getAllByIndex<IdbAccountReport>('accountReports', 'accountId', accountGuid);
       const report = reports.find(item => item.guid === reportGuid);
@@ -227,7 +240,6 @@ export class ReportCommandHandler {
         await transaction.put('accountReports', updated);
       }
       return { report: updated, accountAnalyses: selectedAnalyses };
-    });
   }
 
   async deleteAccountReport(report: IdbAccountReport, activeAccountGuid: string): Promise<number> {

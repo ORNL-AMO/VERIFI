@@ -370,8 +370,10 @@ describe('monthly meter capture through native storage and canonical calculation
     await vi.waitFor(() => { fixture.detectChanges(); expect(monthly().patternCaptureSupport().state, JSON.stringify(monthly().patternCaptureSupport())).toBe('supported'); });
     const patterns = fixture.debugElement.query(By.directive(MeterFiscalYearComparisonChartComponent)).componentInstance as MeterFiscalYearComparisonChartComponent;
     const sourceRoot = fixture.nativeElement.querySelector('app-meter-fiscal-year-comparison-chart') as HTMLElement;
-    await vi.waitFor(() => expect(echarts.getInstanceByDom(sourceRoot.querySelector('.v1-meter-fiscal-comparison__chart')!)).toBeDefined());
-    echarts.getInstanceByDom(sourceRoot.querySelector('.v1-meter-fiscal-comparison__chart')!)!.dispatchAction({ type: 'legendToggleSelect', name: '2026' }); await settle();
+    const sourceChart = () => echarts.getInstanceByDom(sourceRoot.querySelector('.v1-meter-fiscal-comparison__chart')!);
+    // The instance is created before its initial options are applied on the next animation frame.
+    await vi.waitFor(() => expect(sourceChart()?.getOption()).toMatchObject({ legend: [{ data: ['2026', '2027'] }] }));
+    sourceChart()!.dispatchAction({ type: 'legendToggleSelect', name: '2026' }); await settle();
     expect(patterns.hiddenYears()).toEqual([2026]);
     const visualize = sourceRoot.querySelector<HTMLButtonElement>('button[aria-label="Visualize"]')!;
     visualize.focus(); await userEvent.keyboard('{Enter}'); await settle();
@@ -390,7 +392,7 @@ describe('monthly meter capture through native storage and canonical calculation
     workbench().smoothLines.setValue(false); expect(await workbench().editor.flush()).toBe(true); await workspaceReload();
     expect(fixture.nativeElement.textContent).toContain('View source chart');
     const savedChartRoot = () => fixture.nativeElement.querySelector('app-monthly-patterns-chart .monthly-patterns-chart') as HTMLElement;
-    await vi.waitFor(() => expect(echarts.getInstanceByDom(savedChartRoot())).toBeDefined());
+    await vi.waitFor(() => expect(echarts.getInstanceByDom(savedChartRoot())?.getOption()).toMatchObject({ legend: [{ data: ['2026', '2027'] }] }));
     echarts.getInstanceByDom(savedChartRoot())!.dispatchAction({ type: 'legendToggleSelect', name: '2027' }); await settle();
     await vi.waitFor(() => { fixture.detectChanges(); expect(model().years.every(year => !year.visible)).toBe(true); });
     expect(fixture.nativeElement.textContent).not.toContain('View source chart');

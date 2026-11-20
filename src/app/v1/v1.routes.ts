@@ -1,3 +1,4 @@
+import { analysisUsageLeaveGuard } from '@app/v1/analysis/used-by/analysis-usage-leave.guard';
 import { VISUALIZATION_ROUTES, visualizationFacilityEntryGuard } from '@app/v1/visualizations/visualizations.routes';
 import { importSessionGuard } from '@app/v1/account/imports/import-session.guard';
 import { ENERGY_USE_WORKBENCH_ROUTES } from '@app/v1/data/energy-uses/energy-uses.routes';
@@ -85,7 +86,7 @@ import { AccountAnalysisMonthlyTableComponent } from '@app/v1/analysis/account/w
 import { AccountAnalysisMonthlyChartComponent } from '@app/v1/analysis/account/workbench/results/monthly-chart/account-analysis-monthly-chart.component';
 import { AccountAnalysisFacilityDetailsComponent } from '@app/v1/analysis/account/workbench/results/facility-details/account-analysis-facility-details.component';
 import { AccountAnalysisFacilityContributionsComponent } from '@app/v1/analysis/account/workbench/results/facility-contributions/account-analysis-facility-contributions.component';
-import { AccountAnalysisUsedByComponent } from '@app/v1/analysis/account/workbench/used-by/account-analysis-used-by.component';
+import { AnalysisUsedByComponent } from '@app/v1/analysis/used-by/analysis-used-by/analysis-used-by.component';
 import { FacilityAnalysisWorkbenchComponent } from '@app/v1/analysis/facility/workbench/facility-analysis-workbench.component';
 import { FacilityAnalysisSetupComponent } from '@app/v1/analysis/facility/workbench/analysis-setup/facility-analysis-setup.component';
 import { FacilityAnalysisGroupShellComponent } from '@app/v1/analysis/facility/workbench/group/shell/facility-analysis-group-shell.component';
@@ -101,7 +102,6 @@ import { FacilityAnalysisAnnualComponent } from '@app/v1/analysis/facility/workb
 import { FacilityAnalysisMonthlyTableComponent } from '@app/v1/analysis/facility/workbench/results/facility/monthly-table/facility-analysis-monthly-table.component';
 import { FacilityAnalysisMonthlyChartComponent } from '@app/v1/analysis/facility/workbench/results/facility/monthly-chart/facility-analysis-monthly-chart.component';
 import { FacilityAnalysisGroupContributionsComponent } from '@app/v1/analysis/facility/workbench/results/facility/group-contributions/facility-analysis-group-contributions.component';
-import { FacilityAnalysisUsedByComponent } from '@app/v1/analysis/facility/workbench/used-by/facility-analysis-used-by.component';
 import { singleFacilityAnalysisPairGuard } from '@app/v1/analysis/single-facility-analysis-pair.guard';
 
 import { inventoryScopeChangeGuard } from '@app/v1/shell/inventory-scope-change.guard';
@@ -227,7 +227,7 @@ export const V1Routes: Routes = [
                       { path: '**', redirectTo: 'annual' }
                     ]
                   },
-                  { path: 'used-by', component: AccountAnalysisUsedByComponent, data: { accountAnalysisStage: 'used-by' } },
+                  { path: 'used-by', component: AnalysisUsedByComponent, canDeactivate: [analysisUsageLeaveGuard], data: { accountAnalysisStage: 'used-by' } },
                   { path: '**', redirectTo: 'setup' }
                 ]
               },
@@ -425,7 +425,7 @@ export const V1Routes: Routes = [
                       { path: '**', redirectTo: 'annual' }
                     ]
                   },
-                  { path: 'used-by', component: FacilityAnalysisUsedByComponent, data: { analysisScope: 'used-by' } },
+                  { path: 'used-by', component: AnalysisUsedByComponent, canDeactivate: [analysisUsageLeaveGuard], data: { analysisScope: 'used-by' } },
                   { path: '**', redirectTo: 'setup' }
                 ]
               },

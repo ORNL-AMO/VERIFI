@@ -1,3 +1,5 @@
+import { facilityAnalysisEligible } from '@data/account-workspace/analysis-usage.models';
+export { facilityAnalysisEligible } from '@data/account-workspace/analysis-usage.models';
 import { AnalysisGroup, AnalysisType } from '@data/models/analysis';
 import { IdbAccountAnalysisItem } from '@data/models/idbModels/accountAnalysisItem';
 import { IdbAnalysisItem } from '@data/models/idbModels/analysisItem';
@@ -58,16 +60,6 @@ export function reconcileFacilityAnalysisLinks(
     facilityId: facility.guid,
     analysisItemId: existingByFacility.get(facility.guid)
   }));
-}
-
-export function facilityAnalysisEligible(
-  analysis: IdbAnalysisItem,
-  accountAnalysis: Pick<IdbAccountAnalysisItem, 'analysisCategory' | 'energyIsSource' | 'baselineYear'>,
-  facility: Pick<IdbFacility, 'guid' | 'isNewFacility'>
-): boolean {
-  if (analysis.facilityId !== facility.guid || analysis.analysisCategory !== accountAnalysis.analysisCategory) return false;
-  if (analysis.analysisCategory === 'energy' && analysis.energyIsSource !== accountAnalysis.energyIsSource) return false;
-  return !!facility.isNewFacility || analysis.baselineYear === accountAnalysis.baselineYear;
 }
 
 export function eligibleFacilityAnalysisCandidates(
