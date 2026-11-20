@@ -33,7 +33,7 @@ import { ApplicationLifecycleService } from '@app/application-lifecycle/applicat
 import { WorkspaceStatusService } from '@app/v1/status/workspace-status.service';
 import { WorkspaceNavigationService } from '@app/v1/shell/workspace-navigation.service';
 import { ModalPortalService } from '@app/v1/shell/modal-portal.service';
-import { PrimaryRailComponent } from '@app/v1/shell/primary-rail/primary-rail.component';
+import { WorkspaceShellBrowserTestModule } from '@app/v1/shell/workspace-shell/workspace-shell.testing';
 import { IconsModule } from '@app/v1/shared/icons/icons.module';
 import { protectedNavigationPreflightGuard } from '@app/v1/shared/navigation/unsaved-changes.guard';
 import { HomeModule } from '../home.module';
@@ -45,7 +45,7 @@ import { HomeDashboardComponent } from './dashboard.component';
 class HomeBrowserHost { readonly modal = inject(ModalPortalService); }
 @Component({ standalone: true, template: '<h1>Another workspace section</h1>' })
 class OtherSection {}
-@NgModule({ declarations: [HomeBrowserHost, PrimaryRailComponent], imports: [CommonModule, RouterModule, PortalModule, IconsModule, HomeModule] })
+@NgModule({ declarations: [HomeBrowserHost], imports: [CommonModule, RouterModule, PortalModule, IconsModule, HomeModule, WorkspaceShellBrowserTestModule] })
 class HomeBrowserModule {}
 
 const account = { ...getNewIdbAccount(), guid: 'account-a', id: 1, name: 'Account A' };

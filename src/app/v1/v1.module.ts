@@ -26,6 +26,7 @@ import { IconsModule } from '@app/v1/shared/icons/icons.module';
 import { ShellComponent } from '@app/v1/shell/shell.component';
 import { SupportPanelComponent } from '@app/v1/shell/support-panel/support-panel.component';
 import { WorkspaceShellComponent } from '@app/v1/shell/workspace-shell/workspace-shell.component';
+import { PanelResizeHandleComponent } from '@app/v1/shell/panel-resize-handle/panel-resize-handle.component';
 import { V1Routes } from '@app/v1/v1.routes';
 import { WelcomeComponent } from '@app/v1/welcome/welcome.component';
 
@@ -36,6 +37,7 @@ import { WelcomeComponent } from '@app/v1/welcome/welcome.component';
     WorkspaceCheckIndicatorComponent,
     FacilityPickerComponent,
     WorkspaceShellComponent,
+    PanelResizeHandleComponent,
     PrimaryRailComponent,
     SupportPanelComponent
   ],

@@ -11,7 +11,7 @@ import { StatusEvaluationMessageComponent } from '@app/v1/shared/status/status-e
 import { StatusFindingActionComponent } from '@app/v1/shared/status/status-finding-action/status-finding-action.component';
 import { setupSectionNavTest } from '../../section-nav/section-nav-test.helpers';
 import { SectionNavModule } from '../../section-nav/section-nav.module';
-import { SupportPanelComponent } from '../../support-panel/support-panel.component';
+import { WorkspaceShellBrowserTestModule } from '../../workspace-shell/workspace-shell.testing';
 import { SUPPORT_PANEL_TABS } from '../../support-panel/workspace-support-panel.view';
 import { WorkspaceNavigationService } from '../../workspace-navigation.service';
 import { ShellHeaderTestModule } from '../shell-header.testing';
@@ -29,8 +29,8 @@ class CheckFeedbackHost {
 }
 
 @NgModule({
-  declarations: [CheckFeedbackHost, SupportPanelComponent],
-  imports: [CommonModule, ShellHeaderTestModule, SectionNavModule, IconComponent, StatusEvaluationMessageComponent, StatusFindingActionComponent]
+  declarations: [CheckFeedbackHost],
+  imports: [CommonModule, ShellHeaderTestModule, SectionNavModule, IconComponent, StatusEvaluationMessageComponent, StatusFindingActionComponent, WorkspaceShellBrowserTestModule]
 })
 class CheckFeedbackTestModule {}
 

@@ -1,14 +1,27 @@
 @let isSupportPanelOpen = navigation.isSupportPanelOpen();
 @let contextMode = navigation.contextMode();
+@let widths = layout.widths();
+@let navigationBounds = layout.navigationBounds();
+@let supportBounds = layout.supportBounds();
 
 <main
   class="v1-workspace"
+  [style.--v1-section-nav-width]="widths.navigation + 'px'"
+  [style.--v1-support-panel-width]="widths.support + 'px'"
   [class.v1-workspace--panel-closed]="!isSupportPanelOpen"
+  [class.v1-workspace--nav-collapsed]="widths.navigation === 0"
+  [class.v1-workspace--support-collapsed]="widths.support === 0"
   [class.v1-workspace--account]="contextMode === 'account'"
   [class.v1-workspace--facility]="contextMode === 'facility'"
   aria-label="v1 account workspace">
   <app-primary-rail></app-primary-rail>
-  <app-section-nav></app-section-nav>
+  <app-section-nav id="v1-section-navigation" [attr.inert]="widths.navigation === 0 ? '' : null"></app-section-nav>
+  <app-panel-resize-handle class="v1-workspace__nav-resize"
+    label="Resize navigation sidebar" panelId="v1-section-navigation"
+    [value]="widths.navigation" [min]="navigationBounds.min" [max]="navigationBounds.max"
+    [expandedMin]="navigationBounds.expandedMin" [reopenWidth]="navigationBounds.reopenWidth"
+    [disabled]="!navigationBounds.enabled" [resizing]="layout.resizing()"
+    (resizeIntent)="resizePanel('navigation', $event)"></app-panel-resize-handle>
 
   <section [appNavigationMotion]="navigation.routeMotion()" [navigationMotionKey]="navigation.routeMotionKey()" class="v1-workspace__main" aria-label="Workspace content" cdkScrollable>
     <router-outlet></router-outlet>
@@ -19,6 +32,12 @@
   </div>
 
   @if (isSupportPanelOpen) {
-    <app-support-panel></app-support-panel>
+    <app-support-panel id="v1-support-panel" [attr.inert]="widths.support === 0 ? '' : null"></app-support-panel>
+    <app-panel-resize-handle class="v1-workspace__support-resize"
+      label="Resize support panel" panelId="v1-support-panel" [direction]="-1"
+      [value]="widths.support" [min]="supportBounds.min" [max]="supportBounds.max"
+      [expandedMin]="supportBounds.expandedMin" [reopenWidth]="supportBounds.reopenWidth"
+      [disabled]="!supportBounds.enabled" [resizing]="layout.resizing()"
+      (resizeIntent)="resizePanel('support', $event)"></app-panel-resize-handle>
   }
 </main>
