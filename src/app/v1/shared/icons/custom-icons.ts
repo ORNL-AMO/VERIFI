@@ -153,7 +153,25 @@ export const SunburstIcon = [
   ['path', { d: 'M12 9L12 2 M14.59808 13.5L20.66025 17 M9 12L2 12 M17.62917 8.75L20.66025 7 M10.31768 18.27852L9.41181 21.65926 M8.75 6.37083L7 3.33975', stroke: 'currentColor', strokeWidth: 1.25, strokeLinecap: 'round', strokeLinejoin: 'round' }]
 ] as const satisfies IconSvgObject;
 
+/** Design source: src/assets/icons/sidepanel-open.svg. Keep geometry in sync. */
+export const SidePanelOpenIcon = [
+  ['path', { fill: 'currentColor', stroke: 'none', strokeWidth: 1.75, strokeLinecap: 'round', strokeLinejoin: 'round', d: 'M15.5 4H18.5A2.5 2.5 0 0 1 21 6.5v11a2.5 2.5 0 0 1-2.5 2.5h-3Z', opacity: 0.09 }],
+  ['rect', { fill: 'none', stroke: 'currentColor', strokeWidth: 1.75, strokeLinecap: 'round', strokeLinejoin: 'round', x: 3.0, y: 4.0, width: 18.0, height: 16.0, rx: 2.5 }],
+  ['path', { fill: 'none', stroke: 'currentColor', strokeWidth: 1.75, strokeLinecap: 'round', strokeLinejoin: 'round', d: 'M15.5 4v16' }],
+  ['path', { fill: 'none', stroke: 'currentColor', strokeWidth: 1.5, strokeLinecap: 'round', strokeLinejoin: 'round', d: 'M12 12H6.5m2.75-2.75L6.5 12l2.75 2.75' }]
+] as const satisfies IconSvgObject;
+
+/** Design source: src/assets/icons/sidepanel-collapse.svg. Keep geometry in sync. */
+export const SidePanelCollapseIcon = [
+  ['path', { fill: 'currentColor', stroke: 'none', strokeWidth: 1.75, strokeLinecap: 'round', strokeLinejoin: 'round', d: 'M15.5 4H18.5A2.5 2.5 0 0 1 21 6.5v11a2.5 2.5 0 0 1-2.5 2.5h-3Z', opacity: 0.09 }],
+  ['rect', { fill: 'none', stroke: 'currentColor', strokeWidth: 1.75, strokeLinecap: 'round', strokeLinejoin: 'round', x: 3.0, y: 4.0, width: 18.0, height: 16.0, rx: 2.5 }],
+  ['path', { fill: 'none', stroke: 'currentColor', strokeWidth: 1.75, strokeLinecap: 'round', strokeLinejoin: 'round', d: 'M15.5 4v16' }],
+  ['path', { fill: 'none', stroke: 'currentColor', strokeWidth: 1.5, strokeLinecap: 'round', strokeLinejoin: 'round', d: 'M6.5 12H12M9.25 9.25 12 12l-2.75 2.75' }]
+] as const satisfies IconSvgObject;
+
 export const CUSTOM_ICONS = {
+  sidePanelOpen: SidePanelOpenIcon,
+  sidePanelCollapse: SidePanelCollapseIcon,
   dataVisualization: VerifiChartIcon,
   betterPlantsReport: BetterPlantsReportIcon,
   facilityAnalysisReport: FacilityAnalysisReportIcon,

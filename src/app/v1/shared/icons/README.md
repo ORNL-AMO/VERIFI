@@ -23,6 +23,14 @@ Icons are decorative by default. For a meaningful standalone icon, set
 `[decorative]="false"` and supply `label`; labeled buttons normally keep their
 icons decorative.
 
+## Side-panel icons
+
+Use `sidePanelOpen` to expand the right-side panel and `sidePanelCollapse` to
+collapse it. Both keep the panel on the right; their arrows point left to expand
+and right to collapse. Sources: [sidepanel-open.svg](../../../../assets/icons/sidepanel-open.svg)
+and [sidepanel-collapse.svg](../../../../assets/icons/sidepanel-collapse.svg).
+The header toggle selects the action from the current panel visibility.
+
 ## Visualization icons
 
 The [chart catalog](../../visualizations/visualization-charts.ts) owns the mapping
