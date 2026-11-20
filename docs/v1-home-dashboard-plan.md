@@ -7,7 +7,7 @@ Delivery tracker for [Home1 #2912](https://github.com/ORNL-AMO/VERIFI/issues/291
 - The [Home dashboard specification](v1-home-dashboard-spec.md) owns the accepted intended templates, layouts, bindings, filters, lifecycle, future interface requirements and acceptance scenarios.
 - The [Home content map](v1-home-content-map.md) owns source-backed legacy dispositions and adapter gaps.
 - Built-in Home/Overview views use shipped configurations; viewing them creates no saved visualizations. Layout preferences and explicit chart customization are saved separately. The specification owns this planned product contract; Home4 extends storage compatibility; complete default-view activation remains gated on its rendering and composition work.
-- Current runtime behavior remains owned by existing visualization, workspace, status, calculation and persistence references. Home1 has delivered a specification; [Home2 persistence](v1-home-persistence.md) implements storage and compatibility contracts. [Home3 workspace](v1-home-workspace.md) implements navigation/layout editing; Home4–Home6 remain pending. Human review/QA and issue closure are separate from specification delivery.
+- Current runtime behavior remains owned by existing visualization, workspace, status, calculation and persistence references. Home1 has delivered a specification; [Home2 persistence](v1-home-persistence.md) implements storage and compatibility contracts. [Home3 workspace](v1-home-workspace.md) implements navigation/layout editing; Home4 compatibility, shared rendering and protected interactions are merged; Home5 widgets and Home6 compositions remain pending. Human review/QA and issue closure are separate from specification delivery.
 - Implement the new overview experience before migrating overview reports. Overview reports have not been migrated; their formats and creation flow remain later Reports work. Home must not advertise an unavailable v1 overview-report action.
 
 As phases land, move their implemented contracts into the appropriate current references and retire completed planning material after preserving unique invariants and open acceptance. Do not use this tracker as a competing behavior specification.
@@ -54,12 +54,14 @@ Implemented contracts are owned by [Home workspace](v1-home-workspace.md): owner
 
 [Issue #2915](https://github.com/ORNL-AMO/VERIFI/issues/2915). Uses Home2/Home3 and the saved-definition/provider capabilities needed by each chart. Full Vis9 capture coverage is not a prerequisite; capturing an existing screen and rendering a supported configuration are separate entry paths.
 
-- [ ] Complete the built-in reference/preference/compatibility contracts in the first milestone; preserve existing GUID links and durable owner choices.
-- [ ] Render built-in configurations and linked saved charts through the shared pipeline with visible source context and explicit named-analysis versus reporting-following behavior. Default viewing must create no saved visualization records.
-- [ ] Resolve Active for reporting bindings against current committed owner settings; preserve exact named bindings and explain absent/invalid selections.
-- [ ] Extend embedding capabilities for supported display overrides, date precedence, session exploration, and Save as dashboard defaults.
-- [ ] Implement protected built-in customization drafts, explicit save/materialization and chart open/return, repair/replacement, retry and recovery without viewing-time writes or orphan records. Existing saved-chart edits retain explicit shared-link semantics.
-- [ ] Bound demand to active widgets and reject obsolete account/dashboard/definition/source requests; cover native Worker/browser journeys where affected.
+- [x] Complete the built-in reference/preference/compatibility contracts in the first milestone; preserve existing GUID links and durable owner choices.
+- [x] Render built-in configurations and linked saved charts through the shared pipeline with visible source context and explicit named-analysis versus reporting-following behavior. Default viewing must create no saved visualization records.
+- [x] Resolve Active for reporting bindings against current committed owner settings; preserve exact named bindings and explain absent/invalid selections.
+- [x] Extend embedding capabilities for supported display overrides, date precedence, session exploration, and Save as dashboard defaults.
+- [x] Implement protected built-in customization drafts, explicit save/materialization and chart open/return, repair/replacement, retry and recovery without viewing-time writes or orphan records. Existing saved-chart edits retain explicit shared-link semantics.
+- [x] Bound demand to active widgets and reject obsolete account/dashboard/definition/source requests; cover native Worker/browser journeys where affected.
+
+Merged Home4 infrastructure does not establish Home6 composition/parity acceptance, paginated print-output QA or human issue acceptance.
 
 ### Home5 summaries and supporting widgets
 

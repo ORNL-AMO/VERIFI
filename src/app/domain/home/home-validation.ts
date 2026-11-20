@@ -83,7 +83,8 @@ function widgetValid(widget: unknown): boolean {
     case 'goal': return keys(widget, [...base, 'binding']) && homeAnalysisBindingValid(widget.binding);
     case 'actions': case 'owner-summary': return keys(widget, [...base, 'settings']) && object(widget.settings)
       && keys(widget.settings, ['scope']) && widget.settings.scope === 'owner';
-    case 'table': return keys(widget, [...base, 'settings']) && object(widget.settings) && keys(widget.settings, ['view', 'measure', 'period'])
+    case 'table': return keys(widget, [...base, 'settings']) && object(widget.settings) && keys(widget.settings, ['view', 'measure', 'period', 'categories'])
+      && (widget.settings.categories === undefined || widget.settings.view === 'facility-progress' && Array.isArray(widget.settings.categories) && widget.settings.categories.length > 0 && new Set(widget.settings.categories).size === widget.settings.categories.length && widget.settings.categories.every(value => ['energy', 'water'].includes(value)))
       && ['facility-progress', 'utility-detail', 'utility-summary', 'equipment-summary'].includes(widget.settings.view)
       && ['energy', 'cost', 'emissions', 'water'].includes(widget.settings.measure)
       && ['utility-window', 'all-years', 'latest-result', 'latest-equipment-year'].includes(widget.settings.period);

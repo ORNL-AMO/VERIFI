@@ -28,6 +28,13 @@ describe('Home backup contracts and verified mappings', () => {
     expect(homeOwnerResolutionState(second, second.state as any).views?.default).toBeUndefined();
     expect(homeOwnerResolutionState(second, second.state as any).views?.order).toEqual([view]);
   });
+  it('preserves combined progress configuration without storing result rows on transfer', () => {
+    const widget = { id: 'progress', kind: 'table' as const, size: 'full' as const, visibility: 'always' as const,
+      settings: { view: 'facility-progress' as const, measure: 'energy' as const, categories: ['energy', 'water'] as const, period: 'latest-result' as const } };
+    const source = getNewIdbHomeDashboard('account-a', homeAccountOwner, homeDefinition([widget]));
+    const copied = transferHomeDashboard(source, 'account-b', maps, 'progress-copy', []);
+    expect((copied.definition as typeof source.definition)).toMatchObject({ widgets: [widget] });
+  });
   const owner = { kind: 'facility' as const, guid: 'facility-a' };
   const definition = homeDefinition([
     chartWidget('shared', 'first'), chartWidget('shared', 'second'),

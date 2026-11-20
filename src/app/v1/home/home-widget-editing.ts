@@ -1,5 +1,5 @@
 export interface HomeWidgetChoiceDraft {
-  readonly kind: 'note' | 'visualization' | 'shortcut' | 'built-in-chart';
+  readonly kind: 'note' | 'visualization' | 'shortcut' | 'built-in-chart' | 'actions' | 'energy-goal' | 'water-goal' | 'facility-progress';
   readonly recipe?: string;
   readonly visualizationGuids: readonly string[];
   readonly shortcutKeys: readonly string[];
