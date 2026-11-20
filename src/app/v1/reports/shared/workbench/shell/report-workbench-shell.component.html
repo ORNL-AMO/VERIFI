@@ -1,10 +1,10 @@
 @let host = workbench.host;
-@let view = host.presentation();
+@let view = workbench.presentation();
 @let session = workbench.session();
 @let returnLink = host.returnLink();
-@if (host.state() === 'loading') {
+@if (workbench.state() === 'loading') {
   <p role="status">Loading report…</p>
-} @else if (host.state() === 'error') {
+} @else if (workbench.state() === 'error') {
   <div class="v1-alert v1-alert--danger" role="alert">{{ host.error() || 'The report workspace could not be loaded.' }}</div>
   <a [routerLink]="returnLink.route" [queryParams]="returnLink.queryParams">Return to reports</a>
 } @else if (!view || !session) {
@@ -15,7 +15,10 @@
     [titleId]="view.titleId" [resources]="view.resources" [selectedId]="view.selectedId" [name]="view.name" [typeLabel]="view.typeLabel"
     [status]="view.status" [statusLabel]="view.statusLabel" [facts]="view.facts" [stages]="workbench.stages()"
     [checksStatus]="workbench.workflow()" (reportSelected)="workbench.switchReport($event)"/>
-  <main class="report-workbench-content" [attr.aria-labelledby]="view.titleId"><ng-content/></main>
+  <main class="report-workbench-content" [attr.aria-labelledby]="view.titleId">
+    <ng-content/>
+    @if (host.stage() === 'setup') { <app-report-setup-delete/> }
+  </main>
   <footer class="v1-wizard-actions" aria-label="Report workflow navigation">
     @if (workbench.previous(); as previous) {
       <a class="v1-btn v1-btn--quiet" [routerLink]="previous.route"><app-ui-icon name="chevronLeft"/>Back</a>

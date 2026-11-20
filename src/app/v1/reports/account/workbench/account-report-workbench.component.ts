@@ -1,13 +1,12 @@
-import { Component, Injector, computed, inject } from '@angular/core';
+import { Component, computed, inject } from '@angular/core';
 import { ActivatedRoute, CanDeactivateFn } from '@angular/router';
 import { ReportHostAdapter, REPORT_HOST } from '@app/v1/reports/shared/workbench/report-runtime.models';
 import { ReportWorkbenchController } from '@app/v1/reports/shared/workbench/report-workbench.controller';
 import { AccountReportWorkbenchContext } from './account-report-workbench-context.service';
-import { AccountReportDeleteService } from './delete/account-report-delete.service';
 import { ACCOUNT_REPORT_FEATURES, PENDING_ACCOUNT_REPORT } from '../account-report.definitions';
 
 function accountReportHost(): ReportHostAdapter {
-  const context = inject(AccountReportWorkbenchContext), route = inject(ActivatedRoute), owner = inject(Injector);
+  const context = inject(AccountReportWorkbenchContext), route = inject(ActivatedRoute);
   return {
     identity: computed(() => { const report = context.report(); return report ? { scope: 'account' as const, accountGuid: report.accountId, reportGuid: report.guid } : undefined; }),
     stage: context.stage, stages: context.stages,
@@ -22,15 +21,14 @@ function accountReportHost(): ReportHostAdapter {
     returnLink: computed(() => ({ route: context.dashboardRoute() })),
     definitions: ACCOUNT_REPORT_FEATURES, fallback: PENDING_ACCOUNT_REPORT,
     type: () => context.report()?.reportType,
-    providers: () => [AccountReportWorkbenchContext, { provide: ActivatedRoute, useValue: route },
-      { provide: AccountReportDeleteService, useValue: owner.get(AccountReportDeleteService) }],
+    providers: () => [AccountReportWorkbenchContext, { provide: ActivatedRoute, useValue: route }],
     reportLink: (guid, stage = 'setup') => ({ route: context.navigation.accountReportWorkbenchRoute(context.accountGuid() ?? '', guid, stage) })
   };
 }
 
 @Component({ selector: 'app-account-report-workbench', standalone: false,
   templateUrl: './account-report-workbench.component.html', styleUrls: ['./account-report-workbench.component.css'],
-  providers: [AccountReportWorkbenchContext, ReportWorkbenchController, AccountReportDeleteService, { provide: REPORT_HOST, useFactory: accountReportHost }] })
+  providers: [AccountReportWorkbenchContext, ReportWorkbenchController, { provide: REPORT_HOST, useFactory: accountReportHost }] })
 export class AccountReportWorkbenchComponent {
   readonly context = inject(AccountReportWorkbenchContext);
   readonly workbench = inject(ReportWorkbenchController);

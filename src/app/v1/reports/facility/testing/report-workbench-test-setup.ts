@@ -54,6 +54,10 @@ export async function setupReportWorkbench(reports = [reportFixture(), reportFix
     }
     store.publishCommittedPatch({ collections: [{ collection: 'facilityReports', upsert: [report] }] }); return report;
   });
+  const deleteReport = vi.fn(async (_facility: string, guid: string) => {
+    const report = store.facilityReports().find(item => item.guid === guid)!;
+    store.publishCommittedPatch({ collections: [{ collection: 'facilityReports', deleteIds: [report.id!] }] });
+  });
   const status = { state: signal<'ready' | 'evaluating' | 'error'>('ready'), items: signal<StatusItem[]>([]) };
   await TestBed.configureTestingModule({ imports: [FacilityReportsModule], providers: [
     provideLocationMocks(),
@@ -62,7 +66,7 @@ export async function setupReportWorkbench(reports = [reportFixture(), reportFix
     provideRouter([{ path: 'v1/workspace/account/:accountGuid/reports/dashboard', component: ReportInventoryDestination }, { path: 'v1/workspace/facility/:facilityGuid/reports', children: FACILITY_REPORT_ROUTES }, { path: 'elsewhere', component: FacilityReportWorkbenchComponent }]),
     { provide: AccountWorkspaceStore, useValue: store },
     { provide: WorkspaceStatusService, useValue: status },
-    { provide: FacilityReportActionsService, useValue: { updateName, updateSetup } },
+    { provide: FacilityReportActionsService, useValue: { updateName, updateSetup, delete: deleteReport } },
     { provide: WorkspaceCalendarizationService, useValue: { calendarizeBase: () => of({ state: 'idle', meters: [] }), retry: vi.fn() } },
     { provide: WorkspaceNavigationService, useFactory: () => {
       const router = inject(Router);
@@ -82,5 +86,5 @@ export async function setupReportWorkbench(reports = [reportFixture(), reportFix
   const router = TestBed.inject(Router);
   router.setUpLocationChangeListener();
   const open = async (report = 'report-a', stage = 'setup') => await harness.navigateByUrl(`/v1/workspace/facility/${snapshot.facilities[0].guid}/reports/workbench/${report}/${stage}`, FacilityReportWorkbenchComponent) as FacilityReportWorkbenchComponent & { readonly editor: AnalysisReportEditor };
-  return { harness, router, store, updateName, updateSetup, status, open };
+  return { harness, router, store, updateName, updateSetup, deleteReport, status, open };
 }

@@ -1,6 +1,6 @@
 import { ComponentRef, DestroyRef, EnvironmentInjector, Injectable, computed, createEnvironmentInjector, effect, inject, signal, untracked } from '@angular/core';
 import { Router } from '@angular/router';
-import { REPORT_HOST, REPORT_RUNTIME, REPORT_SESSION_IDENTITY, ReportFeatureDefinition, ReportRuntime, reportIdentityKey } from './report-runtime.models';
+import { REPORT_HOST, REPORT_RUNTIME, REPORT_SESSION_IDENTITY, ReportFeatureDefinition, ReportHostPresentation, ReportRuntime, reportIdentityKey } from './report-runtime.models';
 import { ReportStageStateService } from './report-stage-state.service';
 
 export interface ReportSession {
@@ -19,9 +19,13 @@ export class ReportWorkbenchController {
   private readonly router = inject(Router);
   private readonly published = inject(ReportStageStateService);
   private readonly active = signal<ReportSession | undefined>(undefined);
+  private readonly deletionHold = signal<{ session: ReportSession; presentation: ReportHostPresentation } | undefined>(undefined);
+  readonly presentation = computed(() => this.deletionHold()?.presentation ?? this.host.presentation());
+  readonly state = computed(() => this.deletionHold() ? 'ready' : this.host.state());
   readonly session = computed(() => {
     const identity = this.host.identity(), session = this.active();
-    return identity && session?.key === reportIdentityKey(identity) ? session : undefined;
+    if (identity) return session?.key === reportIdentityKey(identity) ? session : undefined;
+    return this.deletionHold()?.session === session ? session : undefined;
   });
   readonly workflow = computed(() => this.session()?.runtime.checks?.workflow());
   readonly stages = computed(() => {
@@ -41,9 +45,10 @@ export class ReportWorkbenchController {
 
   constructor() {
     effect(() => {
-      const identity = this.host.identity(), type = this.host.type();
+      const identity = this.host.identity(), type = this.host.type(), hold = this.deletionHold();
       untracked(() => {
         const key = identity && reportIdentityKey(identity);
+        if (!identity && hold) return;
         if (key === this.active()?.key) return;
         this.dispose();
         if (!identity || !key) return;
@@ -72,6 +77,14 @@ export class ReportWorkbenchController {
   }
 
   flush(): Promise<boolean> { return this.session()?.runtime.editor.flush() ?? Promise.resolve(true); }
+  /** Keep the routed Setup and portal owner alive through removal and navigation retry. */
+  retainForDeletion(): () => void {
+    const session = this.session(), presentation = this.host.presentation();
+    if (!session || !presentation) throw new Error('The report editor is no longer available.');
+    const hold = { session, presentation };
+    this.deletionHold.set(hold);
+    return () => { if (this.deletionHold() === hold) this.deletionHold.set(undefined); };
+  }
   confirmReview(): Promise<void> { return this.session()?.runtime.checks?.confirmReview() ?? Promise.resolve(); }
   switchReport(guid: string): void {
     const link = this.host.reportLink(guid);
@@ -83,6 +96,7 @@ export class ReportWorkbenchController {
   private dispose(): void {
     const session = this.active();
     if (!session) return;
+    this.deletionHold.set(undefined);
     session.mountedStage?.destroy(); session.mountedStage = undefined;
     session.injector.destroy();
     this.published.clear(session.key);

@@ -19,10 +19,11 @@ describe('report presentation footer action', () => {
       retry: vi.fn(), discard: vi.fn(), pauseAutosave: vi.fn(), resumeAutosave: vi.fn() } satisfies ReportWorkbenchEditor;
     const runtime = signal({ editor, output, presentation: presentation as ReportPresentationCapability | undefined });
     const stage = signal<ReportStageId>('report');
-    const workbench = { host: { stage, state: () => 'ready', returnLink: () => ({ route: ['/reports'] }), presentation: () => ({
+    const workbench = { host: { stage, identity: () => undefined, state: () => 'ready', returnLink: () => ({ route: ['/reports'] }), presentation: () => ({
       breadcrumbs: [], breadcrumbLabel: 'Reports', resources: [], selectedId: 'analysis', name: 'Analysis', typeLabel: 'Analysis',
       titleId: 'analysis-heading', status: 'ready', statusLabel: 'Ready', facts: [] }) },
       session: () => ({ runtime: runtime() }), previous: () => undefined, next: () => undefined, workflow: () => undefined, stages: () => [], beforeUnload: vi.fn() };
+    Object.assign(workbench, { presentation: workbench.host.presentation, state: workbench.host.state });
     TestBed.configureTestingModule({ imports: [ReportsSharedModule], providers: [provideRouter([]),
       { provide: WorkbenchLayoutService, useValue: { factsExpanded: signal(false), toggleFacts: vi.fn() } },
       { provide: ReportWorkbenchController, useValue: workbench }] });

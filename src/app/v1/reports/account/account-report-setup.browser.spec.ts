@@ -47,7 +47,7 @@ describe('account report Setup section presentation', () => {
         view.harness.detectChanges();
         const setup = host.querySelector<HTMLElement>('.report-section.report-setup')!;
         const sectionCounts = { water: 5, energy: 4, performance: 3, dataOverview: 2 };
-        const sections = expectReportSetupSections(setup, sectionCounts[variant]);
+        expectReportSetupSections(setup, sectionCounts[variant]);
         host.classList.add('v1-corners-square');
         expectReportSetupSections(setup, sectionCounts[variant]);
         host.classList.remove('v1-corners-square');
@@ -63,8 +63,8 @@ describe('account report Setup section presentation', () => {
         }
         name.scrollIntoView(); name.focus(); await userEvent.keyboard('{Tab}');
         expect(document.activeElement).not.toBe(name);
-        const deletion = setup.querySelector<HTMLElement>('app-account-report-delete')!;
-        expect(deletion.getBoundingClientRect().top).toBeCloseTo(sections.at(-1)!.getBoundingClientRect().bottom, 0);
+        const deletion = host.querySelector<HTMLElement>('app-report-setup-delete')!;
+        expect(deletion.getBoundingClientRect().top).toBeCloseTo(setup.getBoundingClientRect().bottom, 0);
         expect(deletion.querySelector('button')!.textContent).toContain('Delete report');
         expect(host.scrollWidth).toBeLessThanOrEqual(width + 1);
         expect(view.updateSetup).not.toHaveBeenCalled();

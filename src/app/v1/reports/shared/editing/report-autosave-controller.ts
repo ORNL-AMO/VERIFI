@@ -43,12 +43,14 @@ export class ReportAutosaveController<T> implements ReportWorkbenchEditor {
   private synchronizedVersion = 0;
   private forceSave = false;
   private paused = false;
+  private readonly deletionHeld = signal(false);
+  private readonly deletionCompleted = signal(false);
   readonly state = this.stateValue.asReadonly();
   readonly error = this.errorValue.asReadonly();
   readonly saving = this.pending.asReadonly();
   readonly isDirty = computed(() => ['dirty', 'invalid', 'error'].includes(this.state()));
-  readonly needsProtection = computed(() => this.isDirty() || this.saving());
-  readonly canEdit = computed(() => !!this.adapter.saved() && this.adapter.canWrite() && (!this.adapter.hasPending() || this.saving()));
+  readonly needsProtection = computed(() => (this.deletionHeld() && !this.deletionCompleted()) || this.isDirty() || this.saving());
+  readonly canEdit = computed(() => !this.deletionHeld() && !!this.adapter.saved() && this.adapter.canWrite() && (!this.adapter.hasPending() || this.saving()));
 
   constructor(private readonly adapter: ReportAutosaveAdapter<T>) {
     // A dynamically mounted stage must see the saved form on its first render.
@@ -59,8 +61,9 @@ export class ReportAutosaveController<T> implements ReportWorkbenchEditor {
     effect(() => {
       const key = adapter.key(), saved = adapter.saved(), canEdit = this.canEdit();
       untracked(() => {
-        if (key !== this.activeKey || !saved) {
+        if (key !== this.activeKey || (!saved && !this.deletionHeld())) {
           this.clearTimer(); this.activeKey = key; this.generation++; this.running = undefined;
+          this.deletionHeld.set(false); this.deletionCompleted.set(false);
           this.pending.set(false); this.forceSave = false; this.paused = false; this.stateValue.set('idle'); this.errorValue.set(undefined);
           adapter.hydrate(saved); this.synchronizedVersion = this.editVersion;
         } else if (!this.needsProtection() && this.editVersion === this.synchronizedVersion) adapter.hydrate(saved);
@@ -79,11 +82,14 @@ export class ReportAutosaveController<T> implements ReportWorkbenchEditor {
         if (!this.paused) this.timer = setTimeout(() => { void this.flush(); }, REPORT_AUTOSAVE_DEBOUNCE_MS);
       }
     });
-    const unregister = inject(UnsavedChangesService).register(() => this.isDirty(), () => this.discard(), () => this.saving(), () => this.flush());
+    const unregister = inject(UnsavedChangesService).register(() => this.isDirty(), () => this.discard(),
+      () => this.saving() || (this.deletionHeld() && !this.deletionCompleted()), () => this.flush());
     this.destroy.onDestroy(() => { this.generation++; this.clearTimer(); unregister(); });
   }
   flush(): Promise<boolean> {
     this.clearTimer();
+    if (this.deletionCompleted()) return Promise.resolve(true);
+    if (this.deletionHeld()) return Promise.resolve(false);
     if (this.paused) return Promise.resolve(false);
     if (this.running) return this.running;
     if (!this.needsProtection()) return Promise.resolve(true);
@@ -107,13 +113,30 @@ export class ReportAutosaveController<T> implements ReportWorkbenchEditor {
   }
   pauseAutosave(): void { this.paused = true; this.clearTimer(); }
   resumeAutosave(): void {
+    if (this.deletionHeld() || this.destroy.destroyed) return;
     this.paused = false;
     if (this.state() === 'dirty') this.timer = setTimeout(() => { void this.flush(); }, REPORT_AUTOSAVE_DEBOUNCE_MS);
+  }
+  async beginDeletion(): Promise<boolean> {
+    if (this.destroy.destroyed || this.deletionHeld()) return false;
+    const generation = this.generation, key = this.adapter.key();
+    this.deletionHeld.set(true); this.pauseAutosave();
+    // A submitted write must settle, but a newer draft must never enter the queue.
+    await this.running;
+    return !this.destroy.destroyed && generation === this.generation && key === this.adapter.key();
+  }
+  cancelDeletion(): void {
+    if (this.deletionCompleted()) return;
+    this.deletionHeld.set(false); this.resumeAutosave();
+  }
+  completeDeletion(): void {
+    this.clearTimer(); this.deletionCompleted.set(true); this.paused = true;
+    this.forceSave = false; this.stateValue.set('idle'); this.errorValue.set(undefined);
   }
   private async persistUntilClean(): Promise<boolean> {
     const generation = this.generation, key = this.adapter.key();
     try {
-      while (generation === this.generation && key === this.adapter.key() && !this.destroy.destroyed) {
+      while (!this.paused && generation === this.generation && key === this.adapter.key() && !this.destroy.destroyed) {
         const saved = this.adapter.saved(), raw = this.adapter.read(), value = this.adapter.normalize(raw), version = this.editVersion;
         if (!saved || !this.adapter.canWrite()) throw new Error('The report workspace is unavailable. Try again or discard your changes.');
         if (!this.adapter.valid(raw)) { this.stateValue.set('invalid'); return false; }
@@ -129,6 +152,7 @@ export class ReportAutosaveController<T> implements ReportWorkbenchEditor {
           if (this.editVersion === version) { this.adapter.hydrate(committed); this.synchronizedVersion = version; }
           this.stateValue.set('saved'); return true;
         }
+        this.stateValue.set(this.adapter.valid(this.adapter.read()) ? 'dirty' : 'invalid');
       }
       return false;
     } catch (error) {
