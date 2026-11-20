@@ -174,13 +174,11 @@ describe('Home lifecycle with native storage and routing in Chromium', () => {
     const width = (card: HTMLElement) => { const style = getComputedStyle(card); return card.getBoundingClientRect().width - parseFloat(style.paddingLeft) - parseFloat(style.paddingRight) - parseFloat(style.borderLeftWidth) - parseFloat(style.borderRightWidth); };
     expect(widgetCard(first.id).getBoundingClientRect().top).toBeCloseTo(widgetCard(second.id).getBoundingClientRect().top, 1);
     expect(width(widgetCard(first.id))).toBeGreaterThanOrEqual(24 * parseFloat(getComputedStyle(document.documentElement).fontSize));
-    await page.screenshot({ path: '/tmp/home3-visual-evidence/home-widgets-wide.png' });
     const narrowWidth = Math.floor(52 * parseFloat(getComputedStyle(document.documentElement).fontSize) - 20);
     await page.viewport(narrowWidth, 1000); await vi.waitFor(() => expect(window.innerWidth).toBe(narrowWidth)); await settle(); expect(widgetCard(second.id).getBoundingClientRect().top).toBeGreaterThan(widgetCard(first.id).getBoundingClientRect().top);
     await page.viewport(390, 1000); await vi.waitFor(() => expect(window.innerWidth).toBe(390)); root.classList.add('v1-theme-dark'); await settle();
     expect(widgetCard(second.id).getBoundingClientRect().top).toBeGreaterThan(widgetCard(first.id).getBoundingClientRect().top);
     expect(widgetCard(first.id).scrollWidth).toBeLessThanOrEqual(widgetCard(first.id).clientWidth + 1);
-    await page.screenshot({ path: '/tmp/home3-visual-evidence/home-widgets-narrow-dark.png' });
     await click('Edit dashboard'); TestBed.inject(HomeEditor).moveWidget(second.id, 0); await settle();
     const media = cdp() as { send(method: string, params: unknown): Promise<void> };
     await media.send('Emulation.setEmulatedMedia', { media: 'print' });
