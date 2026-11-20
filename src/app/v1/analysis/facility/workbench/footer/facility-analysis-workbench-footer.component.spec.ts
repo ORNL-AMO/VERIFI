@@ -1,3 +1,4 @@
+import { AnalysisUsageService } from '../../../used-by/analysis-usage.service';
 import { signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { vi } from 'vitest';
@@ -10,11 +11,11 @@ describe('FacilityAnalysisWorkbenchFooterComponent', () => {
     const continueNavigation = vi.fn();
     TestBed.configureTestingModule({
       imports: [FacilityAnalysisWorkbenchFooterComponent],
-      providers: [
+      providers: [{ provide: AnalysisUsageService, useValue: { canAct: signal(true), editor: signal(undefined), reportUnavailable: signal(undefined), showAccountAction: signal(true), open: vi.fn() } },
         {
           provide: FacilityAnalysisWorkbenchNavigationService,
           useValue: {
-            requirement: signal('Saving changes before navigation is available.'),
+            activeStageId: signal('setup'), requirement: signal('Saving changes before navigation is available.'),
             navigationBlocked: signal(true),
             disabled: signal(true),
             nextStage: signal({ id: 'group:group-a' }),
@@ -46,11 +47,11 @@ describe('FacilityAnalysisWorkbenchFooterComponent', () => {
     const continueNavigation = vi.fn();
     TestBed.configureTestingModule({
       imports: [FacilityAnalysisWorkbenchFooterComponent],
-      providers: [
+      providers: [{ provide: AnalysisUsageService, useValue: { canAct: signal(true), editor: signal(undefined), reportUnavailable: signal(undefined), showAccountAction: signal(true), open: vi.fn() } },
         {
           provide: FacilityAnalysisWorkbenchNavigationService,
           useValue: {
-            requirement: signal(undefined),
+            activeStageId: signal('setup'), requirement: signal(undefined),
             navigationBlocked: signal(false),
             disabled: signal(false),
             nextStage: signal({ id: 'group:group-a' }),
@@ -72,15 +73,15 @@ describe('FacilityAnalysisWorkbenchFooterComponent', () => {
     expect(continueNavigation).toHaveBeenCalledOnce();
   });
 
-  it('renders Finish on the last stage and delegates the action', () => {
+  it('replaces Finish with account-analysis and report actions on Used By', () => {
     const finish = vi.fn();
     TestBed.configureTestingModule({
       imports: [FacilityAnalysisWorkbenchFooterComponent],
-      providers: [
+      providers: [{ provide: AnalysisUsageService, useValue: { canAct: signal(true), editor: signal(undefined), reportUnavailable: signal(undefined), showAccountAction: signal(true), open: vi.fn() } },
         {
           provide: FacilityAnalysisWorkbenchNavigationService,
           useValue: {
-            requirement: signal(undefined),
+            activeStageId: signal('used-by'), requirement: signal(undefined),
             navigationBlocked: signal(false),
             disabled: signal(false),
             nextStage: signal(undefined),
@@ -95,8 +96,11 @@ describe('FacilityAnalysisWorkbenchFooterComponent', () => {
     fixture.detectChanges();
 
     const buttons = fixture.nativeElement.querySelectorAll('button') as NodeListOf<HTMLButtonElement>;
-    expect(buttons[1].textContent).toContain('Finish');
+    expect(buttons[1].textContent).toContain('Add Account Analysis');
     buttons[1].click();
-    expect(finish).toHaveBeenCalledOnce();
+    expect(TestBed.inject(AnalysisUsageService).open).toHaveBeenCalledWith('account-analysis');
+    buttons[2].click();
+    expect(TestBed.inject(AnalysisUsageService).open).toHaveBeenCalledWith('report');
+    expect(finish).not.toHaveBeenCalled();
   });
 });

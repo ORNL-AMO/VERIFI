@@ -5,3 +5,6 @@
   .v1-wizard-actions__next { justify-items: stretch; }
   .v1-wizard-actions__requirement { max-width: none; text-align: left; }
 }
+
+.analysis-add-actions { display: flex; align-items: center; justify-content: flex-end; flex-wrap: wrap; gap: var(--v1-space-3); }
+@media (max-width: 560px) { .analysis-add-actions, .analysis-add-actions > .v1-btn { width: 100%; } }

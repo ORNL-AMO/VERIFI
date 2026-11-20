@@ -1,0 +1,105 @@
+@let view = usage.view();
+<section class="analysis-usage" aria-label="Used By">
+  @if (view.consumers.length) {
+    <ul class="analysis-usage__cards">
+      @for (card of view.consumers; track card.key) {
+        <li><a class="analysis-usage__card" [routerLink]="card.route" [queryParams]="card.queryParams" [title]="card.name">
+          <app-ui-icon [name]="card.icon" [size]="40"/>
+          <span><strong>{{ card.name }}</strong><small>{{ card.detail }}</small></span>
+        </a></li>
+      }
+    </ul>
+  } @else {
+    <app-data-empty-state icon="link" [context]="usage.host.scope" title="No linked items"
+      description="Use the actions below to connect this analysis to a saved workflow."/>
+  }
+  @if (view.bankingSource; as card) {
+    <section class="analysis-usage__source" aria-labelledby="analysis-banking-source-title">
+      <h3 id="analysis-banking-source-title">Banking source</h3>
+      <ul class="analysis-usage__cards"><li>
+        <a class="analysis-usage__card" [routerLink]="card.route" [title]="card.name"><app-ui-icon [name]="card.icon" [size]="40"/>
+          <span><strong>{{ card.name }}</strong><small>{{ card.detail }}</small></span>
+        </a>
+      </li></ul>
+    </section>
+  }
+</section>
+
+@if (usage.editor()) {
+  @let step = usage.step();
+  @let saved = usage.saved();
+  <app-workspace-slideout [title]="usage.title()" [saving]="usage.saving() || usage.opening()" [hasFooter]="true"
+    [initialFocus]="step === 'review' ? '#usage-name' : '#usage-step-heading'" (closed)="usage.requestClose()">
+    <div class="creation-selections" aria-label="Selections">
+      <div class="creation-selection"><app-ui-icon [name]="usage.host.scope === 'facility' ? 'analysis' : 'accountAnalysis'"/>
+        <span>{{ usage.host.analysis()?.name || 'Untitled analysis' }}</span><app-ui-icon name="check"/>
+      </div>
+      @for (selection of usage.selections(); track selection.step) {
+        <button type="button" class="creation-selection" [class.creation-selection--active]="step === selection.step"
+          [disabled]="usage.saving() || usage.opening() || !!saved" [attr.aria-label]="'Change ' + selection.label"
+          [attr.aria-expanded]="step === selection.step" (click)="usage.editSelection(selection.step)">
+          <app-ui-icon [name]="selection.icon"/><span>{{ selection.label }}</span><app-ui-icon name="edit"/>
+        </button>
+      }
+    </div>
+    <form id="analysis-usage-draft" [formGroup]="usage.form" (ngSubmit)="usage.submit()">
+      <fieldset [disabled]="usage.saving() || usage.opening() || !!saved">
+        <h3 id="usage-step-heading" #stepHeading tabindex="-1">@switch (step) {
+          @case ('type') { Report type }
+          @case ('review') { Review selection }
+        }</h3>
+        @switch (step) {
+          @case ('type') {
+            <div class="creation-choices">
+              @for (type of usage.reportTypes(); track type.value) {
+                <button type="button" class="creation-choice" (click)="usage.chooseType(type.value)">
+                  <app-ui-icon [name]="type.icon" [size]="32"/><strong>{{ type.label }}</strong>
+                  @if (type.pending) { <span class="creation-choice__pending">Preview pending</span> }
+                </button>
+              } @empty { <p role="status">No compatible report types are available.</p> }
+            </div>
+          }
+          @case ('review') {
+            <label for="usage-name">{{ usage.editor() === 'report' ? 'Report name' : 'Account analysis name' }} <span aria-hidden="true">*</span></label>
+            <input #usageName id="usage-name" class="form-control v1-input" formControlName="name" required autocomplete="off"
+              [attr.aria-invalid]="usage.form.controls.name.invalid && usage.form.controls.name.touched" aria-describedby="usage-name-error">
+            @if (usage.form.controls.name.invalid && usage.form.controls.name.touched) { <p id="usage-name-error" class="v1-field-error" role="alert">Enter a name.</p> }
+            @if (usage.editor() === 'account-analysis') {
+              <dl class="usage-settings"><dt>Category</dt><dd>{{ usage.host.analysis()?.analysisCategory === 'water' ? 'Water' : 'Energy' }}</dd>
+                @if (usage.host.analysis()?.analysisCategory === 'energy') { <dt>Energy basis</dt><dd>{{ usage.host.analysis()?.energyIsSource ? 'Source' : 'Site' }} energy</dd> }
+                <dt>Account baseline</dt><dd>{{ usage.accountBaseline() || 'Not set' }}</dd>
+              </dl>
+              <p>Account units will be used. Other facilities remain unconfigured.</p>
+            } @else {
+              <p>Selected analysis: <strong>{{ usage.host.analysis()?.name }}</strong></p>
+              @if (usage.selectedType()?.pending) { <p class="creation-choice-help">Preview pending. You can save the analysis selection in this report.</p> }
+            }
+            @if (!usage.reviewCurrent() && !saved) {
+              <div class="v1-alert v1-alert--warning" role="status">The analysis settings changed. Refresh the review before creating this item.
+                <button type="button" class="v1-btn v1-btn--quiet" (click)="usage.refreshReview()">Refresh review</button>
+              </div>
+            }
+            @if (usage.creationRequirement(); as requirement) { <p class="v1-alert v1-alert--warning" role="status">{{ requirement }}</p> }
+          }
+        }
+      </fieldset>
+    </form>
+    @if (saved) { <div class="v1-alert v1-alert--info" role="status">Your changes are saved.</div> }
+    @if (usage.error(); as error) { <div class="v1-alert v1-alert--danger" role="alert">{{ error }}</div> }
+    <div slideoutFooter class="creation-draft-actions">
+      <button type="button" class="v1-btn v1-btn--quiet" [disabled]="usage.saving() || usage.opening()" (click)="usage.requestClose()">{{ saved ? 'Close' : 'Cancel' }}</button>
+      @if (saved) {
+        <button type="button" class="v1-btn v1-btn--action" [disabled]="usage.opening()" (click)="usage.openSaved()">{{ saved.recover ? 'Refresh and open' : 'Open destination' }}</button>
+      } @else if (step === 'review') {
+        <button type="submit" form="analysis-usage-draft" class="v1-btn v1-btn--action" [disabled]="!usage.canSave()">
+          @if (usage.saving()) { <app-ui-icon name="loading" spin/> }
+          {{ usage.saving() ? 'Creating…' : 'Create and open' }}
+        </button>
+      }
+    </div>
+  </app-workspace-slideout>
+}
+<ng-template #discardConfirmation>
+  <app-confirmation-dialog title="Discard selections?" titleId="discard-analysis-usage-title" cancelAriaLabel="Keep editing selections" confirmLabel="Discard selections"
+    (confirmed)="usage.close()" (cancelled)="usage.cancelDiscard()"><p>Your unsaved selections will be discarded.</p></app-confirmation-dialog>
+</ng-template>

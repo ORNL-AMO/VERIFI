@@ -13,7 +13,15 @@
       class="v1-wizard-actions__requirement"
       role="status"
       aria-live="polite">{{ workflow.requirement() || '' }}</span>
-    @if (workflow.nextStage()) {
+    @if (workflow.activeStageId() === 'used-by') {
+      <div class="analysis-add-actions">
+        @if (usage.showAccountAction()) {
+          <button type="button" class="v1-btn v1-btn--secondary" [disabled]="!usage.canAct() || !!usage.editor()" (click)="usage.open('account-analysis')"><app-ui-icon name="add"/> Add Account Analysis</button>
+        }
+        <button type="button" class="v1-btn v1-btn--action" [disabled]="!usage.canAct() || !!usage.editor() || !!usage.reportUnavailable()" [title]="usage.reportUnavailable() || ''" (click)="usage.open('report')"><app-ui-icon name="add"/> Add Report</button>
+        @if (usage.reportUnavailable(); as reason) { <span class="v1-wizard-actions__requirement" role="status">{{ reason }}</span> }
+      </div>
+    } @else if (workflow.nextStage()) {
       <button
         type="button"
         class="v1-btn v1-btn--action"
@@ -21,15 +29,6 @@
         [attr.aria-describedby]="workflow.requirement() ? 'v1-analysis-navigation-requirement' : null"
         (click)="workflow.continue()">
         Continue <app-ui-icon name="chevronRight"></app-ui-icon>
-      </button>
-    } @else {
-      <button
-        type="button"
-        class="v1-btn v1-btn--action"
-        [disabled]="workflow.disabled()"
-        [attr.aria-describedby]="workflow.requirement() ? 'v1-analysis-navigation-requirement' : null"
-        (click)="workflow.finish()">
-        Finish <app-ui-icon name="check"></app-ui-icon>
       </button>
     }
   </div>

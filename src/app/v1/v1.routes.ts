@@ -1,3 +1,4 @@
+import { analysisUsageLeaveGuard } from '@app/v1/analysis/used-by/analysis-usage-leave.guard';
 import { VISUALIZATION_ROUTES, visualizationFacilityEntryGuard } from '@app/v1/visualizations/visualizations.routes';
 import { importSessionGuard } from '@app/v1/account/imports/import-session.guard';
 import { ENERGY_USE_WORKBENCH_ROUTES } from '@app/v1/data/energy-uses/energy-uses.routes';
@@ -227,7 +228,7 @@ export const V1Routes: Routes = [
                       { path: '**', redirectTo: 'annual' }
                     ]
                   },
-                  { path: 'used-by', component: AccountAnalysisUsedByComponent, data: { accountAnalysisStage: 'used-by' } },
+                  { path: 'used-by', component: AccountAnalysisUsedByComponent, canDeactivate: [analysisUsageLeaveGuard], data: { accountAnalysisStage: 'used-by' } },
                   { path: '**', redirectTo: 'setup' }
                 ]
               },
@@ -425,7 +426,7 @@ export const V1Routes: Routes = [
                       { path: '**', redirectTo: 'annual' }
                     ]
                   },
-                  { path: 'used-by', component: FacilityAnalysisUsedByComponent, data: { analysisScope: 'used-by' } },
+                  { path: 'used-by', component: FacilityAnalysisUsedByComponent, canDeactivate: [analysisUsageLeaveGuard], data: { analysisScope: 'used-by' } },
                   { path: '**', redirectTo: 'setup' }
                 ]
               },

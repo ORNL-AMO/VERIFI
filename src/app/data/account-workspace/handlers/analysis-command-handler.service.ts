@@ -2,6 +2,7 @@
  * Handler for facility-analysis, account-analysis, and predictor-analysis commands.
  */
 import { Injectable } from '@angular/core';
+import { facilityReportAnalysisGuid } from '../analysis-usage.models';
 import { firstValueFrom } from 'rxjs';
 import { AccountAnalysisDbService } from '@data/indexedDB/account-analysis-db.service';
 import { AnalysisDbService } from '@data/indexedDB/analysis-db.service';
@@ -284,7 +285,7 @@ export class AnalysisCommandHandler {
         this.assertOwnership(analysis.accountId, command.accountGuid, 'facility analysis');
 
         const reports = await transaction.getAllByIndex<IdbFacilityReport>('facilityReports', 'accountId', command.accountGuid);
-        const linkedReports = reports.filter(report => report.analysisItemId === analysis.guid);
+        const linkedReports = reports.filter(report => facilityReportAnalysisGuid(report) === analysis.guid);
         if (linkedReports.length) {
           throw new WorkspaceWriteError('validation-failed', `Remove this analysis from ${linkedReports.length} linked facility report(s) before deleting it.`);
         }

@@ -1,3 +1,5 @@
+import { ANALYSIS_USAGE_HOST } from '../../used-by/analysis-usage-host';
+import { AnalysisUsageService } from '../../used-by/analysis-usage.service';
 import { Component, inject } from '@angular/core';
 import { RouterLink, RouterOutlet } from '@angular/router';
 import { IconComponent } from '@app/v1/shared/icons/icon.component';
@@ -17,6 +19,12 @@ import { ReportAnalysisReturnService } from '@app/v1/reports/shared/analysis-ins
   selector: 'app-account-analysis-workbench',
   standalone: true,
   providers: [
+    { provide: ANALYSIS_USAGE_HOST, useFactory: () => {
+      const context = inject(AccountAnalysisWorkbenchContext);
+      const autosave = inject(AccountAnalysisAutosaveService);
+      return { scope: 'account', analysis: context.analysis, blocked: autosave.isBlocked, flush: () => autosave.flush() };
+    } },
+    AnalysisUsageService,
     AccountAnalysisWorkbenchContext,
     ReportAnalysisReturnService,
     AccountAnalysisAutosaveService,
@@ -41,6 +49,8 @@ export class AccountAnalysisWorkbenchComponent {
   readonly navigation = inject(WorkspaceNavigationService);
   readonly autosave = inject(AccountAnalysisAutosaveService);
 
-  hasUnsavedChanges(): boolean { return this.autosave.isDirty(); }
-  isNavigationBlocked(): boolean { return this.autosave.isBlocked(); }
+  readonly usage = inject(AnalysisUsageService);
+
+  hasUnsavedChanges(): boolean { return this.autosave.isDirty() || this.usage.dirty(); }
+  isNavigationBlocked(): boolean { return this.autosave.isBlocked() || this.usage.saving(); }
 }

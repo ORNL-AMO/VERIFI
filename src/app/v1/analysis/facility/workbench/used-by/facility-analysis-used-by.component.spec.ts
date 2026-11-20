@@ -1,18 +1,19 @@
-import { IdbAccountAnalysisItem } from '@data/models/idbModels/accountAnalysisItem';
-import { IdbAnalysisItem } from '@data/models/idbModels/analysisItem';
-import { IdbFacilityReport } from '@data/models/idbModels/facilityReport';
-import { buildFacilityAnalysisDependencies } from './facility-analysis-used-by.component';
+import { TestBed } from '@angular/core/testing';
+import { signal } from '@angular/core';
+import { provideRouter } from '@angular/router';
+import { AnalysisUsageService } from '../../../used-by/analysis-usage.service';
+import { FacilityAnalysisUsedByComponent } from './facility-analysis-used-by.component';
 
-describe('facility analysis dependency projection', () => {
-  it('separates account analyses, reports, banking source, and consumers by GUID', () => {
-    const analysis = { guid: 'current', facilityId: 'facility-a', bankedAnalysisItemId: 'source' } as IdbAnalysisItem;
-    const source = { guid: 'source' } as IdbAnalysisItem;
-    const consumer = { guid: 'consumer', bankedAnalysisItemId: 'current' } as IdbAnalysisItem;
-    const accountAnalysis = { guid: 'account-analysis', facilityAnalysisItems: [{ facilityId: 'facility-a', analysisItemId: 'current' }] } as IdbAccountAnalysisItem;
-    const report = { guid: 'report', analysisItemId: 'current' } as IdbFacilityReport;
-
-    expect(buildFacilityAnalysisDependencies(analysis, [analysis, source, consumer], [accountAnalysis], [report])).toEqual({
-      linkedAccountAnalyses: [accountAnalysis], linkedReports: [report], bankingSource: source, bankingConsumers: [consumer]
-    });
+describe('FacilityAnalysisUsedByComponent', () => {
+  it('renders a linked card to the consuming workbench', () => {
+    TestBed.configureTestingModule({ imports: [FacilityAnalysisUsedByComponent], providers: [provideRouter([]),
+      { provide: AnalysisUsageService, useValue: { view: signal({ consumers: [{ key: 'report:r', name: 'Savings report',
+        detail: 'Analysis report', icon: 'report', route: ['/report', 'r'] }] }), editor: signal(undefined), confirmDiscard: signal(false), close: () => {} } }
+    ] });
+    const fixture = TestBed.createComponent(FacilityAnalysisUsedByComponent);
+    fixture.detectChanges();
+    expect(fixture.nativeElement.querySelector('a')?.getAttribute('href')).toBe('/report/r');
+    expect(fixture.nativeElement.querySelector('a')?.textContent).toContain('Savings report');
+    expect(fixture.nativeElement.textContent).not.toContain('coming');
   });
 });
