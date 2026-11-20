@@ -38,6 +38,7 @@ describe('Home goal browser integration', () => {
     const goal = () => fixture.debugElement.query(By.directive(HomeGoalsComponent)).componentInstance as HomeGoalsComponent;
     await vi.waitFor(() => { fixture.detectChanges(); expect(Object.values(goal().results())[0]?.state).toBe('ready'); });
     expect(fixture.nativeElement.textContent).toContain('No goal set');
+    expect(fixture.nativeElement.querySelector('a[href*=settings]').getAttribute('href')).toContain('/settings/goals');
     expect(fixture.nativeElement.textContent).toContain('Rolling 12-month improvement');
     expect(workers).toHaveBeenCalledTimes(1); expect(store.savedVisualizations()).toEqual([]);
     await page.viewport(390, 850); expect(fixture.nativeElement.getBoundingClientRect().width).toBeLessThanOrEqual(390);

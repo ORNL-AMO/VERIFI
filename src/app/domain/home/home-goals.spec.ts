@@ -17,12 +17,20 @@ describe('Home goals', () => {
     selected.analysisCategory = 'energy' as any; selected.facilityId = 'foreign';
     expect(homeGoalContext(binding, snapshot).resolved.state).toBe('missing-source');
   });
+  it.each([0, -5, 101, 150, NaN])('keeps unsupported reduction target %s invalid', target => {
+    const initial = homeSnapshot();
+    const snapshot = {...initial, facilities: initial.facilities.map(f => ({...f, sustainabilityQuestions: {...f.sustainabilityQuestions,
+      energyReductionGoal: true, energyReductionPercent: target, energyReductionBaselineYear: 2020, energyReductionTargetYear: 2030}}))};
+    const result = homeGoalContext({kind: 'reporting', owner: {kind: 'facility', guid: 'facility-a'}, category: 'energy'}, snapshot);
+    expect(result.goal.state).toBe('invalid'); expect(result.resolved.state).toBe('setup-required');
+  });
   it.each([0, -12, 50])('preserves improvement %s and unbounded target attainment', improvement => {
     const fixture = analysisFixture(), calculated = calculateFacilityAnalysisResults(fixture.request);
     const value: FacilityVisualizationResults = {scope: 'facility', analysis: fixture.analysis, facility: fixture.facility, annual: [], groups: [], groupOnly: false,
       monthly: [{...calculated.monthlyAnalysisSummaryData[0], date: new Date(2024, 3, 1), rolling12MonthImprovement: improvement, missingValueWarning: false, missingPredictors: []}]};
     expect(homeGoalResult(value, 25)).toMatchObject({state: 'ready', improvement, towardTarget: improvement * 4});
     expect(homeGoalResult(value, 0)).toMatchObject({towardTarget: undefined});
+    expect(homeGoalResult(value, 150)).toMatchObject({towardTarget: undefined});
     value.monthly[0].missingValueWarning = true;
     expect(homeGoalResult(value, 25)).toMatchObject({partial: true, towardTarget: undefined});
     value.monthly[0].rolling12MonthImprovement = NaN;

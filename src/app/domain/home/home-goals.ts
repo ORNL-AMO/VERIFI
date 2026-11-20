@@ -20,7 +20,7 @@ export function homeGoalContext(binding: HomeAnalysisBinding, snapshot: AccountW
   const year = category === 'water' ? q?.waterReductionTargetYear : q?.energyReductionTargetYear;
   const absolute = category === 'water' ? q?.waterIsAbsolute : q?.energyIsAbsolute;
   const validYear = (value: unknown): value is number => Number.isInteger(value) && Number(value) >= 1 && Number(value) <= 9999;
-  const goalValid = enabled === true && Number.isFinite(target) && target > 0 && validYear(baseline) && validYear(year) && year > baseline;
+  const goalValid = enabled === true && Number.isFinite(target) && target > 0 && target <= 100 && validYear(baseline) && validYear(year) && year > baseline;
   return { owner, ownerName: record?.name ?? 'Unavailable owner', category, resolved,
     goal: { state: !enabled ? 'missing' as const : goalValid ? 'ready' as const : 'invalid' as const, target, baseline, year, absolute },
     analysis: resolved.state === 'ready' ? resolved.analysis : undefined,
@@ -37,7 +37,7 @@ export function homeGoalResult(value: AnalysisVisualizationResults, target?: num
   const improvement = latest.rolling12MonthImprovement;
   return { state: 'ready' as const, improvement, through: new Date(latest.date), partial,
     horizon: monthly[0] ? new Date(monthly[0].date) : undefined,
-    towardTarget: !partial && Number.isFinite(target) && target! > 0 ? improvement / target! * 100 : undefined,
+    towardTarget: !partial && Number.isFinite(target) && target! > 0 && target! <= 100 ? improvement / target! * 100 : undefined,
     units: value.analysis.analysisCategory === 'water' ? value.analysis.waterUnit : value.analysis.energyUnit,
     basis: value.analysis.analysisCategory === 'water' ? 'Water' : value.analysis.energyIsSource ? 'Source energy' : 'Site energy' };
 }

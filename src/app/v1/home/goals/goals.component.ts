@@ -26,7 +26,7 @@ export class HomeGoalsComponent {
             .map(category => ({ kind: 'reporting' as const, owner: { kind: 'facility' as const, guid: f.guid }, category }))) : [];
     return bindings.map(binding => {
       const context = homeGoalContext(binding, snapshot), scoped = context.owner;
-      return { ...context, bindingKind: binding.kind, key: JSON.stringify(binding), settingsRoute: scoped?.kind === 'facility' ? facilitySettingsRoute(scoped.guid) : accountSettingsRoute(snapshot.account.guid),
+      return { ...context, bindingKind: binding.kind, key: JSON.stringify(binding), settingsRoute: scoped?.kind === 'facility' ? facilitySettingsRoute(scoped.guid, 'goals') : accountSettingsRoute(snapshot.account.guid, 'goals'),
         analysisRoute: binding.kind === 'exact' && context.analysis && scoped ? scoped.kind === 'facility' ? facilityAnalysisWorkbenchRoute(scoped.guid, context.analysis.guid) : accountAnalysisWorkbenchRoute(snapshot.account.guid, context.analysis.guid) : accountAnalysisRoute(snapshot.account.guid), query: scoped?.kind === 'facility' && !snapshot.account.isSingleFacilityCompany ? { facility: scoped.guid } : {} };
     });
   });
