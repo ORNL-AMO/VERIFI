@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { HOME_STARTERS, HomeDashboardDefinition, HomeOwner, HomeOwnerState, resolveHomeDefault, sameHomeOwner } from '@domain/home/home-dashboard';
 import { decodeHomeDashboard, decodeHomeOwnerState, homePositiveInteger, homeText } from '@domain/home/home-validation';
 import { homeOwnerValid } from '@domain/home/home-bindings';
+import { homeViewKey } from '@domain/home/home-views';
 import { decodeVisualizationDefinition } from '@domain/visualizations/visualization-validation';
 import { normalizeVisualizationDefinition } from '@domain/visualizations/visualization-definition';
 import { serializeVisualizationDefinition } from '@domain/visualizations/visualization-source-groups';
@@ -99,17 +100,34 @@ export class HomeCommandHandler {
         const nextState = initialDefault(next, [...dashboards, ...added], preferred);
         return { owner: await writeOwner(nextState), dashboard: added[0], changed: true };
       }
-      if (!owner || !state.initialized) invalid('Initialize or adopt the Home owner before editing it.');
       if (submitted.kind === 'configure') {
         const read = decodeHomeOwnerState(submitted.state);
+        if ((!owner || !state.initialized) && (dashboards.length || read.state !== 'valid' || !read.value.views))
+          invalid('Initialize or adopt the Home owner before editing it.');
         if (read.state !== 'valid' || !read.value.initialized || !sameHomeJson(read.value.deletedStarters, state.deletedStarters)
           || dashboards.some(record => !read.value.dashboardOrder.includes(record.guid))
           || read.value.dashboardOrder.some(guid => !dashboards.some(record => record.guid === guid) && !state.dashboardOrder.includes(guid))
           || read.value.defaultDashboardGuid !== state.defaultDashboardGuid && read.value.defaultDashboardGuid !== undefined
             && !visible(dashboards).includes(read.value.defaultDashboardGuid)) invalid('Retain this owner’s dashboards and choose an available new default.');
-        const acknowledged = new Set(submitted.repairPaths ?? []), references = owner.preservation?.references ?? [];
+        if (state.views && (!read.value.views || !sameHomeJson(state.views.catalog, read.value.views.catalog)))
+          invalid('Retain the reviewed built-in catalog and unavailable preferences.');
+        const viewRefs = (value: HomeOwnerState) => value.views ? [
+          ...(['order', 'hidden', 'deleted'] as const).flatMap(collection => value.views![collection].map(ref => ({ ref, path: `views.${collection}.${homeViewKey(ref)}` }))),
+          ...(value.views.default ? [{ ref: value.views.default, path: 'views.default' }] : [])] : [];
+        const previousViews = viewRefs(state), nextViews = viewRefs(read.value);
+        const viewAvailable = (ref: import('@domain/home/home-dashboard').HomeDashboardReference, selectingDefault = false) => ref.kind === 'saved'
+          ? selectingDefault ? visible(dashboards).includes(ref.dashboardGuid) : dashboards.some(record => record.guid === ref.dashboardGuid)
+          : !!read.value.views?.catalog.some(item => homeViewKey(item) === homeViewKey(ref));
+        const acknowledged = new Set(submitted.repairPaths ?? []), references = owner?.preservation?.references ?? [];
+        for (const { ref, path } of nextViews) if (!viewAvailable(ref, path === 'views.default')
+          && !previousViews.some(previous => previous.path === path && sameHomeJson(previous.ref, ref))) invalid('Choose an available owner-local Home view.');
         for (const path of acknowledged) {
           const ref = references.find(ref => ref.path === path && ref.kind === 'dashboard');
+          if (path.startsWith('views.')) {
+            const next = nextViews.find(item => item.path === path);
+            if (!ref || next && !viewAvailable(next.ref, path === 'views.default')) invalid('Review an available Home view before acknowledging it.');
+            continue;
+          }
           if (!ref || (path === 'defaultDashboardGuid'
             ? read.value.defaultDashboardGuid !== undefined && !visible(dashboards).includes(read.value.defaultDashboardGuid)
             : path !== `dashboardOrder.${ref.guid}` || read.value.dashboardOrder.includes(ref.guid) && !dashboards.some(record => record.guid === ref.guid)))
@@ -117,10 +135,13 @@ export class HomeCommandHandler {
         }
         const remaining = references.filter(ref => !acknowledged.has(ref.path)
           && !(ref.path === 'defaultDashboardGuid' && read.value.defaultDashboardGuid !== state.defaultDashboardGuid)
+          && !(ref.path === 'views.default' && !sameHomeJson(state.views?.default, read.value.views?.default))
+          && !previousViews.some(previous => previous.path === ref.path && !nextViews.some(next => next.path === ref.path))
           && !state.dashboardOrder.some(guid => ref.path === `dashboardOrder.${guid}` && !read.value.dashboardOrder.includes(guid)));
-        const revision = owner.revision, configured = await writeOwner(read.value, remaining);
+        const revision = owner?.revision, configured = await writeOwner(read.value, remaining);
         return { owner: configured, changed: configured.revision !== revision };
       }
+      if (!owner || !state.initialized) invalid('Initialize or adopt the Home owner before editing it.');
       const guid = submitted.kind === 'duplicate' ? submitted.sourceGuid : submitted.guid;
       const current = dashboards.find(record => record.guid === guid);
       if (!current || current.id === undefined || current.revision !== submitted.expectedRevision) throw new HomeConflictError(owner, current);
@@ -131,6 +152,26 @@ export class HomeCommandHandler {
         const deletedStarters = automaticTemplate ? [...new Set([...state.deletedStarters, automaticTemplate])] : state.deletedStarters;
         const order = state.dashboardOrder.filter(guid => guid !== current.guid || !resolution.dashboardOrder.includes(guid));
         let next: HomeOwnerState = { ...state, dashboardOrder: completeOrder(order, remaining), deletedStarters };
+        const references = owner.preservation?.references ?? [];
+        if (state.views) {
+          const views = state.views;
+          const verified = (ref: import('@domain/home/home-dashboard').HomeDashboardReference, path: string) => ref.kind === 'saved'
+            && ref.dashboardGuid === current.guid && !references.some(issue => issue.path === path);
+          const { default: selected, ...rest } = views;
+          const cleaned = { ...rest,
+            order: views.order.filter(ref => !verified(ref, `views.order.${homeViewKey(ref)}`)),
+            hidden: views.hidden.filter(ref => !verified(ref, `views.hidden.${homeViewKey(ref)}`)),
+            deleted: views.deleted.filter(ref => !verified(ref, `views.deleted.${homeViewKey(ref)}`)) };
+          const definition = readHomeDashboard(current);
+          const builtIn = definition.state === 'valid' ? definition.value.builtIn : undefined;
+          if (builtIn && !cleaned.deleted.some(ref => homeViewKey(ref) === homeViewKey(builtIn))) cleaned.deleted.push(builtIn);
+          const fallback = cleaned.order.find(ref => (ref.kind === 'built-in' || visible(remaining).includes(ref.dashboardGuid))
+            && ![...cleaned.hidden, ...cleaned.deleted].some(item => homeViewKey(item) === homeViewKey(ref))
+            && !references.some(issue => issue.path === `views.order.${homeViewKey(ref)}`));
+          // Shipped availability/conditional visibility is resolved on read; never skip ahead to a saved view.
+          const replacement = selected && verified(selected, 'views.default') ? fallback?.kind === 'saved' ? fallback : undefined : selected;
+          next = { ...next, views: { ...cleaned, ...(replacement ? { default: replacement } : {}) } };
+        }
         if (resolution.defaultDashboardGuid === current.guid) next = withDefault(next,
           resolveHomeDefault(homeOwnerResolutionState(owner, withDefault(next, undefined)), visible(remaining)));
         return { owner: await writeOwner(next), changed: true };
@@ -144,7 +185,8 @@ export class HomeCommandHandler {
           || Object.values(submitted.widgetIds).some(id => read.value.widgets.some(widget => widget.id === id)))
           invalid('Duplicate needs stable, independent dashboard and widget identities.');
         await this.assertUnused(tx, 'homeDashboards', submitted.guid);
-        const definition = { ...read.value, name: submitted.name, visibility: 'always' as const,
+        const { builtIn: _builtIn, ...independent } = read.value;
+        const definition = { ...independent, name: submitted.name, visibility: 'always' as const,
           widgets: read.value.widgets.map(widget => ({ ...widget, id: submitted.widgetIds[widget.id] })) };
         const date = new Date(submitted.createdDate);
         const duplicate = getNewIdbHomeDashboard(submitted.accountGuid, submitted.owner, definition, { guid: submitted.guid, createdDate: date, modifiedDate: date });
@@ -268,8 +310,11 @@ export class HomeCommandHandler {
       && oldRefs.some(ref => ref.path === path && ref.kind === kind && ref.guid === guid)
       && retained?.preservation?.references.some(ref => ref.path === path);
     for (const widget of read.value.widgets) {
-      const owner = widget.kind === 'goal' && widget.binding.kind === 'reporting' ? widget.binding.owner : widget.kind === 'shortcut' ? widget.destination.owner : undefined;
-      const ownerPath = `widgets.${widget.id}.${widget.kind === 'goal' ? 'binding' : 'destination'}.owner.guid`;
+      const owner = widget.kind === 'built-in-chart' ? widget.reference.owner
+        : widget.kind === 'goal' && widget.binding.kind === 'reporting' ? widget.binding.owner : widget.kind === 'shortcut' ? widget.destination.owner : undefined;
+      const ownerPath = `widgets.${widget.id}.${widget.kind === 'built-in-chart' ? 'reference' : widget.kind === 'goal' ? 'binding' : 'destination'}.owner.guid`;
+      if (widget.kind === 'built-in-chart' && !sameHomeOwner(widget.reference.owner, command.owner)
+        && !protectedIntent(ownerPath, widget.reference.owner.kind, widget.reference.owner.guid)) invalid('Built-in charts must use their explicit dashboard owner.');
       if (owner?.kind === 'account' && owner.guid !== command.accountGuid && !protectedIntent(ownerPath, owner.kind, owner.guid)) invalid('A Home widget cannot refer to another account.');
       if (widget.kind === 'shortcut' && widget.destination.resource && widget.destination.owner.kind === 'facility') {
         const target = this.findReference(widget.destination.resource, catalog, charts);

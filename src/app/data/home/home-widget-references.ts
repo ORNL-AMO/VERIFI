@@ -13,6 +13,7 @@ export function homeReferences(definition: HomeDashboardDefinition): readonly Ho
     const refs: HomeReference[] = [];
     const add = (field: string, kind: HomeReference['kind'], guid: string) => refs.push({ path: `${path}.${field}`, kind, guid });
     if (widget.kind === 'visualization') add('visualizationGuid', 'visualization', widget.visualizationGuid);
+    if (widget.kind === 'built-in-chart') add('reference.owner.guid', widget.reference.owner.kind, widget.reference.owner.guid);
     if (widget.kind === 'goal') {
       if (widget.binding.kind === 'exact') add('binding.analysisGuid', 'analysis', widget.binding.analysisGuid);
       else add('binding.owner.guid', widget.binding.owner.kind, widget.binding.owner.guid);

@@ -1,12 +1,14 @@
 # V1 Home workspace
 
-Current Home navigation and dashboard editing contract for [Home3 #2914](https://github.com/ORNL-AMO/VERIFI/issues/2914). The [specification](v1-home-dashboard-spec.md) owns accepted design; [persistence](v1-home-persistence.md) owns durable records, commands and compatibility. Complete recipes/initialization remain Home6. Linked numerical rendering and supporting data widgets remain Home4/Home5.
+Current Home navigation and dashboard editing contract for [Home3 #2914](https://github.com/ORNL-AMO/VERIFI/issues/2914). The [specification](v1-home-dashboard-spec.md) owns accepted design; [persistence](v1-home-persistence.md) owns durable records, commands and compatibility. Built-in default viewing, numerical rendering and supporting widgets remain planned Home4–Home6 work through the [first usable Home milestone](v1-home-dashboard-plan.md#first-usable-home-milestone).
 
 ## Navigation and available templates
 
 Home uses explicit account/facility dashboard identities in `home/dashboard/:dashboardGuid`. Default entry resolves once to an explicit URL so a later preference change cannot replace an open editor. Owners have independent sets, order and selected defaults; visible-order fallback never rewrites unavailable preferences. Missing, hidden and foreign dashboard URLs show recovery. A valid flagged single-facility account exposes only its sole facility set, without hidden analysis-pair initialization. Invalid configurations and stale account routes retain recovery.
 
 The recipe catalog exposes Blank plus only provider-declared complete recipes. Template create/restore consume their complete blueprints; they do not construct partial starters. The initialization hook returns a set only when all six complete recipes exist, and entry never calls it. Opening an empty owner remains read-only, including initialized-empty sets. Imported nonempty sets without an initialized marker offer explicit adoption through the existing atomic command; adoption adds no dashboard or chart.
+
+That is the implemented catalog/route contract, not the planned built-in rollout. The specification now calls for default views without saved visualizations and progressive availability of complete templates. Before activation, extend built-in versus persisted identity/preferences, protected drafts/routes and backup semantics explicitly; preserve current saved dashboards/defaults and empty/deleted intent rather than calling the old initializer or creating fake saved records on entry.
 
 ## Dashboard editing and recovery
 

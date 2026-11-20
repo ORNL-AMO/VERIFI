@@ -23,7 +23,7 @@ export interface HomeWidgetView {
   readonly context?: string;
   readonly shortcut?: HomeShortcutChoice;
 }
-export const HOME_WIDGET_LABELS: Record<HomeWidget['kind'], string> = { visualization: 'Saved visualization', note: 'Note', shortcut: 'Shortcut', goal: 'Goal summary',
+export const HOME_WIDGET_LABELS: Record<HomeWidget['kind'], string> = { visualization: 'Saved visualization', 'built-in-chart': 'Built-in chart', note: 'Note', shortcut: 'Shortcut', goal: 'Goal summary',
   actions: 'Actions', 'owner-summary': 'Owner summary', table: 'Table', map: 'Map' };
 export function shortcutKey(destination: ShortcutDestination): string {
   return JSON.stringify([destination.area, destination.owner.kind, destination.owner.guid, destination.resource?.kind ?? null, destination.resource?.guid ?? null]);

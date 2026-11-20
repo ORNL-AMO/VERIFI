@@ -48,6 +48,23 @@ describe('Home backup/copy/delete native acceptance', () => {
   });
   afterEach(async () => { vi.restoreAllMocks(); await harness.destroy(); });
 
+  it('does not turn intentional saved-dashboard deletion into an unavailable view during native backup restore', async () => {
+    for (const name of ['First', 'Second']) await commands.submit(commands.prepareCreate(homeAccountOwner,
+      { template: 'blank', version: 1, dashboard: { ...homeDefinition(), name }, charts: [] }));
+    const view = commands.ownerView(homeAccountOwner), [first, second] = view.records;
+    await commands.submit(commands.prepareConfigure(homeAccountOwner, { ...view.state!, views: { version: 1, catalog: [],
+      order: view.records.map(record => ({ kind: 'saved', dashboardGuid: record.guid })), default: { kind: 'saved', dashboardGuid: first.guid }, hidden: [], deleted: [] } }));
+    await commands.submit(commands.prepareDelete(first));
+    const source = await load(), service = writer();
+    const imported = await service.importAccountBackupFile(prepare(builder.buildAccountBackup(source)), 0);
+    const restored = await load(imported.guid);
+    expect(service.visualizationImportSummary()?.home).toMatchObject({ repairRequired: 0, locked: 0 });
+    expect(restored.homeDashboards).toHaveLength(1);
+    expect((restored.homeOwners[0].state as any).views.default).toEqual({ kind: 'saved', dashboardGuid: restored.homeDashboards[0].guid });
+    expect((restored.homeOwners[0].state as any).views.order).toEqual([{ kind: 'saved', dashboardGuid: restored.homeDashboards[0].guid }]);
+    expect(restored.homeDashboards[0].guid).not.toBe(second.guid);
+  });
+
   it.each(['Account', 'Facility'] as const)('round trips a %s graph with shared charts, settings, provenance and selected default through JSON/save/reopen', async kind => {
     const owner = kind === 'Account' ? homeAccountOwner : facilityOwner;
     await initialize(owner);
@@ -55,7 +72,10 @@ describe('Home backup/copy/delete native acceptance', () => {
     await commands.submit(commands.prepareUpdate(home, { ...definition(home), name: 'My overview', defaults: { emissionsTreatment: 'location' },
       widgets: definition(home).widgets.map(widget => ({ ...widget, size: 'full' })) }));
     const view = commands.ownerView(owner), costs = view.records.find(record => record.template?.template === 'costs')!;
-    await commands.submit(commands.prepareConfigure(owner, { ...view.state!, defaultDashboardGuid: costs.guid }));
+    const builtIn = { kind: 'built-in' as const, template: 'home' as const, version: 99 };
+    await commands.submit(commands.prepareConfigure(owner, { ...view.state!, defaultDashboardGuid: costs.guid,
+      views: { version: 1, catalog: [builtIn], order: view.records.map(record => ({ kind: 'saved', dashboardGuid: record.guid })),
+        default: { kind: 'saved', dashboardGuid: costs.guid }, hidden: [{ kind: 'saved', dashboardGuid: home.guid }], deleted: [builtIn] } }));
     const source = await load(), before = structuredClone(source);
     const backup = prepare(kind === 'Account' ? builder.buildAccountBackup(source) : builder.buildFacilityBackup(source, facility.guid));
     const service = writer();
@@ -85,6 +105,10 @@ describe('Home backup/copy/delete native acceptance', () => {
       guid: kind === 'Account' ? targetAccount : restored.facilities[0].guid });
     expect((restored.homeOwners[0].state as any).defaultDashboardGuid).toBe(restored.homeDashboards.find(record => record.template?.template === 'costs')!.guid);
     expect((restored.homeOwners[0].state as any).dashboardOrder).toEqual(restored.homeDashboards.map(record => record.guid));
+    expect((restored.homeOwners[0].state as any).views).toEqual({ version: 1, catalog: [builtIn],
+      order: restored.homeDashboards.map(record => ({ kind: 'saved', dashboardGuid: record.guid })),
+      default: { kind: 'saved', dashboardGuid: restored.homeDashboards.find(record => record.template?.template === 'costs')!.guid },
+      hidden: [{ kind: 'saved', dashboardGuid: dashboard.guid }], deleted: [builtIn] });
     expect(prepare(builder.buildAccountBackup(restored)).homeDashboards).toHaveLength(6);
     expect(await load()).toEqual(before);
   });

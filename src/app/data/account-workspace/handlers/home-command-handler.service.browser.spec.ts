@@ -13,6 +13,7 @@ import { createVisualizationDefinition, createVisualizationSetupDefinition } fro
 import { IdbHomeDashboard } from '@data/models/idbModels/homeDashboard';
 import { IdbHomeOwner } from '@data/models/idbModels/homeOwner';
 import { HomeDashboardDefinition, HomeOwner, HomeOwnerState, HomeWidget } from '@domain/home/home-dashboard';
+import { resolveHomeViews } from '@domain/home/home-views';
 import { homeAccountOwner, homeDefinition } from '@domain/home/testing/home-fixtures';
 import { storageBlueprints } from '@data/home/testing/home-command-fixtures';
 import { readHomeDashboard, readHomeOwner, readHomeWidget } from '@data/home/home-record';
@@ -45,6 +46,113 @@ describe('Home atomic native commands and workspace publication', () => {
     return commands.ownerView(owner);
   }
   function current(guid: string) { return store.homeDashboards().find(record => record.guid === guid)!; }
+
+  it('saves, duplicates, restores and reloads built-in references without creating library records', async () => {
+    const blueprint = { ...storageBlueprints()[0], charts: [], dashboard: homeDefinition([{
+      id: 'HOME.energy-trend', kind: 'built-in-chart' as const, size: 'half' as const, visibility: 'always' as const,
+      reference: { kind: 'built-in' as const, recipe: 'reporting-energy-rolling', version: 1, owner: homeAccountOwner }, inherit: [], overrides: {}
+    }]) };
+    expect(store.homeOwners()).toEqual([]);
+    const proposal = commands.prepareCreate(homeAccountOwner, blueprint);
+    expect((await commands.submit(proposal)).state).toBe('committed');
+    const original = store.homeDashboards()[0];
+    expect((await commands.submit(commands.prepareDuplicate(original))).state).toBe('committed');
+    expect((await commands.submit(commands.prepareTemplateReplacement(current(original.guid), blueprint))).state).toBe('committed');
+    expect(store.savedVisualizations()).toEqual([]);
+    expect(store.homeDashboards()).toHaveLength(2);
+    expect(definition(store.homeDashboards()[0]).widgets[0]).toMatchObject({ templateKey: 'HOME.energy-trend', reference: { recipe: 'reporting-energy-rolling', version: 1 } });
+    const before = store.snapshot();
+    await harness.reopen();
+    const loaded = await TestBed.inject(AccountWorkspaceLoaderService).load(account.guid);
+    expect(loaded.homeDashboards).toEqual(before!.homeDashboards);
+    expect(loaded.savedVisualizations).toEqual([]);
+    const foreign = { ...definition(original), widgets: definition(original).widgets.map(widget => widget.kind === 'built-in-chart'
+      ? { ...widget, reference: { ...widget.reference, owner: { kind: 'facility' as const, guid: facility.guid } } } : widget) };
+    expect((await commands.submit(commands.prepareUpdate(current(original.guid), foreign))).state).toBe('failed');
+  });
+
+  it('persists explicit owner-local view choices once and preserves them during unrelated layout changes', async () => {
+    const ref = { kind: 'built-in' as const, template: 'home' as const, version: 1 };
+    const views = { version: 1 as const, catalog: [ref], order: [ref], default: ref, hidden: [], deleted: [] };
+    const proposal = commands.prepareConfigure(homeAccountOwner, { version: 1, initialized: true, dashboardOrder: [], deletedStarters: [], views });
+    expect((await commands.submit(proposal)).state).toBe('committed');
+    expect(commands.ownerView(homeAccountOwner).state?.views).toEqual(views);
+    expect(store.homeDashboards()).toEqual([]); expect(store.savedVisualizations()).toEqual([]);
+    expect((await commands.submit(commands.prepareConfigure(homeAccountOwner, { ...commands.ownerView(homeAccountOwner).state!, views: { ...views, catalog: [] } }))).state).toBe('failed');
+    expect((await commands.submit(commands.prepareCreate(homeAccountOwner, { template: 'blank', version: 1, dashboard: homeDefinition(), charts: [] }))).state).toBe('committed');
+    expect(commands.ownerView(homeAccountOwner).state?.views).toEqual(views);
+    expect(commands.ownerView({ kind: 'facility', guid: facility.guid }).state).toBeUndefined();
+  });
+  it('conflicts and recovers explicit view preferences without replaying committed configuration', async () => {
+    const ref = { kind: 'built-in' as const, template: 'home' as const, version: 1 };
+    const state: HomeOwnerState = { version: 1, initialized: true, dashboardOrder: [], deletedStarters: [],
+      views: { version: 1, catalog: [ref], order: [ref], default: ref, hidden: [], deleted: [] } };
+    const stale = commands.prepareConfigure(homeAccountOwner, state);
+    const proposal = commands.prepareConfigure(homeAccountOwner, state);
+    const execute = vi.spyOn(TestBed.inject(HomeCommandHandler), 'execute');
+    vi.spyOn(workspace, 'reloadActiveWorkspace').mockRejectedValueOnce(new Error('View preferences publication unavailable'));
+    expect((await commands.submit(proposal)).state).toBe('refresh-required');
+    expect((await commands.submit(proposal)).state).toBe('refresh-required');
+    expect(execute).toHaveBeenCalledTimes(1);
+    await commands.recover(account.guid, proposal.operationGuid);
+    expect((await commands.submit(proposal)).state).toBe('committed');
+    expect(execute).toHaveBeenCalledTimes(1);
+    expect(commands.ownerView(homeAccountOwner).state).toEqual(state);
+    expect((await commands.submit(stale)).state).toBe('conflict');
+    expect(store.savedVisualizations()).toEqual([]);
+    expect(await harness.getAll('homeOwners')).toEqual(store.homeOwners());
+  });
+  it('removes verified view relationships on deletion and chooses the remaining visible default', async () => {
+    await initialize();
+    const view = commands.ownerView(homeAccountOwner), first = view.records[0], second = view.records[1];
+    const saved = (dashboardGuid: string) => ({ kind: 'saved' as const, dashboardGuid });
+    const state: HomeOwnerState = { ...view.state!, views: { version: 1, catalog: [], order: [saved(first.guid), saved(second.guid)],
+      default: saved(first.guid), hidden: [], deleted: [] } };
+    expect((await commands.submit(commands.prepareConfigure(homeAccountOwner, state))).state).toBe('committed');
+    expect((await commands.submit(commands.prepareDelete(first))).state).toBe('committed');
+    expect(commands.ownerView(homeAccountOwner).state?.views).toEqual({ version: 1, catalog: [], order: [saved(second.guid)], default: saved(second.guid), hidden: [], deleted: [] });
+    expect((await commands.submit(commands.prepareDelete(second))).state).toBe('committed');
+    expect(commands.ownerView(homeAccountOwner).state?.views).toEqual({ version: 1, catalog: [], order: [], hidden: [], deleted: [] });
+  });
+  it('leaves mixed built-in default fallback to current catalog/visibility resolution after saved deletion', async () => {
+    await initialize();
+    const view = commands.ownerView(homeAccountOwner), first = view.records[0], second = view.records[1];
+    const builtIn = { kind: 'built-in' as const, template: 'home' as const, version: 1 };
+    const saved = (dashboardGuid: string) => ({ kind: 'saved' as const, dashboardGuid });
+    expect((await commands.submit(commands.prepareConfigure(homeAccountOwner, { ...view.state!, views: { version: 1, catalog: [builtIn],
+      order: [saved(first.guid), builtIn, saved(second.guid)], default: saved(first.guid), hidden: [], deleted: [] } }))).state).toBe('committed');
+    expect((await commands.submit(commands.prepareDelete(first))).state).toBe('committed');
+    const preferences = commands.ownerView(homeAccountOwner).state!.views!;
+    expect(preferences.order).toEqual([builtIn, saved(second.guid)]);
+    expect(preferences.default).toBeUndefined();
+    expect(resolveHomeViews({ initialization: 'initialized', preferences, legacyOrder: [],
+      legacyDefault: commands.ownerView(homeAccountOwner).state?.defaultDashboardGuid, deletedStarters: [],
+      candidates: [builtIn, saved(second.guid)].map(reference => ({ reference, available: true, visible: true })) }).default).toEqual(builtIn);
+  });
+  it.each(['saved', 'built-in', 'remove'] as const)('acknowledges only changed imported view relationships when choosing %s', async choice => {
+    const view = await initialize(), record = view.record!, first = view.records[0], chosen = view.records[1];
+    const missing = { kind: 'saved' as const, dashboardGuid: 'missing' };
+    const builtIn = { kind: 'built-in' as const, template: 'home' as const, version: 1 };
+    const state: HomeOwnerState = { ...view.state!, views: { version: 1, catalog: [builtIn],
+      order: [missing, { kind: 'saved', dashboardGuid: first.guid }, builtIn, { kind: 'saved', dashboardGuid: chosen.guid }],
+      default: missing, hidden: [missing], deleted: [] } };
+    const preserved = { ...record, state, preservation: { references: [
+      { path: 'views.default', kind: 'dashboard' as const, guid: 'missing', reason: 'not-transferred' as const },
+      { path: 'views.order.["saved","missing"]', kind: 'dashboard' as const, guid: 'missing', reason: 'not-transferred' as const },
+      { path: 'views.hidden.["saved","missing"]', kind: 'dashboard' as const, guid: 'missing', reason: 'not-transferred' as const }
+    ], transfers: [] } };
+    await firstValueFrom(harness.dbService.update('homeOwners', preserved)); await workspace.reloadActiveWorkspace(false);
+    const unrelated = { ...state, dashboardOrder: [...state.dashboardOrder].reverse() };
+    expect((await commands.submit(commands.prepareConfigure(homeAccountOwner, unrelated))).state).toBe('committed');
+    expect(commands.ownerView(homeAccountOwner).record?.preservation?.references).toHaveLength(3);
+    const { default: _default, ...withoutDefault } = state.views!;
+    const nextViews = { ...withoutDefault, hidden: [], ...(choice === 'remove' ? {} : { default: choice === 'saved' ? { kind: 'saved' as const, dashboardGuid: chosen.guid } : builtIn }) };
+    expect((await commands.submit(commands.prepareConfigure(homeAccountOwner, { ...unrelated, views: nextViews }))).state).toBe('committed');
+    const currentView = commands.ownerView(homeAccountOwner);
+    expect(currentView.record?.preservation?.references.map(ref => ref.path)).toEqual(['views.order.["saved","missing"]']);
+    const resolution = (await import('@data/home/home-references')).homeOwnerResolutionState(currentView.record!, currentView.state!);
+    expect(resolution.views?.default).toEqual(nextViews.default);
+  });
 
   it('initializes once, shares starter charts, hydrates after restart and publishes one complete graph', async () => {
     const committed = vi.fn(); TestBed.inject(WorkspaceCommandBoundary).committedChange$.subscribe(committed);

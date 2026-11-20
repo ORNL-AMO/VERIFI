@@ -35,10 +35,11 @@ export function prepareHomeGraph(accountGuid: string, owner: HomeOwner, blueprin
     }
     const widgets = blueprint.dashboard.widgets.map(widget => {
       const id = getNewIdbEntry().guid;
-      if (widget.kind !== 'visualization') return { ...structuredClone(widget), id };
+      const templateKey = widget.templateKey ?? widget.id;
+      if (widget.kind !== 'visualization') return { ...structuredClone(widget), id, templateKey };
       const visualizationGuid = mapping.get(widget.visualizationGuid);
       if (!visualizationGuid) throw new Error('A template widget has no declared chart.');
-      return { ...structuredClone(widget), id, visualizationGuid };
+      return { ...structuredClone(widget), id, templateKey, visualizationGuid };
     });
     return { guid: getNewIdbEntry().guid, definition: { ...structuredClone(blueprint.dashboard), widgets },
       template: blueprint.template, templateVersion: blueprint.version };
