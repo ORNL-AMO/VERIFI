@@ -9,6 +9,7 @@ import {
 import { runWorker } from '@platform/web-workers/run-worker';
 import { Observable, Subscription, defer, of } from 'rxjs';
 import { FacilityAnalysisGroupContext } from '../facility-analysis-group-context.service';
+import { groupWithGeneratedModel } from '@shared/shared-analysis/calculations/regression-model-projection';
 
 export const REGRESSION_VALIDATION_DEBOUNCE_MS = 650;
 
@@ -182,21 +183,4 @@ export function modelPeriodMonthCount(group: AnalysisGroup): number {
     .every(value => Number.isFinite(value))) return 0;
   return (group.regressionEndYear - group.regressionStartYear) * 12
     + group.regressionModelEndMonth - group.regressionModelStartMonth + 1;
-}
-
-export function groupWithGeneratedModel(group: AnalysisGroup, model: JStatRegressionModel): AnalysisGroup {
-  const clone = structuredClone(group);
-  clone.regressionConstant = model.coef[0];
-  clone.regressionModelYear = model.modelYear;
-  clone.selectedModelId = model.modelId;
-  clone.models = [structuredClone(model)];
-  clone.predictorVariables = clone.predictorVariables.map(variable => {
-    const index = model.predictorVariables.findIndex(item => item.id === variable.id);
-    return {
-      ...variable,
-      productionInAnalysis: index >= 0,
-      regressionCoefficient: index >= 0 ? model.coef[index + 1] : undefined
-    };
-  });
-  return clone;
 }

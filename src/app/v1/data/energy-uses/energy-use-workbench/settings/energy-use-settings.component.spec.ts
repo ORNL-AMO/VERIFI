@@ -207,11 +207,11 @@ describe('Energy Use Settings lifecycle', () => {
     expect(store.energyUseEquipment()[0].utilityData.map(source => source.energySource)).toEqual([selected]);
     expect(actions.updateSetup).toHaveBeenCalledTimes(1);
   });
-  it('copies only saved values and deletes the confirmed item before returning to its inventory', async () => {
+  it('allows transfer only for saved values and deletes the confirmed item before returning to its inventory', async () => {
     const { fixture, component, actions, navigation } = setup();
     vi.spyOn(TestBed.inject(Router), 'navigate').mockResolvedValue(true);
-    component.form()!.controls.settings.controls.name.setValue('Pending'); fixture.detectChanges(); await component.copy(); expect(actions.copy).not.toHaveBeenCalled();
-    component.editor.discard(); fixture.detectChanges(); await component.copy(); expect(actions.copy).toHaveBeenCalledTimes(1);
+    component.form()!.controls.settings.controls.name.setValue('Pending'); fixture.detectChanges(); expect(component.canTransfer()).toBe(false);
+    component.editor.discard(); fixture.detectChanges(); expect(component.canTransfer()).toBe(true);
     component.requestDelete(); await component.confirmReview();
     expect(actions.delete).toHaveBeenCalledTimes(1); expect(navigation.openFacilityInventory).toHaveBeenCalledWith(['/group/items']);
   });

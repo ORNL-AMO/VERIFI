@@ -55,11 +55,19 @@ describe('v1 canonical route guards', () => {
       .toEqual({ commands: facilityRoute('facility-a') });
   });
 
-  it.each(['settings/backup', 'reports/dashboard', 'visualization/dashboard', 'visualization/workbench/visualization-a', 'imports/upload?facilityGuid=facility-a&returnUrl=%2Ffacility', 'imports/file/file-a/review'])('allows single-facility account %s without reconciling analysis pairs', async path => {
+  it.each(['home/dashboard/dashboard-a', 'settings/backup', 'reports/dashboard', 'visualization/dashboard', 'visualization/workbench/visualization-a', 'imports/upload?facilityGuid=facility-a&returnUrl=%2Ffacility', 'imports/file/file-a/review'])('allows single-facility account %s without reconciling analysis pairs', async path => {
     workspace.account.mockReturnValue({ guid: 'account-a', isSingleFacilityCompany: true });
     workspace.facilities.mockReturnValue([{ guid: 'facility-a', accountId: 'account-a' }]);
     await expect(invoke(singleSiteAccountRedirectGuard, route({ accountGuid: 'account-a' }),
       { url: `/v1/workspace/account/account-a/${path}` })).resolves.toBe(true);
+    expect(ensurePairs).not.toHaveBeenCalled();
+  });
+
+  it('opens sole-facility Home without initializing hidden analysis pairs', async () => {
+    workspace.account.mockReturnValue({ guid: 'account-a', isSingleFacilityCompany: true });
+    workspace.facilities.mockReturnValue([{ guid: 'facility-a', accountId: 'account-a' }]);
+    await expect(invoke(singleSiteAccountRedirectGuard, route({}), { url: '/v1/workspace/account/account-a/home/overview' }))
+      .resolves.toEqual({ commands: facilityRoute('facility-a') });
     expect(ensurePairs).not.toHaveBeenCalled();
   });
 

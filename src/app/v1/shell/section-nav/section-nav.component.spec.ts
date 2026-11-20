@@ -41,8 +41,8 @@ describe('SectionNavComponent', () => {
     const fixture = TestBed.createComponent(SectionNavComponent);
     fixture.detectChanges();
 
-    expect(fixture.nativeElement.textContent).toContain('Account Home');
-    expect(fixture.nativeElement.textContent).toContain('Overview');
+    expect(fixture.nativeElement.querySelector('app-home-nav')).not.toBeNull();
+    expect(fixture.nativeElement.textContent).toContain('Home dashboards');
     expect(fixture.nativeElement.textContent).not.toContain('Account Settings');
   });
 

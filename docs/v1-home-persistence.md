@@ -1,6 +1,6 @@
 # V1 Home persistence
 
-The [Home specification](v1-home-dashboard-spec.md) owns the accepted experience. This reference owns the implementing persistence contracts; the [delivery phases](v1-home-dashboard-plan.md) track pending work. UI, runtime reporting resolution, rendering, summary adapters and complete starter recipes remain Home3–Home6 work.
+The [Home specification](v1-home-dashboard-spec.md) owns the accepted experience. This reference owns the implementing persistence contracts; the [delivery phases](v1-home-dashboard-plan.md) track pending work. [Home workspace](v1-home-workspace.md) owns implemented navigation/editing. Runtime reporting resolution, rendering, summary adapters and complete starter recipes remain Home4–Home6 work.
 
 ## Records and compatibility
 

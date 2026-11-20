@@ -1,7 +1,10 @@
-import { IdbFacilityEnergyUseEquipment } from '@data/models/idbModels/facilityEnergyUseEquipment';
-import { IdbUtilityMeterGroup } from '@data/models/idbModels/utilityMeterGroup';
-import { IdbUtilityMeter } from '@data/models/idbModels/utilityMeter';
 import type { MeterSource } from '@data/models/constantsAndTypes';
+import type { IdbFacility } from '@data/models/idbModels/facility';
+import type { IdbFacilityEnergyUseEquipment } from '@data/models/idbModels/facilityEnergyUseEquipment';
+import type { IdbFacilityEnergyUseGroup } from '@data/models/idbModels/facilityEnergyUseGroups';
+import type { IdbEntry } from '@data/models/idbModels/idbEntry';
+import type { IdbUtilityMeter } from '@data/models/idbModels/utilityMeter';
+import type { IdbUtilityMeterGroup } from '@data/models/idbModels/utilityMeterGroup';
 
 export interface EnergyUseOwner { readonly accountGuid: string; readonly facilityGuid: string; }
 export interface EnergyUseCommandIdentity extends EnergyUseOwner { readonly energyUseGuid: string; }
@@ -36,7 +39,7 @@ export function energyUseMeterLinksError(item: Pick<IdbFacilityEnergyUseEquipmen
 
 /** Detached reviewed rows; undefined after means equipment-only deletion. */
 export interface EnergyUseBatchChange {
-  readonly facility: import('@data/models/idbModels/facility').IdbFacility;
+  readonly facility: IdbFacility;
   readonly before: IdbFacilityEnergyUseEquipment;
   readonly after?: IdbFacilityEnergyUseEquipment;
 }
@@ -46,11 +49,34 @@ export interface EnergyUseGroupIdentity extends EnergyUseOwner {
 }
 
 export interface EnergyUseGroupDeletion {
-  readonly group: import('@data/models/idbModels/facilityEnergyUseGroups').IdbFacilityEnergyUseGroup;
+  readonly group: IdbFacilityEnergyUseGroup;
   readonly items: readonly IdbFacilityEnergyUseEquipment[];
 }
 
 export interface EnergyUseGroupSettings {
   readonly name: string;
   readonly notes: string;
+}
+
+/** Immutable review shared by the single-item and group-table transfer workflows. */
+export interface EnergyUseTransferRequest {
+  readonly accountGuid: string;
+  readonly mode: 'move' | 'copy';
+  readonly sources: readonly {
+    readonly facility: IdbFacility;
+    readonly item: IdbFacilityEnergyUseEquipment;
+  }[];
+  readonly destinationFacility: IdbFacility;
+  readonly destinationGroup: {
+    readonly kind: 'existing' | 'new';
+    readonly group: IdbFacilityEnergyUseGroup;
+  };
+  /** Generated once per review, retained across rejected-write retries. */
+  readonly copyIdentities: readonly IdbEntry[];
+}
+
+export interface EnergyUseTransferResult {
+  readonly mode: 'move' | 'copy';
+  readonly items: readonly IdbFacilityEnergyUseEquipment[];
+  readonly group: IdbFacilityEnergyUseGroup;
 }

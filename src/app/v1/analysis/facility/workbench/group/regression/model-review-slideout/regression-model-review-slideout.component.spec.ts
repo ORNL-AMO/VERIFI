@@ -26,7 +26,7 @@ describe('RegressionModelReviewSlideoutComponent', () => {
     const element = fixture.nativeElement as HTMLElement;
     expect(element.querySelector('app-workspace-slideout')).not.toBeNull();
     expect(element.textContent).toContain('Modeled Water');
-    expect(element.querySelector('.v1-regression-review__equation')?.getAttribute('aria-label')).toBe('Modeled Water equation');
+    expect(element.querySelector('app-model-equation figure')?.getAttribute('aria-label')).toBe('Modeled Water equation');
     expect(element.textContent).toContain('1.2346 + (2.3457 × Production)');
     expect(element.textContent).toContain('0.91235');
     expect(element.textContent).toContain('Candidate model');
