@@ -22,7 +22,7 @@ describe('AccountAnalysisWorkbenchComponent', () => {
           { provide: AccountAnalysisWorkbenchNavigationService, useValue: {} },
           {
             provide: AccountAnalysisAutosaveService,
-            useValue: { isDirty: signal(false), isBlocked: signal(false) }
+            useValue: { deletionActive: signal(false), isDirty: signal(false), isBlocked: signal(false) }
           },
           { provide: AccountAnalysisFacilitySelectionService, useValue: {} }
         ]

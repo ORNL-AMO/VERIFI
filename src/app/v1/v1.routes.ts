@@ -1,4 +1,5 @@
 import { analysisUsageLeaveGuard } from '@app/v1/analysis/used-by/analysis-usage-leave.guard';
+import { analysisSetupDeletionGuard } from '@app/v1/analysis/deletion/analysis-setup-deletion.guard';
 import { VISUALIZATION_ROUTES, visualizationFacilityEntryGuard } from '@app/v1/visualizations/visualizations.routes';
 import { importSessionGuard } from '@app/v1/account/imports/import-session.guard';
 import { ENERGY_USE_WORKBENCH_ROUTES } from '@app/v1/data/energy-uses/energy-uses.routes';
@@ -211,7 +212,7 @@ export const V1Routes: Routes = [
                 canDeactivate: [unsavedChangesGuard],
                 children: [
                   { path: '', pathMatch: 'full', redirectTo: 'setup' },
-                  { path: 'setup', component: AccountAnalysisSetupComponent, data: { accountAnalysisStage: 'setup' } },
+                  { path: 'setup', component: AccountAnalysisSetupComponent, canDeactivate: [analysisSetupDeletionGuard], data: { accountAnalysisStage: 'setup' } },
                   { path: 'select-items', component: AccountAnalysisSelectFacilityItemsComponent, data: { accountAnalysisStage: 'select-items' } },
                   {
                     path: 'results',
@@ -395,7 +396,7 @@ export const V1Routes: Routes = [
                 canDeactivate: [unsavedChangesGuard],
                 children: [
                   { path: '', pathMatch: 'full', redirectTo: 'setup' },
-                  { path: 'setup', component: FacilityAnalysisSetupComponent, data: { analysisScope: 'analysis', analysisTab: 'setup' } },
+                  { path: 'setup', component: FacilityAnalysisSetupComponent, canDeactivate: [analysisSetupDeletionGuard], data: { analysisScope: 'analysis', analysisTab: 'setup' } },
                   {
                     path: 'group/:groupGuid',
                     component: FacilityAnalysisGroupShellComponent,

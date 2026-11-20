@@ -247,6 +247,8 @@ Analysis Setup and group completion are status-ready projections with no blockin
 
 The footer follows displayed stage order without making groups sequential prerequisites. Continue moves from Setup to the first group, between listed groups even when the current group remains incomplete, from the last group to Facility Results only when all groups are complete, and then to Used By. Back selects the nearest previous available stage. Route guards are a final safety boundary, not the primary save mechanism. Contextual group tabs are derived from configuration: Banked Savings appears after Setup whenever banking is selected and is disabled until its banking options are valid, Regression appears only for regression groups, and result tabs are hidden for skipped groups.
 
+Setup includes a portal-confirmed Delete analysis action, including incomplete analyses and unsaved or invalid drafts. Deletion suspends autosave and drains submitted writes; cancelling retains the draft. Existing atomic deletion guards protect linked reports and banking consumers, including account reports referencing hidden single-facility pairs. Confirmation explains active-selection cleanup and affected account-analysis links. Successful deletion opens the owning Analysis dashboard regardless of return origin. A committed deletion with failed publication stays suspended and retries publication only, never persistence.
+
 ## Testing and debugging map
 
 Use the smallest layer that owns the behavior:

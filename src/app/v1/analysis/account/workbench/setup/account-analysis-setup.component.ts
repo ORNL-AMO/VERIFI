@@ -1,3 +1,4 @@
+import { AnalysisSetupDeleteComponent } from '@app/v1/analysis/deletion/analysis-setup-delete/analysis-setup-delete.component';
 import { TemplatePortal } from '@angular/cdk/portal';
 import { Component, OnDestroy, TemplateRef, ViewChild, ViewContainerRef, computed, effect, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
@@ -21,7 +22,7 @@ import {
   selector: 'app-account-analysis-setup',
   standalone: true,
   providers: [AccountAnalysisPeriodService, AccountAnalysisSetupActionsService],
-  imports: [ReactiveFormsModule, RouterLink, IconComponent, ConfirmationDialogComponent],
+  imports: [ReactiveFormsModule, RouterLink, IconComponent, ConfirmationDialogComponent, AnalysisSetupDeleteComponent],
   templateUrl: './account-analysis-setup.component.html',
   styleUrls: ['./account-analysis-setup.component.css']
 })

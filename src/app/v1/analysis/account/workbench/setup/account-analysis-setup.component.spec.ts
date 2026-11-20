@@ -1,3 +1,7 @@
+import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
+import { WorkspaceCommandBoundary } from '@data/account-workspace/workspace-command-boundary.service';
+import { AccountAnalysisActionsService } from '@app/v1/analysis/account/account-analysis-actions.service';
+import { FacilityAnalysisActionsService } from '@app/v1/analysis/facility/facility-analysis-actions.service';
 import { signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
@@ -12,6 +16,15 @@ import { AccountAnalysisSetupActionsService } from './account-analysis-setup-act
 import { accountAnalysisSetupDraftValid, AccountAnalysisSetupComponent } from './account-analysis-setup.component';
 
 describe('AccountAnalysisSetupComponent', () => {
+  beforeEach(() => {
+    TestBed.configureTestingModule({ providers: [
+      { provide: AccountWorkspaceStore, useValue: { snapshot: signal(undefined), account: signal(undefined), canWrite: signal(false), hasPending: signal(false) } },
+      { provide: WorkspaceCommandBoundary, useValue: {} },
+      { provide: AccountAnalysisActionsService, useValue: {} },
+      { provide: FacilityAnalysisActionsService, useValue: {} }
+    ] });
+  });
+
   const analysis = {
     guid: 'analysis-a', accountId: 'account-a', name: 'Portfolio Energy', analysisCategory: 'energy',
     baselineYear: 2024, energyIsSource: true, energyUnit: 'MMBtu', waterUnit: 'gal',
@@ -111,6 +124,7 @@ describe('AccountAnalysisSetupComponent', () => {
         {
           provide: AccountAnalysisWorkbenchContext,
           useValue: {
+            analysisGuid: signal('analysis-a'),
             account: signal({
               guid: 'account-a', fiscalYear: 'calendarYear',
               sustainabilityQuestions: {
@@ -124,7 +138,7 @@ describe('AccountAnalysisSetupComponent', () => {
         {
           provide: AccountAnalysisAutosaveService,
           useValue: {
-            draft, state: signal('saved'), flush: vi.fn().mockResolvedValue(true),
+            deletionHeld: signal(false), draft, state: signal('saved'), flush: vi.fn().mockResolvedValue(true),
             update, error: signal(undefined)
           }
         },

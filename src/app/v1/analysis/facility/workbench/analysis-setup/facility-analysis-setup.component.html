@@ -2,6 +2,7 @@
 @let facility = context.facility();
 @if (analysis && facility) {
   <form class="v1-analysis-section" aria-label="Analysis setup" [formGroup]="form">
+    <fieldset class="analysis-setup-editor" [disabled]="autosave.deletionHeld()">
     <div class="v1-analysis-setup__grid">
       <section class="v1-analysis-setup__panel" aria-label="Analysis details">
         <label for="analysis-name">Name</label>
@@ -121,9 +122,12 @@
         <span id="analysis-model-lock-message">Boundary, baseline, and display unit settings are locked because one or more regression models use them.</span>
       </div>
     }
+    </fieldset>
   </form>
 
 }
+
+<app-analysis-setup-delete scope="facility" [analysisGuid]="context.analysisGuid()" [autosave]="autosave" />
 
 <ng-template #clearModelsModal>
   @if (draft(); as analysis) {

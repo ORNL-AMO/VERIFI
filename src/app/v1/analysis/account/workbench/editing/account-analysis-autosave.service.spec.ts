@@ -111,4 +111,111 @@ describe('AccountAnalysisAutosaveService', () => {
     expect(execute).not.toHaveBeenCalled();
     expect(await service.flush()).toBe(false);
   });
+  it.each(['dirty', 'invalid', 'error'] as const)('holds a %s draft without saving, then restores it on cancel', async state => {
+    if (state === 'error') {
+      execute.mockRejectedValueOnce(new Error('Disk unavailable'));
+      service.update(draft => { draft.name = 'Unsaved'; }, { immediate: true });
+      await vi.runAllTimersAsync();
+    } else {
+      service.update(draft => { draft.name = state === 'invalid' ? '' : 'Unsaved'; }, { valid: state !== 'invalid' });
+    }
+    const draft = structuredClone(service.draft());
+    const count = execute.mock.calls.length;
+    expect(await service.beginDeletion()).toBe(true);
+    expect(service.isBlocked()).toBe(true);
+    service.update(item => { item.name = 'Must not edit'; });
+    service.discard(); service.retry();
+    expect(await service.flush()).toBe(false);
+    await vi.advanceTimersByTimeAsync(ACCOUNT_ANALYSIS_AUTOSAVE_DEBOUNCE_MS * 2);
+    expect(execute).toHaveBeenCalledTimes(count);
+    expect(service.draft()).toEqual(draft);
+    service.cancelDeletion();
+    expect(service.isBlocked()).toBe(false);
+    expect(service.state()).toBe(state);
+    expect(service.draft()).toEqual(draft);
+    await vi.advanceTimersByTimeAsync(ACCOUNT_ANALYSIS_AUTOSAVE_DEBOUNCE_MS);
+    expect(execute).toHaveBeenCalledTimes(count + (state === 'dirty' ? 1 : 0));
+  });
+
+  it.each([false, true])('drains a submitted save without submitting the newer draft (invalid=%s)', async invalid => {
+    let settle!: () => void;
+    const pending = new Promise<void>(resolve => { settle = resolve; });
+    execute.mockImplementationOnce(async (_options, persist: () => Promise<unknown>) => {
+      await pending;
+      return { value: await persist(), change: {} };
+    });
+    service.update(draft => { draft.name = 'Submitted'; }, { immediate: true });
+    service.update(draft => { draft.name = invalid ? '' : 'Newer'; }, { valid: !invalid });
+    let ready = false;
+    const preparation = service.beginDeletion().then(result => { ready = result; });
+    expect(ready).toBe(false);
+    settle();
+    await preparation;
+    await vi.runAllTimersAsync();
+    expect(ready).toBe(true);
+    expect(service.draft()?.name).toBe(invalid ? '' : 'Newer');
+    expect(service.state()).toBe(invalid ? 'invalid' : 'dirty');
+    expect(execute).toHaveBeenCalledTimes(1);
+    service.completeDeletion();
+    expect(service.draft()).toBeUndefined();
+    expect(service.isDirty()).toBe(false);
+    expect(service.isBlocked()).toBe(false);
+    await vi.runAllTimersAsync();
+    expect(execute).toHaveBeenCalledTimes(1);
+  });
+
+  it('does not approve a deletion after its owner changes while a save drains', async () => {
+    let settle!: () => void;
+    const pending = new Promise<void>(resolve => { settle = resolve; });
+    execute.mockImplementationOnce(async (_options, persist: () => Promise<unknown>) => {
+      await pending;
+      return { value: await persist(), change: {} };
+    });
+    service.update(draft => { draft.name = 'Submitted'; }, { immediate: true });
+    const preparation = service.beginDeletion();
+    analysisState.set({ ...analysis, guid: 'other-analysis', name: 'Other' });
+    settle();
+    expect(await preparation).toBe(false);
+    service.cancelDeletion(); TestBed.tick();
+    expect(service.draft()?.guid).toBe('other-analysis');
+    expect(service.deletionHeld()).toBe(false);
+  });
+
+  it('keeps an old completion from releasing a new owner’s pending save', async () => {
+    let finishOld!: () => void, finishNew!: () => void;
+    execute.mockImplementationOnce(async (_options, persist: () => Promise<unknown>) => {
+      await new Promise<void>(resolve => { finishOld = resolve; });
+      return { value: await persist(), change: {} };
+    }).mockImplementationOnce(async (_options, persist: () => Promise<unknown>) => {
+      await new Promise<void>(resolve => { finishNew = resolve; });
+      return { value: await persist(), change: {} };
+    });
+    service.update(draft => { draft.name = 'Old'; }, { immediate: true });
+    const preparation = service.beginDeletion();
+    analysisState.set({ ...analysis, guid: 'other-analysis', name: 'Other' });
+    service.cancelDeletion(); TestBed.tick();
+    service.update(draft => { draft.name = 'New owner edit'; }, { immediate: true });
+    finishOld(); expect(await preparation).toBe(false);
+    expect(service.state()).toBe('saving');
+    expect(service.isBlocked()).toBe(true);
+    analysisState.set({ ...analysisState()!, name: 'New owner edit' });
+    finishNew(); await vi.runAllTimersAsync();
+    expect(service.committed()?.name).toBe('New owner edit');
+    expect(service.committed()?.guid).toBe('other-analysis');
+    expect(execute).toHaveBeenCalledTimes(2);
+  });
+
+  it('never submits a queued draft after the editor is destroyed', async () => {
+    let finish!: () => void;
+    execute.mockImplementationOnce(async (_options, persist: () => Promise<unknown>) => {
+      await new Promise<void>(resolve => { finish = resolve; });
+      return { value: await persist(), change: {} };
+    });
+    service.update(draft => { draft.name = 'Submitted'; }, { immediate: true });
+    service.update(draft => { draft.name = 'Queued'; });
+    TestBed.resetTestingModule();
+    finish(); await vi.runAllTimersAsync();
+    expect(execute).toHaveBeenCalledTimes(1);
+  });
+
 });

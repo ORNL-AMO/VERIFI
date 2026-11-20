@@ -1,3 +1,4 @@
+import { analysisDeletionBlockedReason } from '../deletion/analysis-deletion';
 import { UnsavedChangesService } from '@app/v1/shared/navigation/unsaved-changes.service';
 import { orderFacilities } from '@app/v1/shared/facilities/facility-order';
 import { AnalysisComparisonState, AnalysisComparisonOption } from '@app/v1/analysis/comparison/analysis-comparison-state';
@@ -166,8 +167,8 @@ export class AnalysisInventoryComponent implements OnDestroy {
   readonly deleteBlockedReason = computed(() => {
     const entry = this.deleteCandidate();
     if (!entry) return '';
-    if (entry.card.linkedReports.length) return `Remove this analysis from ${entry.card.linkedReports.length} linked ${entry.scope} report(s) before deleting it.`;
-    return entry.scope === 'facility' && entry.card.bankingConsumers.length ? `Remove this analysis from ${entry.card.bankingConsumers.length} banking workflow(s) before deleting it.` : '';
+    return analysisDeletionBlockedReason(entry.scope, entry.card.linkedReports.length,
+      entry.scope === 'facility' ? entry.card.bankingConsumers.length : 0);
   });
 
   constructor() {
