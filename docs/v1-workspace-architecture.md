@@ -16,6 +16,16 @@ Path exits from Data inventory leaves and Analysis use registration-backed leave
 
 Async completions check captured ownership and component lifetime before navigation, output, error, or focus effects. Durable commits are not undone when their view disappears. Successful creation/copy releases blocking state, closes the parent drawer, then opens the committed record; failed navigation must not offer to create it again.
 
+## Panel sizing
+
+`WorkspaceLayoutService` owns device-local panel widths separately from navigation/open state and account data. Navigation defaults to 17rem (14–26rem), support to 22rem (18–36rem). Versioned `v1WorkspaceLayout` local-storage preferences use rem and survive routes, account changes, and restarts; unavailable storage leaves resizing usable in memory. Widths never enter IndexedDB or backups.
+
+The workspace applies measured pixel widths through its existing grid variables. Docked navigation resizes above 820px and docked support above 1160px; stacked navigation and the explicitly requested support overlay retain their existing sizing. Fit preferred widths proportionally above their minimums to reserve 24rem for content where possible, without rewriting preferences. Restore preferred widths when space returns. During manual resizing, hold the other panel's rendered width fixed and constrain the edited panel to available space.
+
+Dragging below half the expanded minimum (7rem navigation, 9rem support) snaps the panel to zero width; dragging back across the threshold restores the expanded minimum. Closed navigation retains its edge separator for dragging or keyboard reopening, while closed support uses the existing header toggle. Collapsing retains the last expanded width preference and lasts for the current app session. Stacked navigation remains accessible on narrow screens even when its docked form was collapsed. Closed content is hidden and inert.
+
+Focusable vertical separators support pointer dragging, Arrow keys (8px, Shift: 32px), Home to collapse, End for maximum width, and Enter/double-click reset. An inward Arrow at the expanded minimum collapses; an outward Arrow from zero restores the remembered width. Support collapse returns focus to its header toggle. Pointer previews are frame-coalesced and expanded widths persist once on release. Escape, cancellation/capture loss, blur, window/layout changes, panel closure, or teardown cancel the preview and restore browser selection/cursor state. Handles are absent from narrow layouts and print; resizing does not remount content/charts.
+
 ## Home navigation
 
 Home uses account/facility-qualified dashboard URLs under `home/dashboard/:dashboardGuid`; `home/overview` opens the current owner's resolved default. The Home rail and owner switching enter that owner's default, falling back in saved visible order. Missing, hidden or foreign dashboard URLs show explicit recovery without retargeting ownership. Stale account routes cannot read the newly active owner's dashboards.

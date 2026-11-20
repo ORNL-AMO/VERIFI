@@ -1,24 +1,12 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { Component, NgModule } from '@angular/core';
-import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
-import { NavigationMotionDirective } from '@app/v1/shared/navigation/navigation-motion/navigation-motion.directive';
-import { NotificationsModule } from '@app/v1/shared/notifications/notifications.module';
 import { page } from 'vitest/browser';
 import { CommandNotificationBridgeService } from '@app/v1/shared/notifications/command-notification-bridge.service';
 import { VisualizationImportNotificationBridgeService } from '@app/v1/shared/notifications/visualization-import-notification-bridge.service';
 import { WorkspaceNavigationService } from '../workspace-navigation.service';
 import { WorkspaceShellComponent } from './workspace-shell.component';
-
-@Component({ selector: 'app-primary-rail', template: '', standalone: false })
-export class TestPrimaryRail { }
-@Component({ selector: 'app-section-nav', template: '', standalone: false })
-export class TestSectionNav { }
-@Component({ selector: 'app-support-panel', template: '', standalone: false })
-export class TestSupportPanel { }
-@NgModule({ declarations: [WorkspaceShellComponent, TestPrimaryRail, TestSectionNav, TestSupportPanel],
-  imports: [CommonModule, RouterModule, NavigationMotionDirective, NotificationsModule] })
-export class WorkspaceShellGeometryModule { }
+import { LocalStorageService } from 'ngx-webstorage';
+import { WorkspaceShellBrowserTestModule } from './workspace-shell.testing';
 
 describe('workspace notification clearance in Chromium', () => {
   let fixture: ComponentFixture<WorkspaceShellComponent>;
@@ -40,10 +28,11 @@ describe('workspace notification clearance in Chromium', () => {
         </section>
         <div class="v1-workspace__notifications"><article style="height:80px;background:white;border:1px solid black">Download started</article></div>
       </main>` } });
-    TestBed.configureTestingModule({ imports: [WorkspaceShellGeometryModule], providers: [
+    TestBed.configureTestingModule({ imports: [WorkspaceShellBrowserTestModule, RouterModule], providers: [
+      { provide: LocalStorageService, useValue: { retrieve: () => null, store: vi.fn() } },
       { provide: CommandNotificationBridgeService, useValue: {} },
       { provide: VisualizationImportNotificationBridgeService, useValue: {} },
-      { provide: WorkspaceNavigationService, useValue: {} }
+      { provide: WorkspaceNavigationService, useValue: { isSupportPanelOpen: () => false } }
     ] });
     fixture = TestBed.createComponent(WorkspaceShellComponent);
     const host = fixture.nativeElement as HTMLElement;

@@ -23,6 +23,8 @@ import { WorkspaceNavigationService } from '../workspace-navigation.service';
 import { WORKSPACE_SECTIONS } from '../primary-rail/workspace-sections';
 import { SUPPORT_PANEL_TABS } from '@app/v1/shell/support-panel/workspace-support-panel.view';
 import { WorkspaceShellComponent } from './workspace-shell.component';
+import { PanelResizeHandleComponent } from '../panel-resize-handle/panel-resize-handle.component';
+import { LocalStorageService } from 'ngx-webstorage';
 import { WorkspaceStatusService } from '@app/v1/status/workspace-status.service';
 import { presentFinding } from '@app/v1/status/status.catalog';
 import { makeFinding } from '@app/v1/status/status.models';
@@ -31,6 +33,7 @@ import { makeFinding } from '@app/v1/status/status.models';
   imports: [NavigationMotionDirective, SectionNavModule, StatusEvaluationMessageComponent, StatusFindingActionComponent, CommonModule, FormsModule, IconComponent, ImportStepperComponent, NotificationsModule, RouterModule.forRoot([]), ScrollingModule],
   declarations: [
     WorkspaceShellComponent,
+    PanelResizeHandleComponent,
     PrimaryRailComponent,
     SupportPanelComponent
   ]
@@ -92,6 +95,7 @@ describe('WorkspaceShellComponent', () => {
     TestBed.configureTestingModule({
       imports: [WorkspaceShellTestModule],
       providers: [
+        { provide: LocalStorageService, useValue: { retrieve: () => null, store: vi.fn() } },
         { provide: HomeEditor, useValue: { canStart: () => false } },
         { provide: HomeContext, useValue: { entries: () => [], owner: () => undefined, ownerRoute: () => ['/v1'], selectedGuid: () => undefined, view: () => undefined } },
         { provide: CommandNotificationBridgeService, useValue: {} },

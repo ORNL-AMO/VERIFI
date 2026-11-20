@@ -1,7 +1,9 @@
-import { Component, ElementRef, NgZone, OnDestroy, afterNextRender, inject } from '@angular/core';
+import { Component, ElementRef, Injector, NgZone, OnDestroy, afterNextRender, effect, inject, untracked } from '@angular/core';
 import { CommandNotificationBridgeService } from '@app/v1/shared/notifications/command-notification-bridge.service';
 import { VisualizationImportNotificationBridgeService } from '@app/v1/shared/notifications/visualization-import-notification-bridge.service';
 import { WorkspaceNavigationService } from '../workspace-navigation.service';
+import { WorkspaceLayoutService, WorkspacePanel } from '../workspace-layout.service';
+import { PanelResizeIntent } from '../panel-resize-handle/panel-resize-handle.component';
 
 @Component({
   selector: 'app-workspace-shell',
@@ -14,31 +16,83 @@ export class WorkspaceShellComponent implements OnDestroy {
   private readonly visualizationImportNotifications = inject(VisualizationImportNotificationBridgeService);
   private readonly element = inject<ElementRef<HTMLElement>>(ElementRef);
   private readonly zone = inject(NgZone);
+  private readonly injector = inject(Injector);
   private workspace?: HTMLElement;
   private content?: HTMLElement;
   private view?: Window;
   private resizeObserver?: ResizeObserver;
+  private layoutObserver?: ResizeObserver;
   private contentObserver?: MutationObserver;
   private readonly footers = new Set<HTMLElement>();
   private clearanceFrame?: number;
   private clearance = -1;
   private destroyed = false;
   readonly navigation = inject(WorkspaceNavigationService);
+  readonly layout = inject(WorkspaceLayoutService);
 
   constructor() {
-    afterNextRender(() => this.zone.runOutsideAngular(() => this.observeFooterClearance()));
+    effect(() => {
+      const open = this.navigation.isSupportPanelOpen();
+      untracked(() => this.layout.setSupportOpen(open));
+    });
+    afterNextRender(() => this.zone.runOutsideAngular(() => {
+      this.observeFooterClearance();
+      this.observePanelLayout();
+    }));
+  }
+
+  resizePanel(panel: WorkspacePanel, intent: PanelResizeIntent): void {
+    switch (intent.kind) {
+      case 'begin': this.layout.begin(panel); break;
+      case 'preview': this.layout.preview(panel, intent.width); break;
+      case 'commit': this.completeResize(panel, this.layout.commit(panel)); break;
+      case 'cancel': this.layout.cancel(); break;
+      case 'reset': this.layout.reset(panel); break;
+      case 'set': this.completeResize(panel, this.layout.setWidth(panel, intent.width)); break;
+    }
+  }
+
+  private completeResize(panel: WorkspacePanel, collapsed: boolean): void {
+    if (!collapsed || panel !== 'support') return;
+    this.navigation.hideSupportPanel();
+    afterNextRender(() => {
+      if (!this.destroyed) this.element.nativeElement.ownerDocument
+        .querySelector<HTMLElement>('[aria-label="Toggle support panel"]')?.focus();
+    }, { injector: this.injector });
   }
 
   ngOnDestroy(): void {
     this.destroyed = true;
+    this.layout.cancel();
+    this.layoutObserver?.disconnect();
     this.resizeObserver?.disconnect();
     this.contentObserver?.disconnect();
     this.content?.removeEventListener('scroll', this.scheduleFooterClearance);
     this.view?.removeEventListener('resize', this.scheduleFooterClearance);
+    this.view?.removeEventListener('resize', this.measurePanelLayout);
     this.view?.removeEventListener('scroll', this.scheduleFooterClearance);
     if (this.clearanceFrame !== undefined) this.view?.cancelAnimationFrame(this.clearanceFrame);
     this.footers.clear();
   }
+
+  private observePanelLayout(): void {
+    if (this.destroyed || !this.workspace || !this.view) return;
+    if (typeof ResizeObserver !== 'undefined') {
+      this.layoutObserver = new ResizeObserver(this.measurePanelLayout);
+      this.layoutObserver.observe(this.workspace);
+      this.layoutObserver.observe(this.element.nativeElement.ownerDocument.documentElement);
+    }
+    this.view.addEventListener('resize', this.measurePanelLayout, { passive: true });
+    this.measurePanelLayout();
+  }
+
+  private readonly measurePanelLayout = (): void => {
+    if (this.destroyed || !this.workspace || !this.view) return;
+    const width = this.workspace.getBoundingClientRect().width;
+    const rail = this.workspace.querySelector('app-primary-rail')?.getBoundingClientRect().width ?? 0;
+    const rem = Number.parseFloat(this.view.getComputedStyle(this.element.nativeElement.ownerDocument.documentElement).fontSize) || 16;
+    this.zone.run(() => this.layout.updateGeometry({ width, rail, rem, viewport: this.view!.innerWidth, supportOpen: this.navigation.isSupportPanelOpen() }));
+  };
 
   private observeFooterClearance(): void {
     if (this.destroyed) return;

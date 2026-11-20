@@ -1,0 +1,33 @@
+:host {
+  display: grid;
+  place-items: center;
+  position: relative;
+  z-index: 2;
+  width: 12px;
+  min-height: 0;
+  align-self: stretch;
+  cursor: col-resize;
+  touch-action: none;
+  user-select: none;
+  outline: none;
+}
+:host::before {
+  content: '';
+  position: absolute;
+  inset: 0 5px;
+  background: transparent;
+}
+:host span {
+  z-index: 1;
+  width: 4px;
+  height: 2.5rem;
+  border: 1px solid var(--v1-border);
+  border-radius: var(--v1-radius-sm);
+  background: var(--v1-surface);
+}
+:host(:hover)::before,
+:host(:focus-visible)::before,
+:host(.is-dragging)::before { background: var(--v1-content-control); }
+:host(:focus-visible) { outline: 2px solid var(--v1-content-control); outline-offset: -2px; }
+:host(.is-disabled) { display: none; }
+@media print { :host { display: none !important; } }
