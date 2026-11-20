@@ -1,6 +1,6 @@
 # V1 Home workspace
 
-Current Home navigation and dashboard editing contract for [Home3 #2914](https://github.com/ORNL-AMO/VERIFI/issues/2914). The [specification](v1-home-dashboard-spec.md) owns accepted design; [persistence](v1-home-persistence.md) owns durable records, commands and compatibility. Built-in default viewing, numerical rendering and supporting widgets remain planned Home4–Home6 work through the [first usable Home milestone](v1-home-dashboard-plan.md#first-usable-home-milestone).
+Current Home navigation and dashboard editing contract for [Home3 #2914](https://github.com/ORNL-AMO/VERIFI/issues/2914). The [specification](v1-home-dashboard-spec.md) owns accepted design; [persistence](v1-home-persistence.md) owns durable records, commands and compatibility. Shared built-in/saved chart rendering is implemented; complete default compositions, customization controls and supporting widgets follow the assigned Home phases through the [first usable Home milestone](v1-home-dashboard-plan.md#first-usable-home-milestone).
 
 ## Navigation and available templates
 
@@ -22,7 +22,7 @@ A committed publication failure retains its receipt across departure. Pending sa
 
 ## Presentation boundary
 
-Known unavailable widget references and unsupported formats retain truthful placeholders; a coincident imported GUID does not verify blocked intent. Notes remain plain text. Home does not request widget calculations, embed charts, resolve reporting bindings, repair chart sources, or advertise overview-report creation. Home3 exposes note, existing saved-visualization and typed internal-shortcut additions. All supported persisted widget variants retain title, Half/Full size, order, settings and truthful states; later data widget renderers are not advertised as available additions.
+Known unavailable widget references and unsupported formats retain truthful placeholders; a coincident imported GUID does not verify blocked intent. Notes remain plain text. Chart widgets use the same provider/date/presentation registrations as Visualizations. Built-in energy/water rolling-improvement configurations render directly without library records; explicit saved links read committed definitions. Context labels distinguish live reporting from exact named analyses and retain source scope. Missing/unsupported references remain unavailable; non-chart data widgets and overview-report creation remain unavailable. The layout editor exposes note, existing saved-visualization and typed internal-shortcut additions. Active chart views acquire data; layout editing deactivates chart demand. Existing display overrides remain preserved and unavailable until their controls are implemented, rather than rendering a silently different base chart. All supported persisted widget variants retain title, Half/Full size, order, settings and truthful states; later data widget renderers are not advertised as available additions.
 
 ## Widget drafts, layout and accessibility
 
@@ -33,3 +33,5 @@ Every widget has labeled Move earlier/Move later and Half/Full controls alongsid
 Array order drives DOM, reading, keyboard and grid order. Sparse row placement never backfills gaps or visually repacks the sequence. Two columns require at least `52rem + 4px` of container width, leaving each Half widget 24rem of content after padding and borders; otherwise every widget stacks. Controls wrap, long names/text break safely, and workbench borders connect with square outer corners and no vertical gaps. The main dashboard-order links remain available when the sidebar is collapsed.
 
 Print switches to committed widget order/content and the committed dashboard name, in one column, without changing the retained editing draft. Editing/navigation controls are omitted; notes, shortcut labels and truthful deferred/unavailable states remain readable.
+
+Chart alternatives contain complete shared-presenter values for assistive technology and expand into readable tables when printing. Account/dashboard/widget/source identities bound preview lifetime; obsolete results never replace current context. Pending analysis calculations are shared across active consumers by authoritative input fingerprint and canceled when the last consumer leaves.

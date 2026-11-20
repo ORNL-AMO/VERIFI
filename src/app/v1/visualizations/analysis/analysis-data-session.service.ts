@@ -33,6 +33,7 @@ export class AnalysisDataSession {
   private readonly calendarization = inject(WorkspaceCalendarizationService);
   private readonly pending = new WeakMap<AbortSignal, Map<string, Promise<AnalysisPreviewResult>>>();
   private readonly cache = new Map<string, { readonly fingerprint: string; readonly value: AnalysisVisualizationResults }>();
+  private readonly inFlight = new Map<string, { readonly abort: AbortController; readonly consumers: Set<symbol>; readonly result: Promise<unknown> }>();
   private readonly cancellations = new Set<() => void>();
   private session = 0;
   private lastSnapshot?: AccountWorkspaceSnapshot;
@@ -115,7 +116,7 @@ export class AnalysisDataSession {
       if (cached?.fingerprint === fingerprint && cached.value.scope === 'facility') value = { ...cached.value, analysis, facility };
       else {
         const runSession = this.session;
-        const result = await this.run(fullRequest, groupRequest, signal);
+        const result = await this.share(key, signal, shared => this.run(fullRequest, groupRequest, shared));
         if (!current() || runSession !== this.session) return unavailable('error', 'Analysis preview canceled or superseded.');
         if (result.ok === false) return unavailable('error', result.message);
         if (groupOnly !== ('groupGuid' in result.value)) return unavailable('error', 'The calculation returned a mismatched result scope.');
@@ -193,7 +194,7 @@ export class AnalysisDataSession {
       if (cached?.fingerprint === fingerprint && cached.value.scope === 'account') value = { ...cached.value, ...metadata };
       else {
         const runSession = this.session;
-        const result = await this.runAccount(built, signal);
+        const result = await this.share(key, signal, shared => this.runAccount(built, shared));
         if (!current() || runSession !== this.session) return unavailable('error', 'Analysis preview canceled or superseded.');
         if (result.ok === false) return unavailable('error', result.message);
         if (result.value.itemId !== analysis.guid || !Array.isArray(result.value.facilitySummaries)
@@ -211,6 +212,28 @@ export class AnalysisDataSession {
     const response = typeof Worker === 'undefined' ? of({ ok: true as const, value: calculateAccountAnalysisResults(request) })
       : runWorker<AccountAnalysisResultsWorkerResponse>(new Worker(new URL('../../../platform/web-workers/account-analysis-workbench-results.worker', import.meta.url)), request);
     return this.consume(response, signal);
+  }
+  /** Active widgets share numerical demand; the last departing consumer releases its Worker. */
+  private share<T>(key: string, signal: AbortSignal, run: (signal: AbortSignal) => Promise<T>): Promise<T> {
+    if (signal.aborted) return Promise.reject(new DOMException('Analysis preview canceled', 'AbortError'));
+    let pending = this.inFlight.get(key);
+    if (!pending || pending.abort.signal.aborted) {
+      const abort = new AbortController();
+      const entry = { abort, consumers: new Set<symbol>(), result: Promise.resolve().then(() => run(abort.signal)) as Promise<unknown> };
+      entry.result = entry.result.finally(() => { if (this.inFlight.get(key) === entry) this.inFlight.delete(key); });
+      this.inFlight.set(key, pending = entry);
+    }
+    const entry = pending, consumer = Symbol(); entry.consumers.add(consumer);
+    return new Promise<T>((resolve, reject) => {
+      const cleanup = () => {
+        signal.removeEventListener('abort', canceled); entry.consumers.delete(consumer);
+        if (!entry.consumers.size) entry.abort.abort();
+      };
+      const canceled = () => { cleanup(); reject(new DOMException('Analysis preview canceled', 'AbortError')); };
+      signal.addEventListener('abort', canceled, { once: true });
+      entry.result.then(value => { cleanup(); resolve(value as T); }, error => { cleanup(); reject(error); });
+      if (signal.aborted) canceled();
+    });
   }
   private run(full: FacilityAnalysisResultsWorkerRequest | undefined, group: FacilityAnalysisGroupResultsWorkerRequest | undefined, signal: AbortSignal): Promise<FacilityAnalysisResultsWorkerResponse | FacilityAnalysisGroupResultsWorkerResponse> {
     const response: Observable<FacilityAnalysisResultsWorkerResponse | FacilityAnalysisGroupResultsWorkerResponse> = typeof Worker === 'undefined'

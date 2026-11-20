@@ -14,6 +14,7 @@ import { VisualizationsModule } from '../visualizations.module';
 import { UtilityDataSession } from '../utility/utility-data-session.service';
 import { PreviewController } from '../preview/preview-controller';
 import { TimeSeriesPresenter } from '../time-series/time-series.presenter';
+import { buildHomeChart } from '@domain/home/home-chart-recipes';
 
 type Request = AccountAnalysisResultsWorkerRequest | FacilityAnalysisResultsWorkerRequest | FacilityAnalysisGroupResultsWorkerRequest;
 class ControlledWorker {
@@ -53,6 +54,41 @@ const targets: readonly [string, () => VisualizationDefinition][] = [['facility'
 describe('composed analysis date/provider/presentation acceptance', () => {
   beforeEach(() => { ControlledWorker.instances = []; vi.stubGlobal('Worker', ControlledWorker); });
   afterEach(() => { TestBed.resetTestingModule(); vi.unstubAllGlobals(); vi.restoreAllMocks(); });
+  it('re-resolves reporting selections and rejects obsolete results while exact named bindings stay pinned', async () => {
+    const { fixture, store, controller, update } = setup();
+    const first = fixture.snapshot.facilityAnalyses[0], second = { ...first, guid: 'replacement-analysis', name: 'Next reporting analysis' };
+    const snapshot = { ...fixture.snapshot, facilities: fixture.snapshot.facilities.map(item => item.guid === first.facilityId
+      ? { ...item, selectedEnergyAnalysisId: first.guid } : item), facilityAnalyses: [...fixture.snapshot.facilityAnalyses, second] };
+    store.publishCommitted(snapshot, {});
+    const built = buildHomeChart({ kind: 'built-in', recipe: 'reporting-energy-rolling', version: 1, owner: { kind: 'facility', guid: first.facilityId } }, 'account-a');
+    if (built.state !== 'ready') throw new Error();
+    update(built.definition); const obsolete = await worker(0);
+    store.publishCommitted({ ...snapshot, facilities: snapshot.facilities.map(item => item.guid === first.facilityId ? { ...item, selectedEnergyAnalysisId: second.guid } : item) }, {});
+    update(built.definition); const fresh = await worker(1);
+    expect(obsolete.terminate).toHaveBeenCalledOnce();
+    obsolete.reply(); expect(controller.state().state).toBe('loading');
+    fresh.reply(); await state(controller, 'ready');
+    const ready = controller.state();
+    if (ready.state !== 'ready') throw new Error();
+    expect(ready.evidence[0].request.source).toMatchObject({ analysisGuid: second.guid });
+    expect(built.definition.sources[0]).toHaveProperty('reporting');
+    update(analysisDefinition()); const exact = await worker(2); exact.reply(); await state(controller, 'ready');
+    const pinned = controller.state(); if (pinned.state !== 'ready') throw new Error();
+    expect(pinned.evidence[0].request.source).toMatchObject({ analysisGuid: first.guid });
+    controller.destroy();
+  });
+  it('shares pending numerical demand across widgets and cancels only after the last active consumer leaves', async () => {
+    const { store, update, controller } = setup();
+    const second = TestBed.runInInjectionContext(() => new PreviewController());
+    update();
+    second.update(analysisDefinition(), { accountGuid: 'account-a', definitionGuid: 'sibling-widget', workspaceRevision: store.revision(), definitionRevision: 1 });
+    const pending = await worker(0);
+    await vi.waitFor(() => expect(ControlledWorker.instances).toHaveLength(1));
+    controller.update(undefined, undefined, false);
+    expect(pending.terminate).not.toHaveBeenCalled();
+    pending.reply(); await state(second, 'ready'); expect(controller.state().state).toBe('inactive');
+    controller.destroy(); second.destroy();
+  });
   it.each(targets)('clears %s output, cancels obsolete work and cannot reuse replies from an earlier account session', async (_target, definition) => {
     const { fixture, store, controller, update } = setup();
     update(definition(), false); expect(ControlledWorker.instances).toHaveLength(0);

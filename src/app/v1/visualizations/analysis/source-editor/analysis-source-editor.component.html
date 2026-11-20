@@ -1,4 +1,5 @@
 @if (view(); as context) {
+  @for (binding of reportingBindings(); track $index) { <p>{{ binding }}. The current selection is resolved when charting; choosing named analyses below replaces this rule after review.</p> }
   <app-visualization-resource-picker label="Analyses" icon="analysis" [control]="selectedAnalyses" [options]="resourceOptions()" [disabled]="context.disabled" [requestChanges]="true"
     (selectionRequested)="selectAnalysis($event.guid)" (selectionSetRequested)="setAnalyses($event)"/>
   @for (target of targets(); track target.guid) {

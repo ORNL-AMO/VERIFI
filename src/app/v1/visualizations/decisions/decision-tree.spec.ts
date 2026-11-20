@@ -12,6 +12,7 @@ import { projectTraceItems } from '../shared/trace-items';
 import { serializeVisualizationDefinition } from '@domain/visualizations/visualization-source-groups';
 import { analysisDefinition, analysisFixture } from '@domain/visualizations/testing/analysis-fixtures';
 import { resolveUtilitySelection } from '@domain/visualizations/utility/utility-selection';
+import { buildHomeChart } from '@domain/home/home-chart-recipes';
 
 const snapshot = () => ({ ...visualizationSnapshot(), meters: [meter({ groupId: 'group-a' }), meter({ guid: 'meter-b', groupId: 'group-a', source: 'Natural Gas' })],
   meterGroups: [group({ guid: 'group-a', name: 'Boilers' }), group({ guid: 'empty-group', name: 'Future equipment' })], meterData: [reading({})] });
@@ -30,6 +31,21 @@ function selected(mode: 'source' | 'group' | 'meter' | 'facility' | 'rule', ids:
 }
 
 describe('shared visualization decisions', () => {
+  it('preserves distinct reporting rules across measure edits and reviews replacing them with named targets', () => {
+    const built = buildHomeChart({ kind: 'built-in', recipe: 'reporting-energy-rolling', version: 1, owner: { kind: 'facility', guid: 'facility-a' } }, 'account-a');
+    if (built.state !== 'ready') throw new Error();
+    const original = built.definition;
+    const result = prepareDecisionChange(original, { kind: 'source-measures', sourceKind: 'analysis', measures: ['rolling-improvement', 'actual'] }, { snapshot: analysisFixture().snapshot });
+    if (result.state === 'unchanged') throw new Error('Expected additional measure');
+    expect(result.definition.sources).toHaveLength(2);
+    expect(result.definition.sources.every(source => source.kind === 'analysis' && source.mode === 'result' && !!source.reporting && !source.analysisGuid)).toBe(true);
+    expect(result.definition.series).toHaveLength(2);
+    expect(result.definition.series.every(series => series.resourceGuid === undefined)).toBe(true);
+    const replace = prepareDecisionChange(original, { kind: 'analysis-targets', targets: [{ analysisGuid: 'analysis-a' }] }, { snapshot: analysisFixture().snapshot });
+    expect(replace.state).toBe('confirm'); if (replace.state === 'unchanged') throw new Error();
+    expect(replace.definition.sources[0]).toMatchObject({ analysisGuid: 'analysis-a' });
+    expect(replace.definition.sources[0]).not.toHaveProperty('reporting');
+  });
   it('reviews replacing custom dates with YTD and removing it when intervals or source categories change', () => {
     const definition = { ...selected('meter', ['meter-a']), chart: { kind: 'time-series' as const, interval: 'yearly' as const, defaultTraceType: 'line' as const, stack: 'none' as const }, period: { kind: 'fixed' as const, start: '2025-01-01', end: '2025-12-31', basis: 'calendar' as const } };
     const result = prepareDecisionChange(definition, { kind: 'year-to-date', enabled: true }, { snapshot: snapshot() });

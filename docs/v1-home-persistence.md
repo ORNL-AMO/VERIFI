@@ -1,6 +1,6 @@
 # V1 Home persistence
 
-The [Home specification](v1-home-dashboard-spec.md) owns the accepted experience. This reference owns the implementing persistence contracts; the [delivery phases](v1-home-dashboard-plan.md) track pending work. [Home workspace](v1-home-workspace.md) owns implemented navigation/editing. Runtime reporting resolution, rendering, summary adapters and complete starter recipes remain Home4–Home6 work.
+The [Home specification](v1-home-dashboard-spec.md) owns the accepted experience. This reference owns the implementing persistence contracts; the [delivery phases](v1-home-dashboard-plan.md) track pending work. [Home workspace](v1-home-workspace.md) owns implemented navigation/editing. The shared chart/reporting runtime is described in the visualization foundation and Home workspace references; summary adapters and complete starter recipes remain Home5/Home6 work.
 
 ## Implemented contract and planned extension
 
@@ -52,6 +52,6 @@ Account deletion removes its Home records. Facility deletion/replacement removes
 
 ## Reporting bindings
 
-Existing `analysisGuid` targets remain exact. Result sources may instead declare `reporting: { kind: 'reporting', owner: { kind, guid }, category }`, with account/facility owner and energy/water category. Rules cannot also pin an analysis or group. Model sources remain exact. Grouped serialization retains the rule unchanged; runtime resolution and editor support belong to Home4 and no latest-modified fallback is introduced.
+Existing `analysisGuid` targets remain exact. Result sources may instead declare `reporting: { kind: 'reporting', owner: { kind, guid }, category }`, with account/facility owner and energy/water category. Rules cannot also pin an analysis or group. Model sources remain exact. Grouped serialization retains the rule unchanged; runtime resolution expands them from current committed owner/category settings without rewriting saved intent. Missing, foreign or wrong-category selections show setup/recovery; there is no latest-modified fallback. Exact sources stay pinned. Source-editor context identifies following rules and named-target replacement is reviewed.
 
 Account rules remap only with their owning account; facility rules use the verified facility namespace. Missing mappings remain durably blocked across repeated transfers, even if a destination identity coincides later. The selected reporting analysis is runtime evidence, never a saved substitution for the rule. The existing [visualization persistence contract](v1-visualization-persistence.md) continues to own chart record/deletion/transfer behavior.

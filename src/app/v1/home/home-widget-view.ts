@@ -5,6 +5,7 @@ import { readSavedVisualization } from '@data/visualizations/saved-visualization
 import { inspectVisualizationReferences } from '@data/account-workspace/visualization-reference-inspection';
 import { HomeOwner, HomeWidget } from '@domain/home/home-dashboard';
 import * as routes from '@app/v1/routing/workspace-route';
+import { buildHomeChart } from '@domain/home/home-chart-recipes';
 
 export type ShortcutDestination = Extract<HomeWidget, { kind: 'shortcut' }>['destination'];
 export interface HomeShortcutChoice {
@@ -82,6 +83,11 @@ export function homeWidgetView(record: Readonly<IdbHomeDashboard>, widget: HomeW
     && references.some(ref => ref.path === issue.path)).map(issue => issue.path);
   if (blockedPaths.length) return { ...base, state: 'repair-required', blockedPaths, message: 'This widget has preserved unavailable relationships. Its saved intent is retained.' };
   if (widget.kind === 'note') return { ...base, state: 'ready', message: '' };
+  if (widget.kind === 'built-in-chart') {
+    const built = buildHomeChart(widget.reference, snapshot.account.guid);
+    return built.state === 'ready' ? { ...base, title: widget.title || built.definition.name, state: 'ready', message: '' }
+      : { ...base, state: 'unsupported', message: built.message };
+  }
   if (widget.kind === 'shortcut') {
     const shortcut = (shortcuts ?? homeShortcutChoices(snapshot)).find(choice => choice.key === shortcutKey(widget.destination));
     return shortcut ? { ...base, state: 'ready', message: '', shortcut, context: shortcut.label }
@@ -93,11 +99,11 @@ export function homeWidgetView(record: Readonly<IdbHomeDashboard>, widget: HomeW
     const read = readSavedVisualization(chart);
     if (read.state !== 'valid' && read.state !== 'setup-required') return { ...base, state: read.state, message: 'The linked saved visualization needs review or a compatible version. Its reference is preserved.' };
     if (inspectVisualizationReferences(read.definition, snapshot, chart.preservation?.references).length)
-      return { ...base, state: 'repair-required', message: 'The linked visualization has unavailable sources. Its saved reference is preserved; chart repair will be available in a later Home update.' };
+      return { ...base, state: 'repair-required', message: 'The linked visualization has unavailable sources. Open it to review its sources, replace the link, or remove this widget.' };
     const selection = read.definition.facilitySelection;
     const context = selection.kind === 'all' ? 'All facilities (live)' : selection.facilityGuids.map(guid => snapshot.facilities.find(facility => facility.guid === guid)?.name ?? 'Unavailable facility').join(', ');
-    return { ...base, title: widget.title || read.definition.name, state: 'deferred', context: `${context} · ${widget.inherit.length ? 'Saved dashboard inheritance is retained for later chart display.' : 'Uses saved visualization settings; dashboard inheritance is off.'}`,
-      message: 'Saved visualization linked. Chart display will be available in a later Home update.' };
+    return { ...base, title: widget.title || read.definition.name, state: 'ready', context,
+      message: '' };
   }
   return { ...base, state: 'deferred', message: `${HOME_WIDGET_LABELS[widget.kind]} content will be available in a later Home update. Its settings are preserved.` };
 }

@@ -5,13 +5,16 @@ import type { SettingBinding, VisualizationDefinition, VisualizationSource } fro
 import { resolveVisualizationFacilities } from './visualization-facilities';
 import { resolveUtilitySelection, utilityOwner } from './utility/utility-selection';
 import { analysisUnit } from './analysis/facility-analysis-source';
+import { resolveReportingAnalysis } from './analysis/reporting-analysis';
 
 export function visualizationSourceQuantities(definition: VisualizationDefinition, source: VisualizationSource, snapshot: AccountWorkspaceSnapshot): readonly string[] {
   if (source.kind === 'energy-use' || source.kind === 'utility' && source.measure === 'energy') return ['energy'];
   if (source.kind === 'predictor' || source.kind === 'utility' && (source.measure === 'cost' || source.measure === 'charge' || source.measure.endsWith('emissions'))) return [];
   if (source.kind === 'analysis') {
     if (source.mode !== 'result' || !['actual', 'calculated'].includes(source.measure)) return [];
-    const analysis = [...snapshot.facilityAnalyses, ...snapshot.accountAnalyses].find(item => item.guid === source.analysisGuid);
+    const reporting = source.reporting && resolveReportingAnalysis(source.reporting, snapshot);
+    const analysis = reporting?.state === 'ready' ? reporting.analysis
+      : [...snapshot.facilityAnalyses, ...snapshot.accountAnalyses].find(item => item.guid === source.analysisGuid);
     const quantity = analysis && new ConvertValue(undefined, '', '').getUnit(analysisUnit(analysis, source.measure))?.measure;
     return quantity ? [quantity] : [];
   }

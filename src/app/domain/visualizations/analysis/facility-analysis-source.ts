@@ -38,7 +38,7 @@ export function accountAnalysisInclusionIssue(selectedFacilityGuids: readonly st
     ? 'Include every selected facility to display this saved account analysis, or choose another analysis.' : undefined;
 }
 export const analysisMeasureLabels: Readonly<Record<AnalysisResultVisualizationSource['measure'], string>> = {
-  actual: 'Actual use', calculated: 'Calculated use', savings: 'Rolling 12-month savings (%)', losses: 'Rolling 12-month losses (%)',
+  'rolling-improvement': 'Rolling 12-month improvement (%)', actual: 'Actual use', calculated: 'Calculated use', savings: 'Rolling 12-month savings (%)', losses: 'Rolling 12-month losses (%)',
   'banked-savings': 'Banked savings (%)', 'banked-losses': 'Banked losses (%)',
   'annual-improvement': 'Annual improvement (%)', 'total-improvement': 'Total improvement (%)'
 };
@@ -162,7 +162,7 @@ function resolveAnalysisResults(value: AnalysisVisualizationResults, request: Vi
       const range = civilMonthRange(month), row = byMonth.get(month);
       const intermediate = row?.isIntermediateBanked || !source.groupGuid && intermediateMonths.has(month);
       const metric = source.measure === 'banked-savings' ? 'bankedSavings' : source.measure === 'banked-losses' ? 'bankedLosses' : source.measure;
-      const numeric = row ? ['actual', 'calculated'].includes(source.measure) ? monthlyAnalysisUseValues({ ...row, isIntermediateBanked: !!intermediate })[metric] : savingsByMonth.get(month)?.[metric] : null;
+      const numeric = row ? source.measure === 'rolling-improvement' ? row.rolling12MonthImprovement : ['actual', 'calculated'].includes(source.measure) ? monthlyAnalysisUseValues({ ...row, isIntermediateBanked: !!intermediate })[metric] : savingsByMonth.get(month)?.[metric] : null;
       const invalidImprovement = row && !['actual', 'calculated'].includes(source.measure) && !Number.isFinite(row.rolling12MonthImprovement);
       const partial = !!row?.missingValueWarning || !!row?.missingPredictors?.length;
       const notes = [row?.isBanked ? 'Banked result' : '', intermediate ? 'Banking transition' : '', partial ? `Missing inputs: ${row?.missingPredictors?.join(', ') || 'analysis input warning'}` : ''].filter(Boolean);

@@ -1,3 +1,6 @@
+import { HomeChartComponent } from './home-chart/home-chart.component';
+import { VisualizationRuntimeModule } from '@app/v1/visualizations/visualization-runtime.module';
+import { PreviewModule } from '@app/v1/visualizations/preview/preview.module';
 import { DragDropModule } from '@angular/cdk/drag-drop';
 import { ResourcePickerModule } from '@app/v1/visualizations/shared/resource-picker/resource-picker.module';
 import { HomeWidgetCardComponent } from './widget-card/widget-card.component';
@@ -12,5 +15,5 @@ import { RouterModule } from '@angular/router';
 import { HomeDashboardComponent } from './dashboard/dashboard.component';
 import { HomeNavComponent } from './home-nav/home-nav.component';
 
-@NgModule({ declarations: [HomeDashboardComponent, HomeNavComponent, HomeWidgetCardComponent, HomeWidgetAdderComponent, HomeWidgetBoardComponent], imports: [DragDropModule, ResourcePickerModule, CommonModule, RouterModule, ReactiveFormsModule, PortalModule, ConfirmationDialogComponent], exports: [HomeDashboardComponent, HomeNavComponent] })
+@NgModule({ declarations: [HomeChartComponent, HomeDashboardComponent, HomeNavComponent, HomeWidgetCardComponent, HomeWidgetAdderComponent, HomeWidgetBoardComponent], imports: [VisualizationRuntimeModule, PreviewModule, DragDropModule, ResourcePickerModule, CommonModule, RouterModule, ReactiveFormsModule, PortalModule, ConfirmationDialogComponent], exports: [HomeDashboardComponent, HomeNavComponent] })
 export class HomeModule { }

@@ -29,7 +29,8 @@
     </div>
   }
   @if (model.context) { <p class="widget-context">{{ model.context }}</p> }
-  @if (widget.kind === 'note') { <p class="home-note">{{ widget.text }}</p> }
+  @if (widget.kind === 'visualization' || widget.kind === 'built-in-chart') { <app-home-chart [view]="model" [active]="!editing()"/> }
+  @else if (widget.kind === 'note') { <p class="home-note">{{ widget.text }}</p> }
   @else if (model.shortcut && model.state === 'ready') { <a [routerLink]="model.shortcut.route" [queryParams]="model.shortcut.queryParams">{{ widget.title || model.shortcut.label }}</a> }
   @else { <p [attr.role]="model.state === 'deferred' ? null : 'status'">{{ model.message }}</p> }
 </article>

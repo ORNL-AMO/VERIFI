@@ -17,6 +17,14 @@ function ready(value: FacilityVisualizationResults, request = analysisSourceRequ
   return { result: result as Extract<typeof result, { state: 'ready' }>, rows: result.resolved!.data.rows, points: result.resolved!.data.rows.map(row => Object.values(row.values)[0]) };
 }
 describe('facility analysis result projection', () => {
+  it('projects signed rolling improvement directly with zero, nonfinite and absent-month gaps', () => {
+    const value = results();
+    const monthly = value.monthly.slice(0, 5).map((row, index) => ({ ...row, rolling12MonthImprovement: [10, -5, 0, Number.NaN, 9][index], missingValueWarning: index === 4 }));
+    const projected = ready({ ...value, monthly: monthly.filter((_, index) => index !== 3) }, analysisSourceRequest(analysisDefinition('rolling-improvement')));
+    expect(projected.points.map(point => point.value)).toEqual([10, -5, 0, null, 9]);
+    expect(projected.points[4]).toMatchObject({ state: 'observed', partial: true });
+    expect(ready({ ...value, monthly }, analysisSourceRequest(analysisDefinition('rolling-improvement'))).points[3].state).toBe('missing');
+  });
   it.each([
     ['savings', [10, 0, 0, 0]], ['losses', [0, -5, 0, 0]],
     ['banked-savings', [0, 0, 12, 0]], ['banked-losses', [0, 0, 0, -7]]

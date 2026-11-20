@@ -84,10 +84,10 @@ export interface AnalysisResultVisualizationSource extends SourceBase {
   readonly kind: 'analysis';
   readonly mode: 'result';
   readonly analysisGuid?: string;
-  /** Explicit saved rule, mutually exclusive with exact analysis/group identities. Runtime resolution is Home4. */
+  /** Explicit saved rule, mutually exclusive with exact analysis/group identities. Runtime expansion never changes the saved rule. */
   readonly reporting?: ReportingAnalysisBinding;
   readonly groupGuid?: string;
-  readonly measure: 'actual' | 'calculated' | 'savings' | 'losses' | 'annual-improvement' | 'total-improvement' | 'banked-savings' | 'banked-losses';
+  readonly measure: 'actual' | 'calculated' | 'savings' | 'losses' | 'annual-improvement' | 'total-improvement' | 'banked-savings' | 'banked-losses' | 'rolling-improvement';
   readonly aggregation: 'none';
 }
 

@@ -1,4 +1,5 @@
 import type { AccountWorkspaceSnapshot } from '@data/account-workspace/account-workspace.models';
+import { buildHomeChart } from '@domain/home/home-chart-recipes';
 import { analysisPickerTestProvider } from '../../testing/analysis-picker.testing';
 import { provideRouter } from '@angular/router';
 import { TestBed } from '@angular/core/testing';
@@ -55,8 +56,24 @@ describe('Analysis source editing', () => {
   it('offers account totals without group or banked measure controls', () => {
     const data = accountAnalysisFixture(), { fixture, component } = setup(accountAnalysisDefinition(), data.snapshot);
     expect(component.targets()).toMatchObject([{ account: true, guid: data.analysis.guid }]);
-    expect(component.measures().map(item => item.value)).toEqual(['actual', 'calculated', 'savings', 'losses']);
+    expect(component.measures().map(item => item.value)).toEqual(['rolling-improvement', 'actual', 'calculated', 'savings', 'losses']);
     expect(fixture.nativeElement.textContent).not.toContain('result scopes'); fixture.destroy();
+  });
+  it('identifies a following rule without turning the current selection into saved named intent', () => {
+    const data = analysisFixture();
+    const built = buildHomeChart({ kind: 'built-in', recipe: 'reporting-energy-rolling', version: 1, owner: { kind: 'facility', guid: data.facility.guid } }, data.snapshot.account.guid);
+    if (built.state !== 'ready') throw new Error();
+    const snapshot = { ...data.snapshot, facilities: [{ ...data.facility, selectedEnergyAnalysisId: data.analysis.guid }] };
+    const { fixture, component, request } = setup(built.definition, snapshot);
+    expect(fixture.nativeElement.textContent).toContain('Follow Active for reporting');
+    expect(fixture.nativeElement.textContent).toContain(data.analysis.name);
+    expect(component.targets()).toEqual([]); expect(request).not.toHaveBeenCalled();
+    expect(component.items()[0]).toMatchObject({ identity: { resourceGuid: data.analysis.guid }, available: true });
+    component.setAnalyses([data.analysis.guid]);
+    const replacement = prepareDecisionChange(built.definition, request.mock.lastCall![0], { snapshot });
+    expect(replacement.state).toBe('confirm');
+    expect(built.definition.sources[0]).toHaveProperty('reporting');
+    fixture.destroy();
   });
   it('edits wildcard Analysis presentation without activating dormant provider preferences', () => {
     const { snapshot } = analysisFixture(), initial = analysisDefinition();
