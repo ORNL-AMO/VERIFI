@@ -1,3 +1,5 @@
+import { homeDisplayRaw } from './display-controls/display-controls.component';
+import { chartWidget } from '@domain/home/testing/home-fixtures';
 import { TestBed } from '@angular/core/testing';
 import { Router } from '@angular/router';
 import { vi } from 'vitest';
@@ -24,6 +26,14 @@ function nameDraft(editor: HomeEditor, name: string) { editor.beginEdit(); TestB
 
 describe('Home protected lifecycle drafts', () => {
   afterEach(() => vi.restoreAllMocks());
+  it('removes invalid widget control drafts and pending replacement choices when that widget is explicitly removed', async () => {
+    const { editor } = setupEditor(); nameDraft(editor, 'Renamed'); editor.addWidget(chartWidget('chart', 'chart-widget'));
+    editor.setWidgetDisplay('chart-widget', { raw: homeDisplayRaw({}), valid: false, value: {}, inherit: [] });
+    editor.chooseReplacement('chart-widget', 'pending-chart'); expect(editor.canSave()).toBe(false);
+    editor.requestRemoveWidget('chart-widget'); await editor.confirm();
+    expect(editor.pendingWidgetChoice()).toBe(false); expect(editor.canSave()).toBe(true);
+    expect(editor.session()?.displayDrafts?.['chart-widget']).toBeUndefined();
+  });
   it('retains a rejected update and retries the exact operation, proposal and captured revisions', async () => {
     const { editor, submit, record, owner } = setupEditor();
     nameDraft(editor, 'My draft'); await editor.save();

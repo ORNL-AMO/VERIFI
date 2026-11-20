@@ -1,3 +1,5 @@
+import { HomeDateContext } from './home-date-context.service';
+import { HomeDisplayControlsComponent } from './display-controls/display-controls.component';
 import { HomeChartComponent } from './home-chart/home-chart.component';
 import { VisualizationRuntimeModule } from '@app/v1/visualizations/visualization-runtime.module';
 import { PreviewModule } from '@app/v1/visualizations/preview/preview.module';
@@ -15,5 +17,5 @@ import { RouterModule } from '@angular/router';
 import { HomeDashboardComponent } from './dashboard/dashboard.component';
 import { HomeNavComponent } from './home-nav/home-nav.component';
 
-@NgModule({ declarations: [HomeChartComponent, HomeDashboardComponent, HomeNavComponent, HomeWidgetCardComponent, HomeWidgetAdderComponent, HomeWidgetBoardComponent], imports: [VisualizationRuntimeModule, PreviewModule, DragDropModule, ResourcePickerModule, CommonModule, RouterModule, ReactiveFormsModule, PortalModule, ConfirmationDialogComponent], exports: [HomeDashboardComponent, HomeNavComponent] })
+@NgModule({ providers: [HomeDateContext], declarations: [HomeDisplayControlsComponent, HomeChartComponent, HomeDashboardComponent, HomeNavComponent, HomeWidgetCardComponent, HomeWidgetAdderComponent, HomeWidgetBoardComponent], imports: [VisualizationRuntimeModule, PreviewModule, DragDropModule, ResourcePickerModule, CommonModule, RouterModule, ReactiveFormsModule, PortalModule, ConfirmationDialogComponent], exports: [HomeDashboardComponent, HomeNavComponent] })
 export class HomeModule { }

@@ -42,7 +42,7 @@ export const singleSiteAccountRedirectGuard: CanActivateChildFn = async (_route,
   if (section === 'data' && parts[4] === 'portfolio' && parts[5] === 'energy-uses') return true;
 
   // Home navigation must never initialize hidden analysis pairs or retarget a dashboard URL.
-  if (section === 'home') return parts[4] === 'dashboard' ? true : router.createUrlTree(facilityRoute(facility.guid));
+  if (section === 'home') return ['dashboard', 'built-in'].includes(parts[4]) ? true : router.createUrlTree(facilityRoute(facility.guid));
 
   await inject(SingleFacilityAnalysisPairService).ensurePairs();
 

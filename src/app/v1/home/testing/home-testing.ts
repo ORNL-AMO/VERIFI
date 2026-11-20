@@ -1,3 +1,5 @@
+import { SavedVisualizationCommands } from '@data/account-workspace/saved-visualization-commands.service';
+import { VisualizationCommandHandler } from '@data/account-workspace/handlers/visualization-command-handler.service';
 import { signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
@@ -30,6 +32,7 @@ export function setupHome() {
   TestBed.configureTestingModule({ imports: [HomeModule], providers: [provideRouter([]),
     { provide: AccountWorkspaceService, useValue: { reloadActiveWorkspace: async () => 'published' } },
     { provide: WorkspaceContextService, useValue: { routeState: route } },
+    { provide: SavedVisualizationCommands, useFactory: () => new SavedVisualizationCommands({} as WorkspaceCommandBoundary, {} as VisualizationCommandHandler, TestBed.inject(AccountWorkspaceStore)) },
     { provide: HomeCommands, useFactory: () => new HomeCommands({} as WorkspaceCommandBoundary, {} as HomeCommandHandler, TestBed.inject(AccountWorkspaceStore)) }
   ] });
   const store = TestBed.inject(AccountWorkspaceStore), snapshot = homeSnapshot();

@@ -1,14 +1,16 @@
-import { Component, computed, effect, input, output, signal } from '@angular/core';
+import { HomeEditor } from '../home-editor.service';
+import { Component, computed, effect, input, output, signal, inject } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormControl } from '@angular/forms';
 import { HomeWidget } from '@domain/home/home-dashboard';
-import { HomeShortcutChoice, HomeWidgetView } from '../home-widget-view';
+import { availableHomeCharts, HomeShortcutChoice, HomeWidgetView } from '../home-widget-view';
 
 let nextHeading = 0;
 @Component({ selector: 'app-home-widget-card', standalone: false, templateUrl: './widget-card.component.html', styleUrls: ['./widget-card.component.css'],
   host: { role: 'listitem', '[attr.data-widget-id]': 'view().widget.id', '[class.home-widget--full]': 'view().widget.size === "full"',
     '(document:pointerup)': 'resizeEnd($event)', '(document:pointercancel)': 'resizeCancel()', '(window:blur)': 'resizeCancel()' } })
 export class HomeWidgetCardComponent {
+  readonly editor = inject(HomeEditor);
   readonly view = input.required<HomeWidgetView>();
   readonly editing = input(false);
   readonly enabled = input(false);
@@ -23,6 +25,8 @@ export class HomeWidgetCardComponent {
   readonly text = new FormControl('', { nonNullable: true });
   readonly size = new FormControl<'half' | 'full'>('full', { nonNullable: true });
   readonly destination = new FormControl<string | null>(null);
+  readonly replacement = new FormControl('', { nonNullable: true });
+  readonly charts = computed(() => { const snapshot = this.editor.home.workspace.snapshot(); return snapshot ? availableHomeCharts(snapshot) : []; });
   readonly resizing = signal(false);
   private pointerStart?: { readonly id: number; readonly x: number; readonly target: HTMLElement };
   readonly targetUnavailable = computed(() => this.view().widget.kind === 'shortcut' && (!this.view().shortcut || this.view().state !== 'ready'));
@@ -34,8 +38,10 @@ export class HomeWidgetCardComponent {
       this.text.setValue(widget.kind === 'note' ? widget.text : '', { emitEvent: false });
       this.size.setValue(widget.size, { emitEvent: false });
       this.destination.setValue(widget.kind === 'shortcut' ? view.shortcut && view.state === 'ready' ? view.shortcut.key : '__unavailable__' : null, { emitEvent: false });
-      for (const control of [this.title, this.text, this.size, this.destination]) enabled ? control.enable({ emitEvent: false }) : control.disable({ emitEvent: false });
+      this.replacement.setValue(this.editor.session()?.replacements?.[widget.id] ?? '', { emitEvent: false });
+      for (const control of [this.title, this.text, this.size, this.destination, this.replacement]) enabled ? control.enable({ emitEvent: false }) : control.disable({ emitEvent: false });
     });
+    this.replacement.valueChanges.pipe(takeUntilDestroyed()).subscribe(guid => { if (this.enabled() && this.editing()) this.editor.chooseReplacement(this.view().widget.id, guid); });
     this.title.valueChanges.pipe(takeUntilDestroyed()).subscribe(title => {
       if (this.enabled() && this.editing() && title !== (this.view().widget.title ?? '')) this.changed.emit({ widget: { ...this.view().widget, title } });
     });

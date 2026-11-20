@@ -10,6 +10,7 @@
       <div class="v1-data-workbench-title-row">
         <div class="v1-data-workbench-title"><h1 id="visualization-title"><app-ui-icon name="dataVisualization"/>{{ editor.definition()?.name || 'Visualization' }}</h1></div>
         <div class="v1-data-workbench-actions" aria-label="Visualization summary and controls">
+          @if (journeys.hasHomeReturn(accountGuid())) { <button type="button" class="v1-btn v1-btn--quiet" (click)="back()">Return to Home</button> }
           @if (sourceLink(); as source) { <a class="v1-btn v1-btn--quiet" [routerLink]="source.route" [fragment]="source.fragment" [queryParams]="source.queryParams"><app-ui-icon name="chartTimeSeries"/>View source chart</a> }
           <span class="visualization-workbench__save-state" [class.visualization-workbench__save-state--saved]="editor.state() === 'saved' && !hasInvalidFields()" [class.visualization-workbench__save-state--error]="saveNeedsAttention()" role="status" aria-live="polite">
             @if (saveInProgress()) { <app-ui-icon name="loading" spin/> }

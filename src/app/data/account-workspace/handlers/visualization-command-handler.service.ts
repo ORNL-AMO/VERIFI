@@ -1,3 +1,8 @@
+import { IdbHomeOwner } from '@data/models/idbModels/homeOwner';
+import { homeRecordOwner } from '@data/models/idbModels/homeRecord';
+import { readHomeDashboard, readHomeOwner } from '@data/home/home-record';
+import { sameHomeOwner } from '@domain/home/home-dashboard';
+import { buildHomeChart } from '@domain/home/home-chart-recipes';
 import type { IdbHomeDashboard } from '@data/models/idbModels/homeDashboard';
 import { Injectable } from '@angular/core';
 import { IndexedDbTransactionContext, IndexedDbTransactionService } from '@data/indexedDB/indexed-db-transaction.service';
@@ -30,10 +35,44 @@ export class VisualizationCommandHandler {
   async create(command: CreateVisualizationCommand, activeAccountGuid: string): Promise<IdbSavedVisualization> {
     const submitted = structuredClone(command);
     if (submitted.captureSource && submitted.retainedCaptureOrigin) this.invalid('Choose a new capture or retained provenance, not both.');
-    return this.transactions.runTransaction(submitted.captureSource ? [...new Set([...OWNER_STORES, ...CATALOG_STORES])] : OWNER_STORES, 'readwrite', async tx => {
+    return this.transactions.runTransaction(submitted.captureSource || submitted.homeSource ? [...new Set([...OWNER_STORES, 'homeOwners' as const, ...CATALOG_STORES])] : OWNER_STORES, 'readwrite', async tx => {
       await this.assertOwner(tx, submitted.accountGuid, activeAccountGuid);
       this.assertDefinition(submitted.definition, submitted.accountGuid);
+      // Stable retry first: a successful library save never replays Home/source checks.
+      const existing = await this.find(tx, submitted.guid);
+      if (existing) return this.matchCreation(existing, submitted);
       await this.assertFacilitiesExist(tx, submitted.definition);
+      if (submitted.homeSource) {
+        const source = submitted.homeSource;
+        const owners = (await tx.getAllByIndex<IdbHomeOwner>('homeOwners', 'accountId', submitted.accountGuid)).filter(record => sameHomeOwner(homeRecordOwner(record), source.owner));
+        if (owners.length > 1 || (owners[0]?.revision ?? null) !== source.expectedOwnerRevision || owners[0] && readHomeOwner(owners[0]).state !== 'valid')
+          throw new VisualizationConflictError(undefined, 'Home choices changed. Review them before preparing another library save.');
+        if (!sameHomeOwner(source.owner, source.reference.owner) || source.owner.kind === 'account' && source.owner.guid !== submitted.accountGuid)
+          this.invalid('Retain the explicit Home chart owner.');
+        if (source.owner.kind === 'facility') {
+          const facilities = await tx.getAllByIndex<{ guid: string; accountId: string }>('facilities', 'guid', source.owner.guid);
+          if (facilities.length !== 1 || facilities[0].accountId !== submitted.accountGuid) this.invalid('This Home owner is unavailable.');
+        }
+        if (source.dashboard) {
+          const dashboards = await tx.getAllByIndex<IdbHomeDashboard>('homeDashboards', 'guid', source.dashboard.guid), dashboard = dashboards[0];
+          const read = dashboard && readHomeDashboard(dashboard), widget = read?.state === 'valid' ? read.value.widgets.find(widget => widget.id === source.widgetId) : undefined;
+          if (dashboards.length !== 1 || dashboard.accountId !== submitted.accountGuid || dashboard.revision !== source.dashboard.revision
+            || !sameHomeOwner(homeRecordOwner(dashboard), source.owner) || widget?.kind !== 'built-in-chart' || !sameHomeJson(widget.reference, source.reference)
+            || dashboard.preservation?.references.some(ref => ref.path.startsWith(`widgets.${source.widgetId}.`)))
+            throw new VisualizationConflictError(undefined, 'The Home widget changed or needs reference review. Prepare a new library save after reviewing it.');
+        }
+        if (!source.dashboard) {
+          const dashboards = await tx.getAllByIndex<IdbHomeDashboard>('homeDashboards', 'accountId', submitted.accountGuid);
+          if (dashboards.some(record => { const read = readHomeDashboard(record); return sameHomeOwner(homeRecordOwner(record), source.owner)
+            && read.state === 'valid' && sameHomeJson(read.value.builtIn, source.view); }))
+            throw new VisualizationConflictError(undefined, 'A customization for this Home view was saved. Review it before preparing another library save.');
+        }
+        const built = buildHomeChart(source.reference, submitted.accountGuid);
+        if (built.state !== 'ready' || !sameHomeJson(built.definition.sources, submitted.definition.sources)
+          || !sameHomeJson(built.definition.facilitySelection, submitted.definition.facilitySelection)) this.invalid('Retain the built-in source and inclusion when saving this chart.');
+        const issues = inspectVisualizationReferences(submitted.definition, await readVisualizationReferenceCatalog(tx));
+        if (issues.length) this.invalid('Repair unavailable chart sources before saving a reusable visualization.');
+      }
       if (submitted.captureSource) {
         const catalog = await readVisualizationReferenceCatalog(tx), source = submitted.captureSource;
         if (!catalog.meters.some(item => item.guid === source.meterGuid && item.facilityId === source.facilityGuid && item.accountId === submitted.accountGuid)) this.invalid('The capture source is no longer available.');

@@ -18,6 +18,25 @@ export class HomeTemplateCatalog {
   readonly choices = [{ template: 'blank' as HomeTemplate, label: 'Blank', description: 'An empty layout. Add notes, internal shortcuts, or links to saved visualizations.' },
     ...this.recipes.filter(recipe => recipe.complete).map(({ template, label, description }) => ({ template, label, description }))];
 
+  /** No partial compositions and no saved-definition graphs are eligible for read-only default views. */
+  builtInViews(accountGuid: string, owner: HomeOwner) {
+    return this.recipes.flatMap(recipe => {
+      if (!recipe.complete) return [];
+      const blueprint = this.build(recipe.template, accountGuid, owner);
+      if (blueprint.charts.length || blueprint.dashboard.widgets.some(widget => widget.kind === 'visualization')) return [];
+      const reference = { kind: 'built-in' as const, template: recipe.template, version: blueprint.version };
+      return [{ reference, definition: { ...blueprint.dashboard, builtIn: reference } }];
+    });
+  }
+
+  buildBuiltIn(reference: import('@domain/home/home-dashboard').HomeDashboardReference, accountGuid: string, owner: HomeOwner) {
+    if (reference.kind !== 'built-in') throw new Error('Choose a shipped dashboard reference.');
+    const blueprint = this.build(reference.template, accountGuid, owner);
+    if (blueprint.version !== reference.version || blueprint.charts.length || blueprint.dashboard.widgets.some(widget => widget.kind === 'visualization')) throw new Error('This exact complete dashboard version is unavailable. Its preferences are preserved.');
+    const dashboard = { ...blueprint.dashboard, builtIn: reference };
+    return { ...blueprint, dashboard, baseline: dashboard };
+  }
+
   build(template: HomeTemplate, accountGuid: string, owner: HomeOwner): HomeTemplateBlueprint {
     if (template === 'blank') return { template, version: 1, dashboard: { version: 1, name: 'Blank', widgets: [], defaults: {}, visibility: 'always' }, charts: [] };
     const recipe = this.recipes.find(recipe => recipe.template === template && recipe.complete);

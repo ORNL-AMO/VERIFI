@@ -70,9 +70,9 @@ describe('pure workspace routes', () => {
     expect(routes.facilityScopeQuery({ kind: 'facility', facilityGuid: 'facility-b' })).toEqual({ facility: 'facility-b' });
   });
 
-  it('has no runtime imports or dependency on shell/workspace implementations', () => {
+  it('depends only on pure domain route vocabulary, without shell/workspace implementations', () => {
     const source = readFileSync(join(__dirname, 'workspace-route.ts'), 'utf8');
-    expect(source.match(/^import(?! type\b).*$/gm) ?? []).toEqual([]);
+    expect(source.match(/^import(?! type\b).*$/gm) ?? []).toEqual(["import { HOME_STARTERS } from '@domain/home/home-dashboard';"]);
     expect(source).not.toMatch(/\.service['"]|\binject\s*\(|@Injectable/);
   });
 });

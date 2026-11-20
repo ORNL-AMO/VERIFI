@@ -3,7 +3,7 @@ import { Component, computed, DestroyRef, effect, signal, inject, Input, OnChang
 import type { MonthlyPatternsModel } from '../../monthly-patterns/monthly-patterns.presenter';
 import { VisualizationDefinition } from '@domain/visualizations/visualization-definition';
 import { PreviewController } from '../preview-controller';
-import { PreviewIdentity } from '../preview-registry';
+import { PreviewIdentity, PreviewDateContextResolver } from '../preview-registry';
 
 @Component({
   selector: 'app-visualization-preview', standalone: false,
@@ -13,6 +13,7 @@ export class PreviewComponent implements OnChanges {
   @Input() definition?: VisualizationDefinition;
   @Input() identity?: PreviewIdentity;
   @Input() active = true;
+  @Input() dates?: PreviewDateContextResolver;
   readonly preview = inject(PreviewController);
   readonly yearVisibilityChanged = output<readonly number[]>();
   readonly monthlyPatternsModel = computed(() => {
@@ -39,6 +40,6 @@ export class PreviewComponent implements OnChanges {
     if (!this.active || first?.accountGuid !== this.identity?.accountGuid || first?.definitionGuid !== this.identity?.definitionGuid) {
       this.lastReady.set(undefined);
     }
-    this.preview.update(this.definition, this.identity, this.active);
+    this.preview.update(this.definition, this.identity, this.active, this.dates);
   }
 }

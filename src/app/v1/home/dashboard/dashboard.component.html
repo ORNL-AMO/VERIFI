@@ -26,7 +26,7 @@
       @if (home.selected(); as entry) {
         <button type="button" class="v1-btn v1-btn--secondary" [disabled]="!editor.canStart() || !editor.adopted() || entry.read.state !== 'valid'" (click)="editor.beginEdit()">Edit dashboard</button>
         <button type="button" class="v1-btn v1-btn--quiet" [disabled]="!editor.canStart() || !editor.adopted() || entry.read.state !== 'valid'" (click)="editor.duplicate()">Duplicate dashboard</button>
-        <button type="button" class="v1-btn v1-btn--quiet" [disabled]="!editor.canStart() || !editor.adopted() || entry.read.state !== 'valid' || home.configuredDefaultGuid() === entry.record.guid" (click)="editor.setDefault(entry.record.guid)">Set as default</button>
+        <button type="button" class="v1-btn v1-btn--quiet" [disabled]="!editor.canStart() || !editor.adopted() || entry.read.state !== 'valid' || home.configuredDefaultGuid() === entry.key" (click)="editor.setDefault(entry.key)">Set as default</button>
         <button type="button" class="v1-btn v1-btn--quiet" [disabled]="!editor.canStart() || !editor.adopted() || entry.read.state !== 'valid'" (click)="editor.beginRestore()">Restore from template</button>
         <button type="button" class="v1-btn v1-btn--danger" [disabled]="!editor.canStart() || !editor.adopted()" (click)="editor.requestDelete()">Delete dashboard</button>
       }
@@ -60,6 +60,15 @@
         @if (session?.proposal && session?.outcome?.state !== 'refresh-required') { <button type="button" class="v1-btn v1-btn--danger" [disabled]="editor.saving()" (click)="editor.requestDiscard()">Discard unsaved changes</button> }
       </div>
     }
+    @if (library.message()) { <p role="status">{{ library.message() }}</p> }
+    @if (library.draft()) {
+      <section class="home-panel" aria-label="Save reusable visualization">
+        <h2>Save as visualization</h2>
+        <label>Visualization name <input type="text" [formControl]="library.name" autocomplete="off"></label>
+        <button type="button" class="v1-btn v1-btn--primary" [disabled]="library.saving() || !library.proposal() && !library.name.valid" (click)="library.save()">{{ library.refreshRequired() ? 'Retry library refresh' : library.proposal() ? 'Retry library save' : 'Save to visualization library' }}</button>
+        <button type="button" class="v1-btn v1-btn--quiet" [disabled]="library.saving() || library.refreshRequired()" (click)="library.cancel()">Cancel library save</button>
+      </section>
+    }
     @if (session?.definition && session?.mode !== 'view') {
       <form class="home-panel home-editor" [formGroup]="editor.form" (ngSubmit)="session?.mode === 'restore' ? editor.requestRestore() : editor.save()" aria-label="Dashboard editor">
         <h2>{{ session?.mode === 'create' ? 'Create dashboard' : session?.mode === 'restore' ? 'Restore from template' : 'Edit dashboard' }}</h2>
@@ -84,6 +93,10 @@
     } @else if (home.selected(); as entry) {
       @if (entry.read.state !== 'valid') { <p role="alert">{{ entry.read.message }} Your saved dashboard is preserved.</p> }
       @else {
+        @if (session?.mode !== 'edit') {
+          <app-home-display-controls [context]="{ key: browse.key(), value: browse.effective(), draft: browse.current()?.draft, disabled: !editor.canStart() }" (changed)="browse.update($event)"/>
+          <div class="home-toolbar"><button type="button" class="v1-btn" [disabled]="!editor.canStart() || !browse.current()?.draft?.valid" (click)="editor.saveDisplayDefaults(browse.effective())">Save as dashboard defaults</button><button type="button" class="v1-btn v1-btn--quiet" (click)="browse.reset()">Reset browsing settings</button></div>
+        }
         <app-home-widget-board/>
       }
     } @else {
@@ -91,10 +104,10 @@
     }
     @if (home.entries().length) {
       <section class="home-panel home-order" aria-labelledby="home-order-title"><h2 id="home-order-title">Dashboard order</h2>
-        @for (entry of home.entries(); track entry.record.guid; let first = $first; let last = $last) {
-          <div class="home-toolbar" [attr.data-dashboard-guid]="entry.record.guid"><a [routerLink]="entry.route">{{ entry.name }}</a>
-            <button type="button" class="v1-btn v1-btn--quiet" [attr.aria-label]="'Move ' + entry.name + ' earlier in Home navigation'" [disabled]="first || !editor.canStart() || !editor.adopted()" (click)="editor.moveDashboard(entry.record.guid, -1)">Move earlier</button>
-            <button type="button" class="v1-btn v1-btn--quiet" [attr.aria-label]="'Move ' + entry.name + ' later in Home navigation'" [disabled]="last || !editor.canStart() || !editor.adopted()" (click)="editor.moveDashboard(entry.record.guid, 1)">Move later</button>
+        @for (entry of home.entries(); track entry.key; let first = $first; let last = $last) {
+          <div class="home-toolbar" [attr.data-dashboard-guid]="entry.key"><a [routerLink]="entry.route">{{ entry.name }}</a>
+            <button type="button" class="v1-btn v1-btn--quiet" [attr.aria-label]="'Move ' + entry.name + ' earlier in Home navigation'" [disabled]="first || !editor.canStart() || !editor.adopted()" (click)="editor.moveDashboard(entry.key, -1)">Move earlier</button>
+            <button type="button" class="v1-btn v1-btn--quiet" [attr.aria-label]="'Move ' + entry.name + ' later in Home navigation'" [disabled]="last || !editor.canStart() || !editor.adopted()" (click)="editor.moveDashboard(entry.key, 1)">Move later</button>
           </div>
         }
       </section>

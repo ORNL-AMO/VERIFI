@@ -59,6 +59,9 @@ export class AccountWorkspaceStore {
   readonly selectedFacilityReport = computed(() => this.selections().facilityReport);
   readonly selectedEnergyUseGroup = computed(() => this.selections().energyUseGroup);
   readonly selectedEnergyUseEquipment = computed(() => this.selections().energyUseEquipment);
+  private readonly sessionSequence = signal(0);
+  /** A selected/replaced account snapshot starts a new browsing session; committed refreshes do not. */
+  readonly sessionRevision = this.sessionSequence.asReadonly();
   readonly revision = computed(() => this.state().revision);
   readonly committedRevision = computed(() => this.state().committedRevision);
   readonly error = computed(() => this.state().error);
@@ -113,6 +116,7 @@ export class AccountWorkspaceStore {
   }
 
   publish(snapshot: AccountWorkspaceSnapshot, selections: WorkspaceSelections = {}): void {
+    this.sessionSequence.update(value => value + 1);
     const normalizedSnapshot = copySnapshot(snapshot);
     this.writableState.set({
       status: 'ready',
