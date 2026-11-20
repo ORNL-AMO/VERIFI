@@ -54,7 +54,7 @@ export class HomeDateContext implements PreviewDateContextResolver {
     signal.addEventListener('abort', release, { once: true });
     try { const latestDataDate = await entry.promise;
       const last = latestDataDate ? civilMonthIndex(latestDataDate) : NaN, first = last - period.count * (period.unit === 'year' ? 12 : 1) + 1;
-      const monthlyRange = first >= 12 && last <= 119999 ? { start: civilMonthRange(first).start, end: civilMonthRange(last).end } : undefined;
+      const monthlyRange = local.monthlyRange && first >= 12 && last <= 119999 ? { start: civilMonthRange(first).start, end: civilMonthRange(last).end } : undefined;
       return { ...local, latestDataDate, monthlyRange,
       ...(!latestDataDate ? { emptyReasons: ['No eligible saved observations are available for the shared dashboard window.'] } : {}) }; }
     finally { signal.removeEventListener('abort', release); release(); }

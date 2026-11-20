@@ -8,7 +8,7 @@ import { VisualizationNavigationService } from '@app/v1/visualizations/visualiza
 import { HomeBrowseSession } from '../home-browse-session.service';
 import { homeChartDisplay, applyHomeChartDisplay } from '@domain/home/home-chart-display';
 import { PreviewRegistry } from '@app/v1/visualizations/preview/preview-registry';
-import { visualizationSourceQuantities } from '@domain/visualizations/visualization-display-settings';
+import { projectVisualizationDisplaySettings, visualizationSourceQuantities } from '@domain/visualizations/visualization-display-settings';
 import { HomePrintState } from '../home-print-state.service';
 import { HomeChartPrintCache } from '../home-chart-print-cache.service';
 import { Component, computed, inject, input, viewChild, effect } from '@angular/core';
@@ -67,8 +67,12 @@ export class HomeChartComponent {
     const definition = applied.definition;
     const reporting = resolveReportingVisualization(definition, snapshot);
     const selectedOwner = utilityOwner(snapshot, resolveVisualizationFacilities(definition, snapshot.facilities).scope);
-    const treatment = definition.displaySettings?.energyTreatment;
-    const energyBasis = treatment?.kind === 'pinned' ? treatment.value : selectedOwner?.energyIsSource ? 'source' : 'site';
+    const projected = projectVisualizationDisplaySettings(reporting.state === 'ready' ? reporting.definition : definition, snapshot);
+    const energyBases = [...new Set(projected.sources.flatMap(source => {
+      if (source.kind !== 'utility' || source.measure !== 'energy') return [];
+      const binding = source.settings?.energyTreatment;
+      return [binding?.kind === 'pinned' ? binding.value : selectedOwner?.energyIsSource ? 'source' : 'site'];
+    }))];
     const analysisBasis = reporting.state === 'ready' ? reporting.definition.sources.flatMap(source => {
       if (source.kind !== 'analysis') return [];
       const analysis = [...snapshot.facilityAnalyses, ...snapshot.accountAnalyses].find(item => item.guid === source.analysisGuid);
@@ -87,6 +91,6 @@ export class HomeChartComponent {
         widget.kind === 'visualization' ? 'Linked saved visualization · committed shared edits apply here' : 'Built-in configuration · no library record',
         definition.period.kind === 'all-history' ? 'All available history' : definition.period.kind === 'fixed' ? `${definition.period.start} through ${definition.period.end}` : `Period: ${definition.period.kind}`,
         ...definition.sources.flatMap(source => source.kind === 'utility' && source.measure.endsWith('emissions') ? [`${source.measure === 'market-emissions' ? 'Market' : 'Location'} emissions`] : []),
-        definition.sources.some(source => source.kind === 'utility' && source.measure === 'energy') ? `${energyBasis === 'source' ? 'Source' : 'Site'} energy basis` : ''].filter(Boolean).join(' · ') };
+        ...energyBases.map(basis => `${basis === 'source' ? 'Source' : 'Site'} energy basis`)].filter(Boolean).join(' · ') };
   }, { equal: (a, b) => JSON.stringify(a) === JSON.stringify(b) });
 }
