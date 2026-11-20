@@ -16,16 +16,18 @@ describe('facility report workbench navigation', () => {
     const { harness, open, updateName, store } = await setupReportWorkbench([reportFixture({ facilityReportType: value })]);
     const workbench = await open();
     expect(harness.routeDebugElement!.query(By.css('h1 app-ui-icon')).componentInstance.name)
-      .toBe(value === 'analysis' ? 'facilityAnalysisReport' : value === 'modeling' ? 'modelingReport' : 'report');
+      .toBe(value === 'analysis' ? 'facilityAnalysisReport' : value === 'modeling' ? 'modelingReport'
+        : value === 'emissionFactors' ? 'emissionsFactorsReport' : 'report');
     expect(workbench.context.stages().map(stage => stage.label)).toEqual(['analysis', 'savings', 'costSavings'].includes(value)
       ? ['Setup', 'Data Checks', `${label} Report`] : ['Setup', `${label} Report`]);
     const footer: HTMLElement = harness.routeNativeElement!.querySelector('footer')!;
     expect(footer.querySelector('app-report-output-actions')).toBeNull();
     expect(footer.querySelector('a')?.getAttribute('href')).toContain('/reports/dashboard');
-    if (['analysis', 'dataQuality', 'modeling'].includes(value)) expect(footer.querySelector<HTMLButtonElement>('button.v1-btn--action')?.disabled).toBe(true);
+    if (['analysis', 'dataQuality', 'modeling', 'emissionFactors'].includes(value)) expect(footer.querySelector<HTMLButtonElement>('button.v1-btn--action')?.disabled).toBe(true);
     else expect(footer.querySelectorAll('a')[1].getAttribute('href')).toContain(workbench.workbench.next()!.id);
     if (value === 'dataQuality') expect(harness.routeNativeElement!.querySelector('app-data-quality-report-setup')).not.toBeNull();
     else if (value === 'analysis') expect(harness.routeNativeElement!.querySelector('app-analysis-report-setup')).not.toBeNull();
+    else if (value === 'emissionFactors') expect(harness.routeNativeElement!.querySelector('app-emission-factors-report-setup')).not.toBeNull();
     else if (value === 'modeling') expect(harness.routeNativeElement!.querySelector('app-modeling-report-setup')).not.toBeNull();
     else {
       expect(harness.routeNativeElement!.textContent).toContain('Report-specific settings');
@@ -33,20 +35,21 @@ describe('facility report workbench navigation', () => {
     }
     await open('report-a', 'report');
     const previewSelector = value === 'analysis' ? 'app-analysis-report-preview'
-      : value === 'dataQuality' ? 'app-data-quality-report-preview' : value === 'modeling' ? 'app-modeling-report-preview' : 'app-pending-report-stage';
+      : value === 'dataQuality' ? 'app-data-quality-report-preview' : value === 'modeling' ? 'app-modeling-report-preview'
+      : value === 'emissionFactors' ? 'app-emission-factors-report-preview' : 'app-pending-report-stage';
     if (value === 'modeling') expect(harness.routeNativeElement!.querySelector(previewSelector)).not.toBeNull();
     else expect(harness.routeNativeElement!.querySelector(`${previewSelector} h2`)?.textContent?.trim()).toBe(value === 'analysis'
-      ? 'Facility analysis report' : value === 'dataQuality' ? 'Saved report' : `${label} Report`);
-    if (['analysis', 'dataQuality', 'modeling'].includes(value)) {
+      ? 'Facility analysis report' : ['dataQuality', 'emissionFactors'].includes(value) ? 'Saved report' : `${label} Report`);
+    if (['analysis', 'dataQuality', 'modeling', 'emissionFactors'].includes(value)) {
       const outputs = harness.routeNativeElement!.querySelector('footer app-report-output-actions')!;
       const buttons = Array.from(outputs.querySelectorAll<HTMLButtonElement>('button'));
-      expect(buttons.map(button => button.textContent?.trim())).toEqual(value === 'dataQuality' ? ['PDF'] : ['PDF', 'PowerPoint']);
+      expect(buttons.map(button => button.textContent?.trim())).toEqual(['dataQuality', 'emissionFactors'].includes(value) ? ['PDF'] : ['PDF', 'PowerPoint']);
       expect(buttons.every(button => button.disabled && button.type === 'button')).toBe(true);
       if (value === 'modeling') expect(harness.routeNativeElement!.querySelector('footer')?.textContent).not.toContain('Back to reports');
     } else expect(harness.routeNativeElement!.querySelector('footer')?.textContent).toContain('Back to reports');
     expect(harness.routeNativeElement!.querySelector('footer a')?.getAttribute('href')).toContain(['analysis', 'savings', 'costSavings'].includes(value) ? '/data-checks' : '/setup');
     expect(harness.routeNativeElement!.textContent).toContain(value === 'analysis' || value === 'modeling' ? 'Waiting for'
-      : value === 'dataQuality' ? 'Review Setup' : 'preview is pending migration');
+      : value === 'dataQuality' ? 'Review Setup' : value === 'emissionFactors' ? 'earlier than the end year in Setup' : 'preview is pending migration');
     expect(updateName).not.toHaveBeenCalled();
     expect(store.committedRevision()).toBeUndefined();
   });

@@ -104,6 +104,11 @@ The facility Modeling report uses `modelingReport`, pairing the report page with
 a mathematical function symbol in
 [`modeling-report.svg`](../../../../assets/icons/modeling-report.svg).
 
+The facility Emission Factors report uses `emissionsFactorsReport`, combining
+the report page with a linear CO₂ molecule: a solid carbon center, outlined
+oxygen atoms, and double bonds. Its source is
+[`emissions-factors-report.svg`](../../../../assets/icons/emissions-factors-report.svg).
+
 Use `reportIcon(report)` when preparing report cards, sidebar entries, switcher
 options, linked-report rows, or workflow stages. It returns the current `report`
 page icon when the report has no custom icon, its saved type is unrecognized, or

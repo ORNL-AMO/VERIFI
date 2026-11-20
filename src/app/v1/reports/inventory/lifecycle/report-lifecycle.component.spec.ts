@@ -98,7 +98,7 @@ describe('progressive report creation', () => {
 
   it('revalidates removed choices and recovers through pinned selections', async () => {
     const { fixture, lifecycle, choose, edit, store, root, button } = await setup();
-    choose('Facility Report'); choose('Main facility'); choose('Emission FactorsPreview pending');
+    choose('Facility Report'); choose('Main facility'); choose('Emission Factors');
     store.publish({ ...store.snapshot()!, account: { ...store.account()!, displayEmissions: false } }); fixture.detectChanges();
     expect(button('Create report').disabled).toBe(true); expect(root.textContent).toContain('report type is no longer available');
     edit('Emission Factors'); expect(root.querySelector('.report-choices')!.textContent).not.toContain('Emission Factors'); choose('Analysis');

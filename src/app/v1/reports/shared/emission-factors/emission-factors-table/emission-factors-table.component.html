@@ -1,0 +1,47 @@
+@let data = view();
+@let prefix = idPrefix();
+@if (data.electricity.length && category() !== 'other') {
+  <section [attr.aria-labelledby]="prefix + '-electricity'">
+    <h3 [id]="prefix + '-electricity'">Electricity Emission Factors</h3>
+    <p class="facility-details"><strong>Zip Code:</strong> {{ data.facility.zip }} <span><strong>eGRID Region:</strong> {{ data.facility.eGridSubregion }}</span></p>
+    <p class="facility-details"><strong>Electricity Meters:</strong> {{ data.electricityMeterNames }}</p>
+    <div class="factor-table">
+      <table>
+        <caption class="visually-hidden">Electricity emission factors by year for {{ data.facility.name }}</caption>
+        <thead>
+          <tr><th scope="col" rowspan="2">Year</th><th scope="colgroup" colspan="3" class="market">Market Emission Rates</th><th scope="colgroup" colspan="3">Location Emission Rates</th></tr>
+          <tr><th scope="col" class="market">CO₂ (kg CO₂/MWh)</th><th scope="col" class="market">CH₄ (g CH₄/MWh)</th><th scope="col" class="market">N₂O (g N₂O/MWh)</th>
+            <th scope="col">CO₂ (kg CO₂/MWh)</th><th scope="col">CH₄ (g CH₄/MWh)</th><th scope="col">N₂O (g N₂O/MWh)</th></tr>
+        </thead>
+        <tbody>
+          @for (row of data.electricity; track row.year) {
+            <tr><th scope="row">{{ row.year }}</th>
+              @for (value of row.marketValues; track $index) { <td class="market">{{ value }}</td> }
+              @for (value of row.locationValues; track $index) { <td>{{ value }}</td> }
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  </section>
+}
+@if (data.other.length && category() !== 'electricity') {
+  <section [attr.aria-labelledby]="prefix + '-other'">
+    <h3 [id]="prefix + '-other'">Other Emission Factors</h3>
+    <div class="factor-table">
+      <table>
+        <caption class="visually-hidden">Other emission factors by meter for {{ data.facility.name }}</caption>
+        <thead><tr><th scope="col">Meter</th><th scope="col">Source</th><th scope="col">Fuel Type</th><th scope="col">CO₂ Factor</th><th scope="col">CH₄ Factor</th><th scope="col">N₂O Factor</th></tr></thead>
+        <tbody>
+          @for (row of data.other; track row.meterGuid) {
+            <tr><th scope="row">{{ row.meterName }} @if (row.unavailable) { <p class="factor-warning" role="status">{{ row.unavailable }}</p> }</th>
+              <td>{{ row.source }}</td><td>{{ row.fuel }}</td><td>{{ row.co2 }}</td><td>{{ row.ch4 }}</td><td>{{ row.n2o }}</td></tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  </section>
+}
+@if (!data.electricity.length && !data.other.length) {
+  <p role="status">This facility has no meters with applicable emission factors.</p>
+}

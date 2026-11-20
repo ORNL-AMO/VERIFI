@@ -17,6 +17,13 @@ function finding(scope: 'account' | 'facility', code: StatusRuleCode = 'report.c
 }
 
 describe('report status destinations', () => {
+  it('opens facility factor year controls while account factor settings remain pending', () => {
+    const snapshot = accountReportSnapshot(); snapshot.facilityReports = [reportFixture({ facilityReportType: 'emissionFactors' })];
+    snapshot.accountReports[0].reportType = 'accountEmissionFactors'; snapshot.account.displayEmissions = true;
+    expect(resolveReportStatusItem(finding('facility', 'report.configuration.invalid', ['missingBaselineYear', 'missingReportYear']), snapshot).destination.kind).toBe('facility-report-setup');
+    expect(resolveReportStatusItem(finding('facility', 'report.dates.invalid'), snapshot).destination.kind).toBe('facility-report-setup');
+    expect(resolveReportStatusItem(finding('account', 'report.dates.invalid'), snapshot).destination.kind).toBe('unavailable');
+  });
   it.each(['account', 'facility'] as const)('opens %s name setup without changing finding identity, evidence or dismissal signatures', scope => {
     const snapshot = accountReportSnapshot(), item = finding(scope), before = structuredClone(snapshot);
     const resolved = resolveReportStatusItem(item, snapshot);

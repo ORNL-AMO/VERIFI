@@ -53,6 +53,8 @@ import { join } from 'path';
     <app-ui-icon name="sidePanelCollapse" [size]="16" [strokeWidth]="2" [decorative]="false" label="Collapse side panel override"></app-ui-icon>
     <app-ui-icon name="modelingReport" [size]="24" [decorative]="false" label="Modeling report"></app-ui-icon>
     <app-ui-icon name="modelingReport" [size]="16" [strokeWidth]="2" [decorative]="false" label="Modeling report override"></app-ui-icon>
+    <app-ui-icon name="emissionsFactorsReport" [size]="24" [decorative]="false" label="Emissions factors report"></app-ui-icon>
+    <app-ui-icon name="emissionsFactorsReport" [size]="16" [strokeWidth]="2" [decorative]="false" label="Emissions factors report override"></app-ui-icon>
   `,
   imports: [IconComponent],
   standalone: true
@@ -74,8 +76,8 @@ describe('IconComponent', () => {
   it('renders Hugeicons icons with the v1 icon host class', () => {
     const icons = fixture.nativeElement.querySelectorAll('app-ui-icon hugeicons-icon');
 
-    expect(icons.length).toBe(40);
-    expect(fixture.nativeElement.querySelectorAll('app-ui-icon.v1-icon').length).toBe(40);
+    expect(icons.length).toBe(42);
+    expect(fixture.nativeElement.querySelectorAll('app-ui-icon.v1-icon').length).toBe(42);
   });
 
   it('keeps decorative icons hidden from assistive technology by default', () => {
@@ -145,7 +147,9 @@ describe('IconComponent', () => {
     { file: 'sidepanel-collapse.svg', index: 36, label: 'Collapse side panel', size: '24', stroke: undefined },
     { file: 'sidepanel-collapse.svg', index: 37, label: 'Collapse side panel override', size: '16', stroke: '2' },
     { file: 'modeling-report.svg', index: 38, label: 'Modeling report', size: '24', stroke: undefined },
-    { file: 'modeling-report.svg', index: 39, label: 'Modeling report override', size: '16', stroke: '2' }
+    { file: 'modeling-report.svg', index: 39, label: 'Modeling report override', size: '16', stroke: '2' },
+    { file: 'emissions-factors-report.svg', index: 40, label: 'Emissions factors report', size: '24', stroke: undefined },
+    { file: 'emissions-factors-report.svg', index: 41, label: 'Emissions factors report override', size: '16', stroke: '2' }
   ])('renders $file through the same themed, accessible icon API', ({ file, index, label, size, stroke }) => {
     const source = readFileSync(join(process.cwd(), 'src/assets/icons', file), 'utf8');
     const document = new DOMParser().parseFromString(source, 'image/svg+xml');

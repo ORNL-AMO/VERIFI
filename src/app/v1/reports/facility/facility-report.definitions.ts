@@ -4,10 +4,11 @@ import { PendingReportStageComponent } from '@app/v1/reports/shared/workbench/pe
 import { FACILITY_ANALYSIS_REPORT } from './analysis/analysis-report.definition';
 import { FACILITY_DATA_QUALITY_REPORT } from './data-quality/data-quality-report.definition';
 import { FACILITY_MODELING_REPORT } from './modeling/modeling-report.definition';
+import { FACILITY_EMISSION_FACTORS_REPORT } from './emission-factors/emission-factors-report.definition';
 import { FacilityReportEditor } from './workbench/editing/facility-report-editor.service';
 import { FacilityReportSetupComponent } from './workbench/setup/facility-report-setup.component';
 
-export const FACILITY_REPORT_FEATURES: readonly ReportFeatureDefinition[] = [FACILITY_ANALYSIS_REPORT, FACILITY_DATA_QUALITY_REPORT, FACILITY_MODELING_REPORT];
+export const FACILITY_REPORT_FEATURES: readonly ReportFeatureDefinition[] = [FACILITY_ANALYSIS_REPORT, FACILITY_DATA_QUALITY_REPORT, FACILITY_MODELING_REPORT, FACILITY_EMISSION_FACTORS_REPORT];
 export const PENDING_FACILITY_REPORT: ReportFeatureDefinition = {
   type: 'pending', providers: [FacilityReportEditor,
     { provide: REPORT_RUNTIME, useFactory: () => ({ editor: inject(FacilityReportEditor), gateSetup: false }) }],

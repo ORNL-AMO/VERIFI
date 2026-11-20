@@ -1,5 +1,5 @@
 import { getAnalysisReportSettings, getDataQualityReportSettings, getModelingReportSettings } from '@data/models/idbModels/facilityReport';
-import { mergeFacilityAnalysisSettings, mergeFacilityDataQualitySettings, mergeFacilityModelingSettings } from './facility-report-setup.models';
+import { mergeFacilityAnalysisSettings, mergeFacilityDataQualitySettings, mergeFacilityModelingSettings, mergeFacilityEmissionFactorsSettings } from './facility-report-setup.models';
 describe('facility report setup patches', () => {
   it('merges Modeling switches and clears its year without changing untouched settings', () => {
     const saved = { ...getModelingReportSettings(), reportYear: 2023, includeExecutiveSummary: false };
@@ -11,6 +11,16 @@ describe('facility report setup patches', () => {
   it.each([{ reportYear: 2024.5 }, { reportYear: 0 }, { reportYear: '2024' }, { includeIssuesSummary: 'true' },
     { includeExecutiveSummary: null }, { unknown: true }])('rejects malformed Modeling settings: %j', patch => {
     expect(() => mergeFacilityModelingSettings(getModelingReportSettings(), patch as never)).toThrow('invalid');
+  });
+  it('merges factor years independently, preserves unknown fields, and saves cleared or reversed draft periods', () => {
+    const saved = { startYear: 2022, endYear: 2024, futureOption: true };
+    expect(mergeFacilityEmissionFactorsSettings(saved, { startYear: 2025 })).toEqual({ ...saved, startYear: 2025 });
+    expect(mergeFacilityEmissionFactorsSettings(saved, { endYear: null })).toEqual({ ...saved, endYear: undefined });
+    expect(saved.endYear).toBe(2024);
+  });
+  it.each([{ startYear: NaN }, { startYear: Infinity }, { endYear: 2023.5 }, { startYear: '2022' },
+    { endYear: 10000 }, { unknown: true }])('rejects malformed factor-year patches %j', changes => {
+    expect(() => mergeFacilityEmissionFactorsSettings({ startYear: 2022, endYear: 2024 }, changes as never)).toThrow('invalid');
   });
   it('merges Data Quality edits without defaulting absent optional flags or mutating GUID arrays', () => {
     const saved = getDataQualityReportSettings();

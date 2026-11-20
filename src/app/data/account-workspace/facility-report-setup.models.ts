@@ -1,5 +1,6 @@
 import { AnalysisTableColumns } from '@data/models/analysis';
-import { AnalysisReportSettings, DataQualityReportSettings, ModelingReportSettings, getAnalysisReportSettings, getDataQualityReportSettings, getModelingReportSettings } from '@data/models/idbModels/facilityReport';
+import { AnalysisReportSettings, DataQualityReportSettings, ModelingReportSettings, EmissionFactorsReportSettings, getAnalysisReportSettings, getDataQualityReportSettings, getModelingReportSettings } from '@data/models/idbModels/facilityReport';
+import { validEmissionFactorYear } from '@domain/reports/emission-factors/emission-factors-period';
 import { WorkspaceWriteError } from './workspace-commands.models';
 
 /** Omitted fields survive concurrent edits; null explicitly clears a selection. */
@@ -12,6 +13,7 @@ export interface FacilityReportSetupChanges {
   };
   readonly dataQualityReportSettings?: DataQualityReportSetupChanges;
   readonly modelingReportSettings?: Partial<Omit<ModelingReportSettings, 'reportYear'>> & { readonly reportYear?: number | null };
+  readonly emissionFactorsReportSettings?: { readonly startYear?: number | null; readonly endYear?: number | null };
 }
 
 export function mergeFacilityModelingSettings(saved: ModelingReportSettings,
@@ -28,6 +30,19 @@ export function mergeFacilityModelingSettings(saved: ModelingReportSettings,
       if (!Object.hasOwn(defaults, key) || typeof value !== 'boolean') invalidSetting();
       Object.assign(settings, { [key]: value });
     }
+  }
+  return settings;
+}
+
+export function mergeFacilityEmissionFactorsSettings(saved: EmissionFactorsReportSettings,
+  changes: FacilityReportSetupChanges['emissionFactorsReportSettings']): EmissionFactorsReportSettings {
+  const settings = { ...saved };
+  for (const [key, value] of Object.entries(changes ?? {})) {
+    if (value === undefined) continue;
+    if (!['startYear', 'endYear'].includes(key) || (value !== null && !validEmissionFactorYear(value))) {
+      throw new WorkspaceWriteError('validation-failed', 'An Emission Factors report year is invalid.');
+    }
+    settings[key] = value === null ? undefined : value;
   }
   return settings;
 }

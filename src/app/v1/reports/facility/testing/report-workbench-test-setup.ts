@@ -1,6 +1,6 @@
 import { AnalysisReportEditor } from '../analysis/editing/analysis-report-editor.service';
 import { WorkspaceCalendarizationService } from '@app/v1/shared/calendarization/workspace-calendarization.service';
-import { mergeFacilityAnalysisSettings, mergeFacilityDataQualitySettings, mergeFacilityModelingSettings } from '@data/account-workspace/facility-report-setup.models';
+import { mergeFacilityAnalysisSettings, mergeFacilityDataQualitySettings, mergeFacilityModelingSettings, mergeFacilityEmissionFactorsSettings } from '@data/account-workspace/facility-report-setup.models';
 import { resolveDataQualitySelection } from '@domain/reports/data-quality-report-selection';
 import { AccountReportActionsService } from '@app/v1/reports/account/account-report-actions.service';
 import { Component, Provider, computed, inject, signal } from '@angular/core';
@@ -40,6 +40,8 @@ export async function setupReportWorkbench(reports = [reportFixture(), reportFix
       ...(changes.modelingReportSettings ? { modelingReportSettings: mergeFacilityModelingSettings(current.modelingReportSettings, changes.modelingReportSettings) } : {}),
       ...(changes.analysisItemId !== undefined ? { analysisItemId: changes.analysisItemId ?? undefined } : {}),
       ...(changes.analysisReportSettings ? { analysisReportSettings: mergeFacilityAnalysisSettings(current.analysisReportSettings, changes.analysisReportSettings) } : {}) };
+    if (changes.emissionFactorsReportSettings) report.emissionFactorsReportSettings =
+      mergeFacilityEmissionFactorsSettings(current.emissionFactorsReportSettings, changes.emissionFactorsReportSettings);
     if (current.facilityReportType === 'dataQuality') {
       const settings = mergeFacilityDataQualitySettings(current.dataQualityReportSettings, changes.dataQualityReportSettings ?? {});
       settings.missingSelection = !resolveDataQualitySelection({ accountGuid: current.accountId, facilityGuid: current.facilityId,
