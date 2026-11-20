@@ -147,6 +147,18 @@
   @if (lifecycle.deleteCandidate(); as candidate) {
     <app-confirmation-dialog title="Delete visualization?" titleId="delete-visualization-title" cancelAriaLabel="Cancel visualization deletion" confirmLabel="Delete visualization" confirmClass="v1-btn--danger" confirmIcon="delete" [busy]="lifecycle.saving()" [disabled]="lifecycle.saving()" [confirmDisabled]="!!lifecycle.proposal()" (confirmed)="lifecycle.confirmDelete()" (cancelled)="lifecycle.cancelConfirmation()">
       <p>Permanently delete <strong>{{ candidate.name }}</strong> belonging to <strong>{{ candidate.ownerName }}</strong>? Source records remain available.</p>
+      @let dependencies = lifecycle.deletionDependencies();
+      @if (dependencies.widgets.length) {
+        <p>These dashboard widgets will keep an unavailable link that can be replaced or removed:</p>
+        <ul>
+          @for (widget of dependencies.widgets; track widget.dashboardGuid + ':' + widget.widgetId) {
+            <li>{{ widget.ownerName }} / {{ widget.dashboardName }}: {{ widget.label }}</li>
+          }
+        </ul>
+      }
+      @if (dependencies.unreadableDashboardGuids.length) {
+        <p>Some dashboards use an unavailable format. Their chart links could not be checked and will remain preserved.</p>
+      }
       @if (lifecycle.outcome() === 'conflict') { <button type="button" class="v1-btn v1-btn--quiet" [disabled]="lifecycle.saving()" (click)="lifecycle.reloadSavedConflict()">Reload saved state and discard proposal</button> }
       @if (lifecycle.error(); as message) { <div class="v1-alert v1-alert--danger" role="alert">{{ message }}</div> }
       @if (lifecycle.proposal()) { <button type="button" class="v1-btn v1-btn--quiet" [disabled]="!lifecycle.canRetry()" (click)="lifecycle.retry()">{{ lifecycle.outcome() === 'refresh-required' ? 'Retry refresh' : 'Retry deletion' }}</button><button type="button" class="v1-btn v1-btn--quiet" [disabled]="!lifecycle.canDiscard()" (click)="lifecycle.discard()">Discard proposal</button> }

@@ -194,7 +194,6 @@ describe('report inventory browser journeys and presentation', () => {
       expect(getComputedStyle(pinned).position).toBe('sticky');
       expect(getComputedStyle(panel.querySelector('.report-choices')!).gridTemplateColumns.split(' ')).toHaveLength(2);
       body.scrollTop = 0; await settle(view.fixture);
-      await page.screenshot({ element: panel, path: `../../../../../.angular/report-choices-${width}.png` });
     }
     await page.getByRole('button', { name: 'Analysis', exact: true }).click(); await settle(view.fixture);
     expect((document.activeElement as HTMLElement).id).toBe('report-name');
@@ -285,7 +284,6 @@ describe('report inventory browser journeys and presentation', () => {
           if (width === 1200) expect(getComputedStyle(tableFrame.querySelector('td')!).verticalAlign).toBe('middle');
         }
       }
-      await page.screenshot({ element: view.root.querySelector<HTMLElement>('[role="dialog"]')!, path: `./__screenshots__/report-analysis-inspector-${single ? 'facility' : 'account'}${dark ? '-dark' : ''}.png` });
     }
     view.root.classList.remove('v1-theme-dark');
     await page.getByRole('button', { name: 'Go To Analysis', exact: true }).click(); await settle(view.fixture);

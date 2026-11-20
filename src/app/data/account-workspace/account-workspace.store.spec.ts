@@ -274,7 +274,7 @@ function createSnapshot(): AccountWorkspaceSnapshot {
     { id: 1, guid: 'facility-a', accountId: 'account-a', name: 'A' },
     { id: 2, guid: 'facility-b', accountId: 'account-a', name: 'B' }
   ] as any;
-  return {
+  return { homeDashboards: [], homeOwners: [],
     account: { id: 1, guid: 'account-a', name: 'Account A' } as any,
     savedVisualizations: [],
     facilities,

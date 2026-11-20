@@ -1,7 +1,6 @@
 import { signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
-import { page } from 'vitest/browser';
 import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
 import { WorkspaceNavigationService } from '@app/v1/shell/workspace-navigation.service';
 import { ModalPortalService } from '@app/v1/shell/modal-portal.service';
@@ -55,7 +54,6 @@ describe('portfolio sticky browse layout', () => {
       }
     }
     host.className = 'v1-root';
-    await page.screenshot({ element: host.querySelector('header')!, path: '../../../../../.angular/portfolio-spike/header-actions.png' });
     const content = document.createElement('section');
     // A simple routed-toolbar probe avoids unrelated resource services and calculations.
     content.innerHTML = '<form class="v1-data-browse-toolbar">Search controls</form><div style="height:1400px"></div>';

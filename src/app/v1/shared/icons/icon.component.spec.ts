@@ -47,6 +47,12 @@ import { join } from 'path';
     <app-ui-icon name="sankey" [size]="16" [strokeWidth]="2" [decorative]="false" label="Sankey override"></app-ui-icon>
     <app-ui-icon name="sunburst" [size]="24" [decorative]="false" label="Sunburst"></app-ui-icon>
     <app-ui-icon name="sunburst" [size]="16" [strokeWidth]="2" [decorative]="false" label="Sunburst override"></app-ui-icon>
+    <app-ui-icon name="sidePanelOpen" [size]="24" [decorative]="false" label="Open side panel"></app-ui-icon>
+    <app-ui-icon name="sidePanelOpen" [size]="16" [strokeWidth]="2" [decorative]="false" label="Open side panel override"></app-ui-icon>
+    <app-ui-icon name="sidePanelCollapse" [size]="24" [decorative]="false" label="Collapse side panel"></app-ui-icon>
+    <app-ui-icon name="sidePanelCollapse" [size]="16" [strokeWidth]="2" [decorative]="false" label="Collapse side panel override"></app-ui-icon>
+    <app-ui-icon name="modelingReport" [size]="24" [decorative]="false" label="Modeling report"></app-ui-icon>
+    <app-ui-icon name="modelingReport" [size]="16" [strokeWidth]="2" [decorative]="false" label="Modeling report override"></app-ui-icon>
   `,
   imports: [IconComponent],
   standalone: true
@@ -68,8 +74,8 @@ describe('IconComponent', () => {
   it('renders Hugeicons icons with the v1 icon host class', () => {
     const icons = fixture.nativeElement.querySelectorAll('app-ui-icon hugeicons-icon');
 
-    expect(icons.length).toBe(34);
-    expect(fixture.nativeElement.querySelectorAll('app-ui-icon.v1-icon').length).toBe(34);
+    expect(icons.length).toBe(40);
+    expect(fixture.nativeElement.querySelectorAll('app-ui-icon.v1-icon').length).toBe(40);
   });
 
   it('keeps decorative icons hidden from assistive technology by default', () => {
@@ -133,7 +139,13 @@ describe('IconComponent', () => {
     { file: 'sankey.svg', index: 30, label: 'Sankey', size: '24', stroke: undefined },
     { file: 'sankey.svg', index: 31, label: 'Sankey override', size: '16', stroke: '2' },
     { file: 'sunburst.svg', index: 32, label: 'Sunburst', size: '24', stroke: undefined },
-    { file: 'sunburst.svg', index: 33, label: 'Sunburst override', size: '16', stroke: '2' }
+    { file: 'sunburst.svg', index: 33, label: 'Sunburst override', size: '16', stroke: '2' },
+    { file: 'sidepanel-open.svg', index: 34, label: 'Open side panel', size: '24', stroke: undefined },
+    { file: 'sidepanel-open.svg', index: 35, label: 'Open side panel override', size: '16', stroke: '2' },
+    { file: 'sidepanel-collapse.svg', index: 36, label: 'Collapse side panel', size: '24', stroke: undefined },
+    { file: 'sidepanel-collapse.svg', index: 37, label: 'Collapse side panel override', size: '16', stroke: '2' },
+    { file: 'modeling-report.svg', index: 38, label: 'Modeling report', size: '24', stroke: undefined },
+    { file: 'modeling-report.svg', index: 39, label: 'Modeling report override', size: '16', stroke: '2' }
   ])('renders $file through the same themed, accessible icon API', ({ file, index, label, size, stroke }) => {
     const source = readFileSync(join(process.cwd(), 'src/assets/icons', file), 'utf8');
     const document = new DOMParser().parseFromString(source, 'image/svg+xml');

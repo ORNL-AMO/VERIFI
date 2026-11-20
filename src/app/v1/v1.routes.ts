@@ -9,7 +9,8 @@ import { CustomGridFactorsComponent } from '@app/v1/data/custom-database/custom-
 import { CustomFuelsComponent } from '@app/v1/data/custom-database/custom-fuels/custom-fuels.component';
 import { CustomGwpsComponent } from '@app/v1/data/custom-database/custom-gwps/custom-gwps.component';
 import { flushPendingChangesGuard, unsavedChangesGuard, protectedNavigationPreflightGuard } from '@app/v1/shared/navigation/unsaved-changes.guard';
-import { AccountHomeComponent } from '@app/v1/account/home/account-home.component';
+import { homeDefaultGuard, homeLeaveGuard } from '@app/v1/home/home-navigation.guards';
+import { HomeDashboardComponent } from '@app/v1/home/dashboard/dashboard.component';
 import { DataInventoryComponent } from '@app/v1/data/inventory/data-inventory.component';
 import { EnergyUsesInventoryComponent } from '@app/v1/data/energy-uses/inventory/energy-uses-inventory.component';
 import { FacilitiesInventoryComponent } from '@app/v1/data/facilities/inventory/facilities-inventory.component';
@@ -47,7 +48,6 @@ import { WeatherPredictorWorkbenchComponent } from '@app/v1/data/predictors/weat
 import { WeatherPredictorSetupComponent } from '@app/v1/data/predictors/weather-predictor-workbench/setup/weather-predictor-setup.component';
 import { WeatherPredictorReadingsComponent } from '@app/v1/data/predictors/weather-predictor-workbench/readings/weather-predictor-readings.component';
 import { WeatherPredictorQualityComponent } from '@app/v1/data/predictors/weather-predictor-workbench/quality/weather-predictor-quality.component';
-import { FacilityHomeComponent } from '@app/v1/facility/home/facility-home.component';
 import { FacilitySettingsComponent } from '@app/v1/facility/settings/facility-settings.component';
 import { FacilitySettingsBackupComponent } from '@app/v1/facility/settings/backup/facility-settings-backup.component';
 import { FacilitySettingsDeleteComponent } from '@app/v1/facility/settings/delete/facility-settings-delete.component';
@@ -122,10 +122,11 @@ export const V1Routes: Routes = [
         children: [
           { path: '', pathMatch: 'full', redirectTo: 'home/overview' },
           { path: 'home', pathMatch: 'full', redirectTo: 'home/overview' },
+          { path: 'home/dashboard/:dashboardGuid', component: HomeDashboardComponent, canActivate: [protectedNavigationPreflightGuard], canDeactivate: [homeLeaveGuard], runGuardsAndResolvers: 'always' },
           {
             path: 'home/:detail',
-            component: AccountHomeComponent,
-            canActivate: [accountHomeCanonicalGuard]
+            component: HomeDashboardComponent,
+            canActivate: [protectedNavigationPreflightGuard, accountHomeCanonicalGuard, homeDefaultGuard], canDeactivate: [homeLeaveGuard], runGuardsAndResolvers: 'always'
           },
           { path: 'data/portfolio/analyses', pathMatch: 'full', redirectTo: 'analysis/dashboard' },
           { path: 'data/portfolio/reports', pathMatch: 'full', redirectTo: 'reports/dashboard' },
@@ -249,10 +250,11 @@ export const V1Routes: Routes = [
           { path: 'visualization', canActivate: [visualizationFacilityEntryGuard], children: [{ path: '**', children: [] }] },
           { path: '', pathMatch: 'full', redirectTo: 'home/overview' },
           { path: 'home', pathMatch: 'full', redirectTo: 'home/overview' },
+          { path: 'home/dashboard/:dashboardGuid', component: HomeDashboardComponent, canActivate: [protectedNavigationPreflightGuard], canDeactivate: [homeLeaveGuard], runGuardsAndResolvers: 'always' },
           {
             path: 'home/:detail',
-            component: FacilityHomeComponent,
-            canActivate: [facilityHomeCanonicalGuard]
+            component: HomeDashboardComponent,
+            canActivate: [protectedNavigationPreflightGuard, facilityHomeCanonicalGuard, homeDefaultGuard], canDeactivate: [homeLeaveGuard], runGuardsAndResolvers: 'always'
           },
           {
             path: 'data',

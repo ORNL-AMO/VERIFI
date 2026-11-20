@@ -61,9 +61,7 @@ describe('shared analysis validation disclosures in Chromium', () => {
       root.querySelector<HTMLButtonElement>('.validation-detail button')!.click(); fixture.detectChanges();
       const executiveSection = root.querySelector<HTMLElement>('[aria-labelledby="analysis-executive-title"]')!;
       executiveSection.scrollIntoView({ block: 'start' });
-      await page.screenshot({ element: executiveSection, path: `./__screenshots__/analysis-executive-narrow-${dark ? 'dark' : 'light'}.png` });
       await page.viewport(1500, 900); fixture.detectChanges();
-      await page.screenshot({ element: executiveSection, path: `./__screenshots__/analysis-executive-wide-${dark ? 'dark' : 'light'}.png` });
       rowButton.click(); fixture.detectChanges();
 
     }

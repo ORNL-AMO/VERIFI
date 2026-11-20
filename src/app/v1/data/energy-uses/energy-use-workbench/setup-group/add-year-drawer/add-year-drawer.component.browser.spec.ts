@@ -123,7 +123,6 @@ describe('Group Add year slideout in Chromium', () => {
     for (const [width, theme] of [[1200, ''], [390, 'v1-theme-dark'], [390, 'v1-contrast-strong']] as const) {
       await page.viewport(width, 850); root.className = `v1-root ${theme}`; await settle();
       const panel = root.querySelector<HTMLElement>('.v1-workspace-slideout')!;
-      await page.screenshot({ element: panel, path: `./__screenshots__/add-year-${width}-${theme || 'light'}.png` });
       expect(panel.scrollWidth).toBeLessThanOrEqual(panel.clientWidth + 1);
       const footer = root.querySelector<HTMLElement>('.v1-workspace-slideout__footer')!;
       expect(footer.getBoundingClientRect().bottom).toBeLessThanOrEqual(851);

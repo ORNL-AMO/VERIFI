@@ -1,0 +1,44 @@
+@let fields = editor.form.controls.settings.controls;
+@let base = editor.base();
+<section class="report-section report-setup" aria-label="Modeling report setup">
+  @if (!editor.canEdit()) { <p class="v1-alert v1-alert--warning" role="status">Report settings are read-only while workspace editing is unavailable. Your saved settings are preserved.</p> }
+  <section class="report-setup-section" aria-labelledby="modeling-information-heading">
+    <h2 id="modeling-information-heading" class="setup-section-heading">Report information</h2>
+    <div class="report-setup-body report-setup-body--with-period">
+      <div class="report-setup-field report-setup-name">
+        <label for="report-workbench-name">Name <span class="report-setup-required" aria-hidden="true">*</span></label>
+        <input id="report-workbench-name" class="v1-input" [formControl]="editor.name" required autocomplete="off" [attr.aria-invalid]="editor.name.invalid ? true : null" aria-describedby="modeling-name-help">
+        <p id="modeling-name-help" class="report-setup-help" [class.v1-field-error]="editor.name.invalid">{{ editor.name.invalid ? 'Enter a nonblank report name.' : 'Changes save automatically, including incomplete selections.' }}</p>
+      </div>
+      <div class="report-period">
+        <div class="report-setup-field">
+          <label for="modeling-report-year">Report year <span class="report-setup-required" aria-hidden="true">*</span></label>
+          <select id="modeling-report-year" class="v1-select" [formControl]="fields.reportYear" required [attr.aria-invalid]="unavailableYear() ? true : null" aria-describedby="modeling-year-help">
+            <option [ngValue]="null">Not selected</option>
+            @if (retainedYear()) { <option [ngValue]="fields.reportYear.value">{{ fields.reportYear.value }} — {{ unavailableYear() ? 'saved year unavailable' : 'saved year' }}</option> }
+            @for (year of editor.periods(); track year) { <option [ngValue]="year">{{ context.facility()?.fiscalYear === 'nonCalendarYear' ? 'FY ' : '' }}{{ year }}</option> }
+          </select>
+        </div>
+        <p id="modeling-year-help" class="report-setup-help" [class.v1-field-error]="unavailableYear()">{{ unavailableYear() ? 'Choose an available report year at or after the analysis baseline.' : 'Partial reporting years are included.' }}</p>
+        @if (base.state !== 'error' && !editor.periodsCurrent()) { <p role="status">Finding available reporting years…</p> }
+        @if (base.state === 'error') { <p class="v1-field-error" role="alert">Reporting years could not be loaded.</p><button type="button" class="v1-btn v1-btn--secondary" (click)="editor.retryPeriods()">Retry reporting years</button> }
+        @if (editor.periodsCurrent() && !editor.periods().length) { <p class="v1-alert v1-alert--warning" role="status">No reporting years are available at or after the analysis baseline.</p> }
+      </div>
+    </div>
+  </section>
+  <app-report-analysis-selection [cards]="cards()" [selectionControl]="editor.form.controls.analysis" [selectedValue]="editor.draft().analysis"
+    [resetKey]="context.key()" idPrefix="modeling-report" [canEdit]="editor.canEdit()" [showTypeFilter]="showCategory()" [sectioned]="true" (inspected)="inspect($event)">
+    @if (unavailableSelection()) { <p class="v1-alert v1-alert--warning" role="status">The saved analysis is unavailable. Its reference is preserved until you choose a replacement.</p> }
+  </app-report-analysis-selection>
+  <section class="report-setup-section" aria-labelledby="modeling-content-heading">
+    <h2 id="modeling-content-heading" class="setup-section-heading">Included content</h2>
+    <div class="report-setup-body">
+      @for (section of content; track section.key) { <label class="report-setup-option modeling-option"><input type="checkbox" [formControl]="fields[section.key]"><span>{{ section.label }}</span></label> }
+    </div>
+  </section>
+</section>
+@if (inspected(); as entry) { @if (entry.scope === 'facility') {
+  <app-analysis-details-slideout [card]="entry.card" [evaluation]="inventories.statusState()" [meterGroups]="inventories.meterGroups()" [outcomeDisplay]="entry.outcomeDisplay"
+    [showCategory]="showCategory()" actionLabel="Select for report" actionIcon="check" [actionDisabled]="!editor.canEdit() || openingAnalysis()"
+    secondaryActionLabel="Go To Analysis" [secondaryActionDisabled]="openingAnalysis()" (secondaryActionSelected)="goToAnalysis()" (closed)="closeInspection()" (opened)="selectInspected()"/>
+} }

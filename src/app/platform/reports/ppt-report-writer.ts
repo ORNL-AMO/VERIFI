@@ -336,7 +336,18 @@ class PresentationRenderer {
     const bands = tableColumnBands(count, 7);
     for (const [index, columns] of bands.entries()) {
       const title = model.title + (bands.length > 1 ? ` (${index + 1}/${bands.length})` : '');
+      const equationLines = index === 0 && model.equation ? wrappedLines(`${model.equation.label} = ${model.equation.expression}`, 105) : [];
+      // Keep large equations readable without consuming the table's entire first page.
+      if (equationLines.length > 8) {
+        for (let start = 0; start < equationLines.length; start += 15) {
+          const equationSlide = pptx.addSlide({ masterName: SLIDE_MASTERS.BLANK });
+          equationSlide.addText(`${model.title} — equation${start ? ' continued' : ''}`, {
+            x: .5, y: .2, w: this.contentWidth, h: .85, fontSize: 24, bold: true, fontFace: this.theme.fonts.heading });
+          this.addEquation(pptx, equationSlide, equationLines.slice(start, start + 15));
+        }
+      }
       const slide = pptx.addSlide({ masterName: SLIDE_MASTERS.BLANK });
+      const firstPageY = equationLines.length && equationLines.length <= 8 ? this.addEquation(pptx, slide, equationLines) : 1.25;
       const headers = projectTableHeaders(model.headers, columns, cell => cell.colspan ?? 1, (cell, colspan) => ({ ...cell, colspan }));
       const rows = [this.buildHeaderRow(headers, this.theme.colors.primary, 'FFFFFF')];
       if (model.subHeaders?.length) {
@@ -356,7 +367,7 @@ class PresentationRenderer {
         ? columns.map(column => model.columnWidths[column]) : undefined;
       const totalWidth = widths?.reduce((sum, width) => sum + width, 0);
       slide.addTable(rows, {
-        x: .5, y: 1.25, w: this.contentWidth,
+        x: .5, y: firstPageY, w: this.contentWidth,
         colW: widths?.map(width => width / totalWidth! * this.contentWidth),
         margin: .06, fontSize: this.theme.sizes.tableBody,
         color: this.theme.colors.text, fontFace: this.theme.fonts.body,
@@ -387,6 +398,17 @@ class PresentationRenderer {
         }
       }
     }
+  }
+
+  private addEquation(pptx: pptxgen, slide: pptxgen.Slide, lines: readonly string[]): number {
+    const height = lines.length * .3 + .25;
+    slide.addShape(pptx.ShapeType.rect, { x: .5, y: 1.25, w: this.contentWidth, h: height,
+      line: { color: 'E8EFF6', transparency: 100 }, fill: { color: 'EFF5FA' } });
+    slide.addShape(pptx.ShapeType.rect, { x: .5, y: 1.25, w: .04, h: height,
+      line: { transparency: 100 }, fill: { color: this.theme.colors.primary } });
+    slide.addText(lines.join('\n'), { x: .62, y: 1.32, w: this.contentWidth - .24, h: height - .12,
+      fontFace: 'Cambria Math', fontSize: 18, color: this.theme.colors.text, margin: 0, valign: 'middle', breakLine: false });
+    return 1.25 + height + .2;
   }
 
   private imageBounds(data: string, model: ImageSlide, region: { x: number; y: number; w: number }, height: number): { x: number; y: number; w: number; h: number } {

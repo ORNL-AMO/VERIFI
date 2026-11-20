@@ -168,7 +168,6 @@ describe('uniform account inventories in Chromium', () => {
           expect(button.getBoundingClientRect().left).toBeGreaterThanOrEqual(actions.getBoundingClientRect().left);
           expect(button.getBoundingClientRect().right).toBeLessThanOrEqual(actions.getBoundingClientRect().right);
         }
-        await page.screenshot({ element: root, path: `../../../../../../.angular/${resource}-selection-header.png` });
         await page.getByRole('button', { name: 'Cancel selection', exact: true }).click(); fixture.detectChanges();
         expect(toggle.getAttribute('aria-pressed')).toBe('false'); expect(tools.selected()).toEqual([]);
         expect(root.querySelector('.portfolio-tile__selection')).toBeNull();
@@ -237,14 +236,11 @@ describe('uniform account inventories in Chromium', () => {
       }
     }
     root.className='v1-root';root.style.height='1100px';await page.viewport(1300,1200);
-    await page.screenshot({element:tile,path:'../../../../../../.angular/predictor-weather-snapshot.png'});
     const standard=root.querySelector<HTMLElement>('.portfolio-tile__name[data-browse-id="p1"]')!.closest('article')!;
     expect(standard.querySelector('.reading-snapshot__recent-reading')?.textContent).toContain('12 tons');
-    await page.screenshot({element:standard,path:'../../../../../../.angular/predictor-standard-snapshot.png'});
     await page.viewport(390,1000);fixture.detectChanges();await settled(root);
     expect(root.scrollWidth).toBeLessThanOrEqual(root.clientWidth);expect(tile.scrollWidth).toBeLessThanOrEqual(tile.clientWidth);
     expect([...tile.querySelectorAll<HTMLElement>('.reading-snapshot__recent-list li')].every(item=>getComputedStyle(item).borderTopWidth==='0px')).toBe(true);
-    await page.screenshot({element:tile,path:'../../../../../../.angular/predictor-snapshot-narrow.png'});
     for(const state of ['evaluating','error','ready'] as const) {
       statusState.set(state);fixture.detectChanges();await settled(root);
       expect(tile.querySelector('.reading-snapshot__attention')!==null).toBe(state==='ready');
@@ -305,8 +301,6 @@ describe('uniform account inventories in Chromium', () => {
     }
     root.className='v1-root';
     root.style.height='1000px';root.scrollTop=0;await page.viewport(1300,1200);
-    await page.screenshot({element:tile,path:'../../../../../../.angular/meter-recent-readings.png'});
-    await page.screenshot({element:root.querySelector<HTMLElement>('.portfolio-inventory .portfolio-tile[data-tone="warning"]')!,path:'../../../../../../.angular/meter-warning-dividers.png'});
     for(const state of ['evaluating','error','ready'] as const) {
       statusState.set(state);fixture.detectChanges();await settled(root);
       expect(rows().some(row=>row.querySelector<HTMLElement>('.reading-snapshot__reading-value')?.dataset['tone']==='danger')).toBe(state==='ready');
@@ -320,7 +314,6 @@ describe('uniform account inventories in Chromium', () => {
     const groupLink=tile.querySelector<HTMLAnchorElement>('.portfolio-tile__group a')!;
     expect(groupLink.getAttribute('href')).toBe('/v1/workspace/facility/f0/data/meter-grouping/g/monthly-table');
     root.scrollTop=0;await page.viewport(390,1200);
-    await page.screenshot({element:tile,path:'../../../../../../.angular/meter-recent-readings-narrow.png'});
     root.style.height='600px';await page.viewport(390,750);
     const readingsLink=tile.querySelector<HTMLAnchorElement>('.reading-snapshot__recent-reading')!;
     readingsLink.focus();await userEvent.keyboard('{Enter}');await fixture.whenStable();fixture.detectChanges();
@@ -371,8 +364,6 @@ describe('uniform account inventories in Chromium', () => {
       }
     }
     root.className='v1-root';
-    await page.screenshot({element:tile.querySelector<HTMLElement>('.facility-snapshot__resources')!,path:'../../../../../../.angular/facility-resource-row.png'});
-    await page.screenshot({element:tile,path:'../../../../../../.angular/facility-resource-snapshot.png'});
     for(const state of ['evaluating','error','ready'] as const) {
       statusState.set(state);fixture.detectChanges();await settled(root);
       expect(tile.querySelector('.facility-snapshot__strip')!==null).toBe(state==='ready');
@@ -381,7 +372,6 @@ describe('uniform account inventories in Chromium', () => {
     expect(root.scrollWidth).toBeLessThanOrEqual(root.clientWidth);
     expect(tile.scrollWidth).toBeLessThanOrEqual(tile.clientWidth);
     expectResourceRows(tile);
-    await page.screenshot({element:tile,path:'../../../../../../.angular/facility-resource-snapshot-narrow.png'});
     const action=tile.querySelector<HTMLAnchorElement>('.facility-snapshot__attention a')!;
     action.focus();await userEvent.keyboard('{Enter}');await fixture.whenStable();fixture.detectChanges();
     expect(router.url).toBe('/v1/workspace/facility/f0/data/meters/m0/settings');
@@ -413,7 +403,6 @@ describe('uniform account inventories in Chromium', () => {
     expect(background).not.toBe('rgba(0, 0, 0, 0)');
     expect(background).not.toBe('transparent');
     expect(parseFloat(getComputedStyle(pager).paddingLeft)).toBeGreaterThan(0);
-    await page.screenshot({element:root,path:'../../../../../../.angular/account-inventory-long-names.png'});
     fixture.destroy();
   });
   it('lays out expanded tiles in sorted rows, centers Simple identity, and supports themed keyboard/right-click menus without navigating', async () => {
@@ -453,7 +442,6 @@ describe('uniform account inventories in Chromium', () => {
     const menu=document.querySelector<HTMLElement>('.portfolio-tile-menu')!; expect(textContrast(menu)).toBeGreaterThanOrEqual(4.5);
     const rect=menu.getBoundingClientRect(); expect(rect.bottom).toBeLessThanOrEqual(1000); expect(rect.left).toBeGreaterThanOrEqual(0);
     await userEvent.keyboard('{Escape}'); fixture.detectChanges(); root.className='v1-root';
-    await page.screenshot({element:root,path:'../../../../../../.angular/account-inventory-tiles.png'});
     fixture.destroy();
   });
   it('restores the page, individual expansion, scroll and originating focus after drill-in and cancelled navigation', async () => {
@@ -493,7 +481,6 @@ describe('uniform account inventories in Chromium', () => {
     root.scrollTop=0;await page.viewport(390,650);fixture.detectChanges();await settled(root);
     expect(root.scrollWidth).toBeLessThanOrEqual(root.clientWidth);expect(root.querySelector('.portfolio-inventory')!.scrollWidth).toBeLessThanOrEqual(root.clientWidth);
     expect(getComputedStyle(root.querySelector('.portfolio-inventory')!).gridTemplateColumns.split(' ')).toHaveLength(1);
-    await page.screenshot({element:root,path:'../../../../../../.angular/account-inventory-narrow.png'});
     const client=cdp() as {send(command:string,parameters:unknown):Promise<void>};await client.send('Emulation.setEmulatedMedia',{media:'print'});
     expect(getComputedStyle(root.querySelector('.portfolio-inventory')!).display).toBe('none');
     const printed=root.querySelector<HTMLElement>('.portfolio-inventory-print')!;expect(getComputedStyle(printed).display).toBe('grid');

@@ -51,6 +51,7 @@ export function inspectVisualizationReferences(definition: VisualizationDefiniti
 function findReference(ref: VisualizationReference, catalog: VisualizationReferenceCatalog): VisualizationCatalogResource | undefined {
   const byGuid = (items: readonly VisualizationCatalogResource[]) => items.find(item => item.guid === ref.guid);
   switch (ref.kind) {
+    case 'account': return { guid: ref.guid, accountId: ref.guid };
     case 'facility': return byGuid(catalog.facilities);
     case 'meter': return byGuid(catalog.meters);
     case 'meter-group': {

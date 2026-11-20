@@ -5,9 +5,17 @@ import { createVisualizationDefinition } from '@domain/visualizations/visualizat
 import { LibraryComponent } from './library.component';
 import { LibraryModule } from './library.module';
 import { configureLibraryTest, libraryRecord } from './testing/library-testing';
+import { getNewIdbHomeDashboard } from '@data/models/idbModels/homeDashboard';
+import { chartWidget, homeDefinition } from '@domain/home/testing/home-fixtures';
+import { Component, inject } from '@angular/core';
+import { PortalModule } from '@angular/cdk/portal';
+import { ModalPortalService } from '@app/v1/shell/modal-portal.service';
+
+@Component({ imports: [PortalModule], template: '<ng-template [cdkPortalOutlet]="modal.activePortal()" />' })
+class ModalHost { readonly modal = inject(ModalPortalService); }
 
 async function setup() {
-  const context = configureLibraryTest([LibraryModule]);
+  const context = configureLibraryTest([LibraryModule, ModalHost]);
   context.workspace.publish({ ...context.workspace.snapshot()!, savedVisualizations: [libraryRecord('Portfolio trend'),
     getNewIdbSavedVisualization(createVisualizationDefinition('Facility weather', 'account-a', { kind: 'fixed', facilityGuids: ['facility-a'] }, 'predictor'))] });
   await TestBed.compileComponents();
@@ -15,6 +23,23 @@ async function setup() {
   return { ...context, fixture, component: fixture.componentInstance, root: fixture.nativeElement as HTMLElement };
 }
 describe('visualization library dashboard', () => {
+  it('explains linked Home appearances and unreadable uncertainty before deleting a chart', async () => {
+    const { component, fixture, workspace, commands } = await setup();
+    const modal = TestBed.createComponent(ModalHost); modal.detectChanges();
+    const entry = component.entries()[0];
+    const dashboard = getNewIdbHomeDashboard('account-a', { kind: 'facility', guid: 'facility-a' },
+      { ...homeDefinition([{ ...chartWidget(entry.record.guid), title: 'Energy trend' }]), name: 'My overview' });
+    const unknown = { ...getNewIdbHomeDashboard('account-a', { kind: 'account', guid: 'account-a' }, homeDefinition()), recordVersion: 90 };
+    workspace.publish({ ...workspace.snapshot()!, homeDashboards: [dashboard, unknown] });
+    component.lifecycle.requestDelete(entry); fixture.detectChanges(); await fixture.whenStable(); modal.detectChanges();
+    const dialog = modal.nativeElement.querySelector('[role="dialog"]');
+    expect(dialog?.textContent).toContain('My overview'); expect(dialog?.textContent).toContain('Energy trend');
+    expect(dialog?.textContent).toContain('Facility A'); expect(dialog?.textContent).toContain('unavailable');
+    expect(dialog?.textContent).toContain('could not be checked');
+    await component.lifecycle.confirmDelete();
+    expect(commands.prepareDelete).toHaveBeenCalledWith(entry.record);
+    expect(commands.submit.mock.calls[0][0]).toMatchObject({ homeUsage: [expect.objectContaining({ dashboardGuid: expect.any(String) }), expect.objectContaining({ dashboardGuid: expect.any(String) })] });
+  });
   it.each(['failed', 'conflict', 'refresh-required'] as const)('keeps %s deletion recovery visible after Cancel', async outcome => {
     const { component, fixture, root, commands } = await setup();
     const entry = component.entries()[0];

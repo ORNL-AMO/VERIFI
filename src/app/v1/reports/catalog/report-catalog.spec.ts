@@ -1,6 +1,10 @@
 import { ACCOUNT_REPORT_TYPES, FACILITY_REPORT_TYPES, reportDefinition, reportTypeChoices, reportTypePresentation } from './report-catalog';
 
 describe('report catalog', () => {
+  it('enables diagnostic facility Modeling without enabling the account report or a review stage', () => {
+    expect(reportDefinition('facility', 'modeling')).toMatchObject({ contentImplemented: true, hasDataChecks: false, supportsAnalysisReturn: true });
+    expect(reportDefinition('account', 'analysis')?.contentImplemented).toBe(false);
+  });
   it('implements facility emission factors independently of the pending account report', () => {
     expect(reportDefinition('facility', 'emissionFactors')).toMatchObject({ contentImplemented: true, hasDataChecks: false,
       supportsAnalysisReturn: false, requiresOtherImpacts: true });

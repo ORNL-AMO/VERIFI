@@ -143,7 +143,6 @@ describe('Better Plants review and display in Chromium', () => {
       }
     }
     await page.viewport(1200, 1100); root.className = 'v1-root v1-palette-blueprint';
-    await page.screenshot({ element: setup, path: `./__screenshots__/better-plants-setup-${category}.png` });
     await view.open('report', 'report'); await waitFor(state => !!state.value?.summaries);
     const outputButtons = Array.from(root.querySelectorAll<HTMLButtonElement>('footer app-report-output-actions button'));
     expect(outputButtons.map(button => button.textContent?.trim())).toEqual(['PDF', 'Excel']);
@@ -189,7 +188,6 @@ describe('Better Plants review and display in Chromium', () => {
       const table = presentedPapers[0].querySelector<HTMLElement>('.table-scroll')!;
       table.scrollIntoView(); table.focus(); await userEvent.keyboard('{ArrowRight}');
       if (category === 'water') await vi.waitFor(() => expect(table.scrollLeft).toBeGreaterThan(0));
-      await page.screenshot({ element: surface, path: `./__screenshots__/better-plants-presentation-${category}.png` });
       await page.getByRole('button', { name: 'Close presentation', exact: true }).click(); await portal.whenStable();
       await vi.waitFor(() => expect(document.fullscreenElement).toBeNull());
       view.harness.detectChanges();
@@ -225,7 +223,6 @@ describe('Better Plants review and display in Chromium', () => {
     await waitFor(state => state.state === 'ready' && !!state.value?.checks && !state.value.completed);
     expect(root.querySelector('app-report-workbench-header')!.textContent).toContain('Data Check Pending');
     expect(root.querySelector<HTMLButtonElement>('footer button.v1-btn--action')!.disabled).toBe(true);
-    const checksPage = root.querySelector<HTMLElement>('app-better-plants-data-checks')!;
     for (const dark of [false, true]) {
       root.className = `v1-root v1-palette-blueprint${dark ? ' v1-theme-dark' : ''} v1-contrast-strong`;
       for (const width of [1024, 640, 390]) {
@@ -233,11 +230,9 @@ describe('Better Plants review and display in Chromium', () => {
         expect(root.scrollWidth).toBeLessThanOrEqual(root.clientWidth + 1);
         const checkbox = root.querySelector<HTMLInputElement>('footer input[type="checkbox"]')!;
         expect(checkbox.getBoundingClientRect().right).toBeLessThanOrEqual(root.getBoundingClientRect().right + 1);
-        if (category === 'energy' && width === 390) await page.screenshot({ element: root, path: `./__screenshots__/better-plants-checks-footer-${dark ? 'dark' : 'light'}.png` });
       }
     }
     await page.viewport(1024, 900); root.className = 'v1-root v1-palette-blueprint';
-    await page.screenshot({ element: checksPage, path: `./__screenshots__/better-plants-checks-${category}.png` });
     const confirmation = root.querySelector<HTMLInputElement>('footer input[type="checkbox"]')!;
     confirmation.focus(); await userEvent.keyboard(' '); await waitFor(state => state.value?.reviewed === true);
     expect(view.store.accountAnalyses()[0].dataCheckReviews?.map(review => review.reportYear)).toEqual([2024]);
@@ -266,17 +261,6 @@ describe('Better Plants review and display in Chromium', () => {
       }
     }
     await page.viewport(1100, 900); root.className = 'v1-root v1-palette-blueprint';
-    // Capture the complete rendered form independently of the workbench's scroll viewport.
-    const frame = document.createElement('div'); frame.className = 'v1-root v1-palette-blueprint';
-    frame.style.cssText = 'position:absolute;inset:0 auto auto 0;width:1100px;height:auto;min-height:0;overflow:visible;z-index:10000';
-    const form = root.querySelector('app-better-plants-preview')!.cloneNode(true) as HTMLElement;
-    frame.append(form); document.body.append(frame);
-    try {
-      await page.viewport(1100, Math.ceil(frame.scrollHeight) + 20);
-      await page.screenshot({ element: frame, path: `./__screenshots__/better-plants-${category}.png` });
-      frame.classList.add('v1-theme-dark');
-      await page.screenshot({ element: frame, path: `./__screenshots__/better-plants-${category}-dark.png` });
-    } finally { frame.remove(); await page.viewport(1100, 900); }
     await view.open('second-report', 'report'); coordinator = component.workbench.session()!.injector.get(BetterPlantsReportService); await waitFor(state => !!state.value?.summaries);
     const changed = { ...snapshot.meterData[0], totalEnergyUse: 5, totalVolume: 5 };
     await transactions.runTransaction(['utilityMeterData'], 'readwrite', tx => tx.put('utilityMeterData', changed));

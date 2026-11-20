@@ -493,7 +493,6 @@ describe('visualization routed journeys in Chromium', () => {
           expect(picker.scrollWidth).toBeLessThanOrEqual(picker.clientWidth);
           expect(textContrast(rows.querySelector<HTMLElement>('.facility-picker__card')!)).toBeGreaterThanOrEqual(4.5);
         }
-        await page.screenshot({ element: picker, path: `../../../../../.angular/vis3-alignment/facilities-checklist-${width}.png` });
       }
     } finally { test.destroy(); }
   });
@@ -518,7 +517,6 @@ describe('visualization routed journeys in Chromium', () => {
       expect((chart.getOption() as any).dataZoom[0]).toMatchObject({ start: 25, end: 75 });
       expect(test.resolve).toHaveBeenCalledOnce();
       const surface = test.root.querySelector<HTMLElement>('main.v1-root')!;
-      await page.screenshot({ element: surface, path: '../../../../../.angular/vis3-alignment/ready-chart-settings-hidden.png' });
       await userEvent.keyboard('{Enter}'); test.fixture.detectChanges();
       await vi.waitFor(() => expect(chart.getWidth()).toBe(initialWidth));
       expect(test.resolve).toHaveBeenCalledOnce();
@@ -526,7 +524,6 @@ describe('visualization routed journeys in Chromium', () => {
         await page.viewport(width, 900);
         surface.classList.toggle('v1-theme-dark', width === 390);
         expect(surface.scrollWidth).toBeLessThanOrEqual(surface.clientWidth);
-        await page.screenshot({ element: surface, path: `../../../../../.angular/vis3-alignment/ready-workbench-${width}.png` });
       }
       expect(test.submit).not.toHaveBeenCalled();
     } finally { test.destroy(); await page.viewport(1280, 900); }
@@ -578,7 +575,6 @@ describe('visualization routed journeys in Chromium', () => {
             if (width < 850) expect(panel.getBoundingClientRect().height).toBeLessThanOrEqual(layout.clientHeight / 2 + 1);
           }
         }
-        await page.screenshot({ element: surface, path: `../../../../../.angular/vis3-alignment/cleaned-workbench-${width}.png` });
       }
       expect(test.submit).not.toHaveBeenCalled();
     } finally { test.destroy(); await page.viewport(1280, 900); }
@@ -649,7 +645,6 @@ describe('visualization routed journeys in Chromium', () => {
         expect(toggle.getAttribute('aria-expanded')).toBe('true');
         expect(surface.querySelector<HTMLElement>('#visualization-workbench-facts')!.hidden).toBe(false);
         expect(header.scrollWidth).toBeLessThanOrEqual(header.clientWidth);
-        await page.screenshot({ element: surface, path: `../../../../../.angular/vis3-alignment/workbench-${width}.png` });
         await userEvent.keyboard('{Enter}'); test.fixture.detectChanges();
         expect(toggle.getAttribute('aria-expanded')).toBe('false');
       }
@@ -712,7 +707,6 @@ describe('visualization routed journeys in Chromium', () => {
       expect(marker.left).toBeGreaterThan(card.left); expect(marker.right).toBeLessThan(card.left + card.width / 2);
       expect(marker.top).toBeGreaterThan(card.top); expect(marker.bottom).toBeLessThan(card.top + card.height / 2);
       await activate(test, choice.resource); expect(resource.getAttribute('aria-pressed')).toBe('true');
-      await page.screenshot({ element: dialog, path: `../../../../../.angular/vis3-alignment/energy-trend-${choice.grouping}-cards.png` });
       await activate(test, 'Continue'); await activate(test, 'Continue'); await activate(test, 'Add visualization');
       await vi.waitFor(() => { test.fixture.detectChanges(); expect(test.router.url).toBe(`${base}/workbench/created-1`); });
       const record = test.store.savedVisualizations().find(item => item.guid === 'created-1')!;
@@ -839,7 +833,6 @@ describe('visualization routed journeys in Chromium', () => {
         expect(document.activeElement).toBe(namedButton(dialog, label));
         expect(parseFloat(getComputedStyle(document.activeElement!).outlineWidth)).toBeGreaterThanOrEqual(2);
       }
-      await page.screenshot({ element: dialog, path: '../../../../../.angular/vis3-alignment/chart-choices-wide.png' });
       await activate(test, 'Scatter'); await activate(test, 'Meters'); await activate(test, 'Predictors');
       for (const width of [1280, 480]) {
         await page.viewport(width, 760);
@@ -857,7 +850,6 @@ describe('visualization routed journeys in Chromium', () => {
           }
         }
       }
-      await page.screenshot({ element: creationDialog(test), path: '../../../../../.angular/vis3-alignment/data-sources-narrow-dark-contrast.png' });
       await activate(test, 'Continue');
       expect(creationDialog(test).querySelector('[aria-label="View meters by"]')).not.toBeNull();
       test.library()!.lifecycle.discard(); test.fixture.detectChanges();

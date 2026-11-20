@@ -71,7 +71,6 @@ describe('inventory ownership header presentation', () => {
     expect(document.querySelector('[role="menu"]')).not.toBeNull();
     await userEvent.keyboard('{Escape}'); expect(document.activeElement).toBe(menu);
     menu.blur();
-    await page.screenshot({ element: root, path: '../../../../../../.angular/inventory-ownership-headers.png' });
     fixture.destroy();
   });
 });

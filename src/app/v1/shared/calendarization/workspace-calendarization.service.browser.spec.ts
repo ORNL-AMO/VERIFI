@@ -152,7 +152,7 @@ function workspaceSnapshot(accountGuid: string, energyUse: number): AccountWorks
   const accountValue = account({ guid: accountGuid, assessmentReportVersion: 'AR6' });
   const facilityValue = facility({ guid: 'facility-a', accountId: accountGuid, energyUnit: 'kWh', energyIsSource: false });
   const meterValue = meter({ guid: 'meter-a', accountId: accountGuid, facilityId: 'facility-a', meterReadingDataApplication: 'fullMonth' });
-  return {
+  return { homeDashboards: [], homeOwners: [],
     account: accountValue, facilities: [facilityValue], meters: [meterValue],
     meterData: [reading({ accountId: accountGuid, facilityId: 'facility-a', meterId: 'meter-a', totalEnergyUse: energyUse })],
     meterGroups: [], predictors: [], predictorData: [], facilityAnalyses: [], accountAnalyses: [], accountReports: [],

@@ -3,6 +3,7 @@ import type { VisualizationDefinition } from '@domain/visualizations/visualizati
 import { serializeVisualizationDefinition } from '@domain/visualizations/visualization-source-groups';
 import type { VisualizationCaptureOrigin } from '@data/visualizations/visualization-capture-origin';
 import type { VisualizationGuidMaps, VisualizationReferenceIssue } from '@domain/visualizations/visualization-references';
+import type { HomeOwner, HomeTemplate } from '@domain/home/home-dashboard';
 
 export const SAVED_VISUALIZATION_RECORD_VERSION = 1;
 
@@ -30,6 +31,8 @@ export interface IdbSavedVisualization extends IdbEntry {
   definition: unknown;
   preservation?: VisualizationPreservation;
   captureOrigin?: VisualizationCaptureOrigin;
+  /** Provenance only. Starter charts remain ordinary reusable saved visualizations. */
+  homeOrigin?: { readonly operationGuid: string; readonly owner: HomeOwner; readonly templates: readonly HomeTemplate[]; readonly unresolved?: boolean };
 }
 
 /** Creation may reuse a submitted identity so retries cannot allocate another saved record. */

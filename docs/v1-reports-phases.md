@@ -6,11 +6,14 @@ Active delivery reference for [Reports foundation #2790](https://github.com/ORNL
 
 The unified inventory and saved-report lifecycle are implemented. Account/facility hosts share Setup, applicable Data Checks, Report stages, typed editing, guarded navigation, status destinations, and runtime registration. Pending content is distinct from saved-configuration status; opening an existing report preserves settings/GUIDs and does not reconcile ownership on browse. Single-facility presentation retains account-backed reports through explicit hidden analysis pairs.
 
+Better Plants has energy/water setup, explicit analysis review, in-app official-form content, direct PDF, and template-compatible Excel. Facility Analysis has typed setup, selected-year checks/review, continuous in-app content, PDF, and PowerPoint. Data Quality has selected meter/predictor content and PDF output; facility Modeling has in-app content, PDF, and PowerPoint. All four reports support fullscreen presentation with a full-window fallback through an opt-in shared report capability. Outputs share snapshot/readiness and delivery infrastructure. Existing calculations, v0 behavior, persisted relationships, templates, and known compatibility quirks remain authoritative.
 Better Plants has energy/water setup, explicit analysis review, in-app official-form content, direct PDF, and template-compatible Excel. Facility Analysis has typed setup, selected-year checks/review, continuous in-app content, PDF, and PowerPoint. Data Quality has selected meter/predictor content and PDF output. All three reports support fullscreen presentation with a full-window fallback through an opt-in shared report capability. Their outputs share snapshot/readiness and delivery infrastructure. Existing calculations, v0 behavior, persisted relationships, templates, and known compatibility quirks remain authoritative.
 
 Facility Emission Factors has typed Setup, in-app Report, PDF output, and fullscreen presentation with the shared window fallback. It shares neutral factor assembly and v1 tables for later account reuse, retains history-based year choices, requires start before end, and preserves legacy display conventions. The account report is not migrated.
 
 Build each remaining report as a feature-owned runtime using shared editing/check/result/output capabilities. Do not add report-type branches to the workbench. Output support is explicit per format. In-app completion does not establish output or release acceptance.
+
+Facility Modeling has Setup, Report, Present mode, PDF, and PowerPoint output with shared modeling projections, presentation, and file composition for a future account adapter. It remains diagnostic without review acknowledgment; account report integration remains deferred.
 
 ## Remaining migrations and dependencies
 

@@ -226,6 +226,7 @@ describe('ElectronBackupFileComponent', () => {
 
 function buildPreparedBackupFile(): PreparedBackupFile {
   return {
+    homeDashboards: [], homeOwners: [],
     dataVersion: 2,
     origin: 'VERIFI',
     backupFileType: 'Account',

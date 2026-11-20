@@ -138,10 +138,9 @@ describe('source data status in the native saved workbench', () => {
     };
     let root = await mount();
     expect(root.querySelector('.time-series-omissions, table')).toBeNull();
-    for (const [width, theme, label] of [[1100, '', 'wide'], [390, 'v1-theme-dark', 'narrow-dark'], [390, 'v1-theme-dark v1-contrast-strong', 'contrast']] as const) {
+    for (const [width, theme] of [[1100, ''], [390, 'v1-theme-dark'], [390, 'v1-theme-dark v1-contrast-strong']] as const) {
       await page.viewport(width, 950); root.className = `v1-root ${theme}`; fixture!.detectChanges();
       expect(root.scrollWidth).toBeLessThanOrEqual(width);
-      await page.screenshot({ element: root, path: `../../../../../.angular/predictor-p2-${label}.png` });
     }
     fixture!.destroy(); fixture = undefined;
     const reopened = await TestBed.inject(SavedVisualizationsDbService).getStoredByGuid(saved.value.guid);

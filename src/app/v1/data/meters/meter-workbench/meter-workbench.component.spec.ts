@@ -106,7 +106,8 @@ describe('MeterWorkbenchComponent', () => {
     expect(breadcrumb?.textContent).toContain('Facility A');
     expect(breadcrumb?.textContent).not.toContain('Meters');
     expect(breadcrumb?.textContent).not.toContain('Electric Main');
-    expect(breadcrumb?.querySelectorAll('app-ui-icon').length).toBe(1);
+    expect(fixture.debugElement.query(By.css('[aria-label="Data context"]')).queryAll(By.directive(IconComponent))
+      .map(icon => icon.componentInstance.name)).toEqual(['account', 'chevronRight', 'facility']);
     expect(element.querySelector('app-page-identity h1')?.textContent).toContain('Electric Main');
     expect(element.querySelector('.v1-eyebrow')).toBeNull();
     expect(text).toContain('Other Fuels');

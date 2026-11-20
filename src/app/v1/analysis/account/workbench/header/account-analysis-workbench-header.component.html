@@ -4,18 +4,9 @@
     @let status = statusPresentation();
     @let outcomes = resultDisplay();
     <header class="v1-data-workbench-header v1-account-analysis-workbench__header">
-      <nav class="v1-data-workbench-breadcrumb" aria-label="Account analysis breadcrumb">
-        <ol>
-          <li><a [routerLink]="navigation.accountAnalysisRoute(account.guid)">{{ account.name || 'Account' }}</a></li>
-          <li aria-hidden="true"><app-ui-icon name="chevronRight"></app-ui-icon></li>
-          <li><a [routerLink]="navigation.accountAnalysisRoute(account.guid)">Analyses</a></li>
-        </ol>
-      </nav>
-
       <div class="v1-data-workbench-title-row">
         <div class="v1-data-workbench-title">
-          <h1 id="v1-account-analysis-workbench-title">
-            <app-ui-icon name="analysis"></app-ui-icon>
+          <app-page-identity [breadcrumbs]="breadcrumbs()" [title]="displayedAnalysis.name || 'Untitled analysis'" icon="accountAnalysis" headingId="v1-account-analysis-workbench-title" breadcrumbLabel="Account analysis context" [customTitle]="true">
             <app-data-workbench-resource-switcher
               [resources]="analysisResources()"
               [selectedId]="displayedAnalysis.guid"
@@ -23,7 +14,7 @@
               ariaLabel="Switch account analysis"
               (resourceSelected)="switchAnalysis($event)">
             </app-data-workbench-resource-switcher>
-          </h1>
+          </app-page-identity>
         </div>
         <div class="v1-data-workbench-actions" aria-label="Analysis summary and controls">
           @if (reportReturn?.origin()) {

@@ -144,7 +144,7 @@ function createSnapshot(): AccountWorkspaceSnapshot {
       productionInAnalysis: true, regressionCoefficient: 1 }]), isGeneratedModel: false, regressionConstant: 10, regressionModelYear: 2022,
       regressionModelStartMonth: 0, regressionStartYear: 2022, regressionModelEndMonth: 11, regressionEndYear: 2022 }] };
   const months = [2022, 2023].flatMap(year => Array.from({ length: 12 }, (_, month) => ({ year, month })));
-  return {
+  return { homeDashboards: [], homeOwners: [],
     account, facilities: [facility], meters: [meter],
     meterData: months.map(({ year, month }) => ({ ...getNewIdbUtilityMeterData(meter, []), year, month: month + 1, day: 1,
       totalEnergyUse: year === 2022 ? 100 : 110, totalCost: 25 })),

@@ -99,8 +99,6 @@ describe('Annual Totals with native calendarization', () => {
     expect(getComputedStyle(annual.querySelector('tbody th')!).textAlign).toBe('left');
     const pdf = host.querySelector<HTMLButtonElement>('footer app-report-output-actions button')!;
     expect(pdf.disabled).toBe(false); expect(pdf.title).toBe('');
-    if (mode === 'manual' && theme !== 'dark') await page.screenshot({ element: host,
-      path: `../../../../../../../.angular/data-quality-complete-${theme}.png` });
     await activate(host.querySelector<HTMLAnchorElement>('footer a')!);
     expect(host.querySelector<HTMLInputElement>('#report-workbench-name')!.value).toBe('Complete Data Quality Report');
     await activate([...host.querySelectorAll<HTMLButtonElement>('.content-presets button')].find(button => button.textContent?.trim() === 'Tables only')!);
@@ -140,8 +138,6 @@ describe('Annual Totals with native calendarization', () => {
       expect(scroller.scrollWidth).toBeGreaterThan(scroller.clientWidth);
       scroller.focus(); await userEvent.keyboard('{ArrowRight}');
     }
-    await page.screenshot({ element: host.querySelector<HTMLElement>('.meter-report')!,
-      path: `../../../../../../../.angular/data-quality-annual-totals-${theme}.png` });
   });
   it('uses the bundled eGRID rates loaded by workspace initialization for electricity emissions', async () => {
     const snapshot = annualTotalsSnapshot(); snapshot.facilities[0].eGridSubregion = 'CAMX';

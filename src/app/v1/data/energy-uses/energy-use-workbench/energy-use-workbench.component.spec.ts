@@ -91,8 +91,8 @@ describe('energy use workbench routes', () => {
     const workbench = await harness.navigateByUrl(path('energy-a'), EnergyUseWorkbenchComponent);
     const portfolio = workbench.breadcrumbs();
     expect(portfolio).toEqual([
-      { label: 'Example account', route: ['/inventory'] },
-      { label: 'North plant', route: ['/inventory'], queryParams: { facility: 'facility-a' } }
+      { label: 'Example account', icon: 'account', route: ['/inventory'] },
+      { label: 'North plant', icon: 'facility', route: ['/inventory'], queryParams: { facility: 'facility-a' } }
     ]);
     const breadcrumb = () => harness.routeNativeElement?.querySelector('app-page-identity nav');
     expect(breadcrumb()?.textContent).not.toContain('Energy Uses');
@@ -194,7 +194,8 @@ describe('energy use workbench routes', () => {
     });
     const workbench = await harness.navigateByUrl(path('energy-a'), EnergyUseWorkbenchComponent);
     const panel = () => harness.routeDebugElement!.query(By.directive(EnergyUseSettingsComponent)).componentInstance as EnergyUseSettingsComponent;
-    await panel().copy(); await harness.fixture.whenStable(); harness.detectChanges();
+    store.publish({ ...snapshot, energyUseEquipment: [...snapshot.energyUseEquipment, copy] });
+    await panel().openTransferred(copy); await harness.fixture.whenStable(); harness.detectChanges();
     expect(router.url).toBe(path('copy'));
     panel().requestDelete(); await panel().confirmReview(); await harness.fixture.whenStable(); harness.detectChanges();
     expect(router.url).toBe(path('energy-a'));

@@ -36,7 +36,7 @@ describe('manual backup downloads in Chromium', () => {
   beforeEach(async () => {
     harness = await IndexedDbTestHarness.create('manual-backup-download');
     const account = { ...getNewIdbAccount(), id: 1, guid: 'account-a', name: 'Account A' };
-    snapshot = {
+    snapshot = { homeDashboards: [], homeOwners: [],
       account,
       facilities: ['facility-a', 'facility-b'].map((guid, index) => ({
         ...getNewIdbFacility(account), id: index + 1, guid, name: guid

@@ -118,12 +118,11 @@ describe('Energy Uses template import and native recovery', () => {
     await expect.element(first).toBeDisabled();
     session.setPending(false); view.detectChanges();
     const root = view.nativeElement.querySelector('main') as HTMLElement;
-    for (const [width, theme, label] of [[1200, '', 'wide'], [390, 'v1-theme-dark', 'narrow-dark']] as const) {
+    for (const [width, theme] of [[1200, ''], [390, 'v1-theme-dark']] as const) {
       await page.viewport(width, 850); root.className = `v1-root ${theme}`;
       view.detectChanges(); await view.whenStable();
       const queue = root.querySelector<HTMLElement>('[aria-labelledby="queue-title"]')!;
       expect(queue.scrollWidth).toBeLessThanOrEqual(queue.clientWidth + 1);
-      await page.screenshot({ element: queue, path: `../../../../../.angular/phase5/upload-queue-${label}.png` });
     }
     (first.element() as HTMLButtonElement).focus();
     await userEvent.keyboard('{Enter}'); view.detectChanges(); await view.whenStable();
@@ -163,12 +162,11 @@ describe('Energy Uses template import and native recovery', () => {
     await expect.element(page.getByRole('table').first()).toBeVisible();
     await expect.element(page.getByRole('button', { name: 'Import', exact: true })).toBeDisabled();
     const root = view.nativeElement.querySelector('main') as HTMLElement;
-    for (const [width, theme, label] of [[1200, '', 'wide'], [390, 'v1-theme-dark', 'narrow-dark'], [390, 'v1-theme-dark v1-contrast-strong', 'narrow-contrast']] as const) {
+    for (const [width, theme] of [[1200, ''], [390, 'v1-theme-dark'], [390, 'v1-theme-dark v1-contrast-strong']] as const) {
       await page.viewport(width, 850);
       root.className = `v1-root ${theme}`;
       view.detectChanges(); await view.whenStable();
       expect(root.scrollWidth).toBeLessThanOrEqual(root.clientWidth + 1);
-      await page.screenshot({ element: root, path: `../../../../../.angular/phase5/import-single-page-${label}.png` });
     }
     const changesButton = page.getByRole('button', { name: 'Show changes for Heater', exact: true });
     await changesButton.click();
@@ -176,7 +174,6 @@ describe('Energy Uses template import and native recovery', () => {
     const changesDialog = page.getByRole('dialog', { name: 'Changes for Heater', exact: true });
     await expect.element(changesDialog).toBeVisible();
     await expect.element(changesDialog.getByRole('table', { name: 'Changes for Heater', exact: true })).toBeVisible();
-    await page.screenshot({ element: changesDialog.element(), path: '../../../../../.angular/phase5/import-change-slideout-narrow.png' });
     await userEvent.keyboard('{Escape}');
     view.detectChanges(); await view.whenStable();
     await expect.element(changesDialog).not.toBeInTheDocument();

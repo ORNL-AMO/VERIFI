@@ -29,7 +29,7 @@ const FACILITY_REPORT_CATALOG = {
   overview: { label: 'Data Overview', icon: 'report', requiresOtherImpacts: false, hasDataChecks: false, contentImplemented: false, supportsAnalysisReturn: false },
   emissionFactors: { label: 'Emission Factors', icon: 'report', requiresOtherImpacts: true, hasDataChecks: false, contentImplemented: true, supportsAnalysisReturn: false },
   savings: { label: 'Savings', icon: 'report', requiresOtherImpacts: false, hasDataChecks: true, contentImplemented: false, supportsAnalysisReturn: false },
-  modeling: { label: 'Modeling', icon: 'report', requiresOtherImpacts: false, hasDataChecks: false, contentImplemented: false, supportsAnalysisReturn: false },
+  modeling: { label: 'Modeling', icon: 'modelingReport', requiresOtherImpacts: false, hasDataChecks: false, contentImplemented: true, supportsAnalysisReturn: true },
   costSavings: { label: 'Cost Savings', icon: 'report', requiresOtherImpacts: false, hasDataChecks: true, contentImplemented: false, supportsAnalysisReturn: false },
   dataQuality: { label: 'Data Quality', icon: 'report', requiresOtherImpacts: false, hasDataChecks: false, contentImplemented: true, supportsAnalysisReturn: true }
 } as const satisfies Readonly<Record<FacilityReportType, ReportDefinition>>;

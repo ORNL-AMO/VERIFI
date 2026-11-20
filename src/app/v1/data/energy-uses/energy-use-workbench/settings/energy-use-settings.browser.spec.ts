@@ -1,3 +1,6 @@
+import type { Type } from '@angular/core';
+import { TransferEnergyUseComponent } from '../transfer-energy-use/transfer-energy-use.component';
+import { getNewIdbEntry } from '@data/models/idbModels/idbEntry';
 import { By } from '@angular/platform-browser';
 import { SetupCalculatorComponent } from '../../forms/setup-calculator/setup-calculator.component';
 import { PortalModule, TemplatePortal } from '@angular/cdk/portal';
@@ -66,7 +69,7 @@ describe('Energy Uses creation and saved Settings in Chromium', () => {
     root = document.createElement('main'); root.className = 'v1-root'; root.style.overflow = 'auto'; document.body.append(root);
   });
   afterEach(async () => { fixtures.forEach(fixture => fixture.destroy()); root.remove(); vi.restoreAllMocks(); await harness.destroy(); });
-  function mount<T>(type: import('@angular/core').Type<T>): ComponentFixture<T> {
+  function mount<T>(type: Type<T>): ComponentFixture<T> {
     const fixture = TestBed.createComponent(type); fixtures.push(fixture);
     // The browser TestBed renderer otherwise removes earlier fixture roots when mounting the portal host.
     fixture.nativeElement.removeAttribute('id'); root.append(fixture.nativeElement); return fixture;
@@ -119,7 +122,6 @@ describe('Energy Uses creation and saved Settings in Chromium', () => {
       await page.viewport(width, 850); root.className = `v1-root ${theme}`; await settle(portal);
       const dialog = selection.element() as HTMLElement;
       expect(dialog.scrollWidth).toBeLessThanOrEqual(dialog.clientWidth + 1);
-      await page.screenshot({ element: root, path: `./__screenshots__/meter-groups-${width}-${theme.includes('contrast') ? 'contrast' : theme ? 'dark' : 'light'}.png` });
     }
     await userEvent.keyboard('{Tab}{Shift>}{Tab}{/Shift}');
     expect(selection.element().contains(document.activeElement)).toBe(true);
@@ -194,7 +196,9 @@ describe('Energy Uses creation and saved Settings in Chromium', () => {
     const store = TestBed.inject(AccountWorkspaceStore), saved = store.energyUseEquipment()[0];
     expect(saved.utilityData[0].energyUse[0].energyUse).toBe(87600); expect(committed).toHaveBeenCalledTimes(2);
     vi.spyOn(TestBed.inject(Router), 'navigate').mockResolvedValue(true);
-    await settings.componentInstance.copy(); await settle(settings);
+    const transfer = settings.debugElement.query(By.directive(TransferEnergyUseComponent)).componentInstance as TransferEnergyUseComponent;
+    transfer.open(); transfer.controller.form.controls.asCopy.setValue(true);
+    transfer.controller.chooseGroup(store.energyUseGroups()[0]); await transfer.confirm(); await settle(settings);
     const copy = store.energyUseEquipment().find(item => item.guid !== created.guid)!;
     expect(copy.utilityData).toEqual(saved.utilityData); expect(copy.operatingConditionsData).toEqual(saved.operatingConditionsData);
     expect(copy.energyUseGroupId).toBe(saved.energyUseGroupId); expect(committed).toHaveBeenCalledTimes(3);
@@ -215,7 +219,8 @@ describe('Energy Uses creation and saved Settings in Chromium', () => {
     const actions = TestBed.inject(EnergyUseActionsService);
     const created = await actions.create({ initialYear: 2025, group: { kind: 'new', name: 'Equipment' },
       settings: { name: 'Pump', notes: '', equipmentType: 'Pump', sources: [{ energySource: 'Electricity', size: 10, units: 'kW', numberOfEquipment: 1 }], utilityMeterGroupIds: [] } }, account.guid, facility.guid);
-    const survivor = await actions.copy({ accountGuid: account.guid, facilityGuid: facility.guid, energyUseGuid: created.guid });
+    const store = TestBed.inject(AccountWorkspaceStore);
+    const survivor = (await actions.transferItems({ accountGuid: account.guid, mode: 'copy', sources: [{ item: created, facility: store.facilities()[0] }], destinationFacility: store.facilities()[0], destinationGroup: { kind: 'existing', group: store.energyUseGroups()[0] }, copyIdentities: [getNewIdbEntry()] })).items[0];
     guid.set(created.guid);
     const settings = mount(EnergyUseSettingsComponent);
     const portal = mount(EnergyUsePortalHost);
@@ -271,7 +276,6 @@ describe('Energy Uses creation and saved Settings in Chromium', () => {
       await page.viewport(width, 850); root.className = `v1-root ${theme}`; await settle(settings);
       expect(root.scrollWidth).toBeLessThanOrEqual(root.clientWidth + 1);
       expect(root.querySelectorAll('select:not(.v1-select)')).toHaveLength(0);
-      await page.screenshot({ element: root, path: `./__screenshots__/settings-${width}-${theme.includes('contrast') ? 'contrast' : theme ? 'dark' : 'light'}.png` });
     }
     await page.getByRole('button', { name: 'Select Utilities', exact: true }).click(); await settle(settings); await settle(portal);
     const utilities = page.getByRole('dialog', { name: 'Select Utilities', exact: true });
@@ -418,7 +422,6 @@ describe('Energy Uses creation and saved Settings in Chromium', () => {
     for (const [width, theme] of [[1100, ''], [390, 'v1-theme-dark'], [390, 'v1-theme-dark v1-contrast-strong']] as const) {
       await page.viewport(width, 850); root.className = `v1-root ${theme}`; await settle(portal);
       expect(hours.element().getBoundingClientRect().width).toBeLessThanOrEqual(width);
-      await page.screenshot({ element: hours.element(), path: `./__screenshots__/calculator-hours-${width}-${theme || 'light'}.png` });
     }
     await hours.getByRole('button', { name: 'Cancel', exact: true }).click(); await settle(portal);
     expect(document.activeElement).toBe(hoursOpener.element());
@@ -438,7 +441,6 @@ describe('Energy Uses creation and saved Settings in Chromium', () => {
     await load.getByRole('spinbutton', { name: 'Current (A)', exact: true }).fill('5');
     await load.getByRole('combobox', { name: 'Number of phases', exact: true }).selectOptions(load.getByRole('option', { name: '1', exact: true })); await settle(portal);
     expect(load.element().textContent).toContain('Calculated Power:'); expect(load.element().textContent).toContain('50.0%');
-    await page.screenshot({ element: load.element(), path: './__screenshots__/calculator-load-voltage.png' });
     await load.getByRole('button', { name: 'Measured power', exact: true }).click();
     await load.getByRole('spinbutton', { name: 'Measured power', exact: true }).fill('20'); await settle(portal);
     expect(load.element().textContent).toContain('200.0%'); expect(load.element().textContent).toContain('capped at 115%');

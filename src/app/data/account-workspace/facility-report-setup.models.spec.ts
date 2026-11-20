@@ -1,6 +1,17 @@
-import { getAnalysisReportSettings, getDataQualityReportSettings } from '@data/models/idbModels/facilityReport';
-import { mergeFacilityAnalysisSettings, mergeFacilityDataQualitySettings, mergeFacilityEmissionFactorsSettings } from './facility-report-setup.models';
+import { getAnalysisReportSettings, getDataQualityReportSettings, getModelingReportSettings } from '@data/models/idbModels/facilityReport';
+import { mergeFacilityAnalysisSettings, mergeFacilityDataQualitySettings, mergeFacilityModelingSettings, mergeFacilityEmissionFactorsSettings } from './facility-report-setup.models';
 describe('facility report setup patches', () => {
+  it('merges Modeling switches and clears its year without changing untouched settings', () => {
+    const saved = { ...getModelingReportSettings(), reportYear: 2023, includeExecutiveSummary: false };
+    expect(mergeFacilityModelingSettings(saved, { reportYear: null, includeIssuesSummary: false })).toEqual({
+      reportYear: undefined, includeExecutiveSummary: false, includeIssuesSummary: false, includeDataValidationTables: true
+    });
+    expect(saved.reportYear).toBe(2023); expect(saved.includeIssuesSummary).toBe(true);
+  });
+  it.each([{ reportYear: 2024.5 }, { reportYear: 0 }, { reportYear: '2024' }, { includeIssuesSummary: 'true' },
+    { includeExecutiveSummary: null }, { unknown: true }])('rejects malformed Modeling settings: %j', patch => {
+    expect(() => mergeFacilityModelingSettings(getModelingReportSettings(), patch as never)).toThrow('invalid');
+  });
   it('merges factor years independently, preserves unknown fields, and saves cleared or reversed draft periods', () => {
     const saved = { startYear: 2022, endYear: 2024, futureOption: true };
     expect(mergeFacilityEmissionFactorsSettings(saved, { startYear: 2025 })).toEqual({ ...saved, startYear: 2025 });

@@ -104,18 +104,16 @@ describe('populated predictor visualization backup acceptance', () => {
         const chart = echarts.getInstanceByDom(root.querySelector<HTMLElement>('.time-series-canvas')!)!;
         expect((chart.getOption() as any).series.find((series: any) => series.name === 'Saved cooling')).toMatchObject({ type: 'bar', yAxisIndex: 1 });
         if (decoded.definition.name === 'All predictors') {
-          for (const [width, theme, label] of [[1100, '', 'wide'], [390, 'v1-theme-dark', 'narrow-dark']] as const) {
+          for (const [width, theme] of [[1100, ''], [390, 'v1-theme-dark']] as const) {
             await page.viewport(width, 850); root.className = `v1-root ${theme}`; fixture.detectChanges();
             await vi.waitFor(() => expect(chart.getWidth()).toBeLessThanOrEqual(width));
             expect(root.scrollWidth).toBeLessThanOrEqual(width);
-            await page.screenshot({ element: root, path: `../../../../.angular/predictor-p4-restored-${kind}-${label}.png` });
           }
           await page.viewport(1100, 850); root.className = 'v1-root';
           await media.send('Emulation.setEmulatedMedia', { media: 'print' }); fixture.detectChanges();
           expect(root.querySelector('.time-series-actions, table')).toBeNull();
           await vi.waitFor(() => expect(chart.getHeight()).toBe(Math.round(root.querySelector<HTMLElement>('.time-series-canvas')!.getBoundingClientRect().height)));
           expect(previewValuesText(fixture!)).toBe(values);
-          await page.screenshot({ element: root, path: `../../../../.angular/predictor-p4-restored-${kind}-print.png` });
           await media.send('Emulation.setEmulatedMedia', { media: '' });
         }
       }

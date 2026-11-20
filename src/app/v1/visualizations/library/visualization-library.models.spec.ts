@@ -1,3 +1,4 @@
+import type { UtilityVisualizationSource } from '@domain/visualizations/visualization-definition';
 import { serializeVisualizationDefinition } from '@domain/visualizations/visualization-source-groups';
 import { createVisualizationDefinition, createVisualizationSetupDefinition } from '@domain/visualizations/visualization-definition';
 import { getNewIdbSavedVisualization } from '@data/models/idbModels/savedVisualization';
@@ -20,7 +21,7 @@ describe('visualization library projections', () => {
   it('deduplicates repeated data-source categories and matches each Dashboard filter', () => {
     const base = createVisualizationSetupDefinition({ name: 'All sources', accountGuid: 'account-a', facilitySelection: { kind: 'all' },
       chart: createVisualizationChart('line'), sourceKinds: ['utility', 'predictor', 'energy-use', 'analysis'] });
-    const definition = { ...base, sources: [...base.sources, { ...base.sources[0] as import('@domain/visualizations/visualization-definition').UtilityVisualizationSource, id: 'utility-cost', measure: 'cost' as const }] };
+    const definition = { ...base, sources: [...base.sources, { ...base.sources[0] as UtilityVisualizationSource, id: 'utility-cost', measure: 'cost' as const }] };
     const entries = buildVisualizationLibrary({ ...librarySnapshot(), savedVisualizations: [getNewIdbSavedVisualization(definition)] });
     expect(entries[0].dataSourceLabel).toBe('Meters, Predictors, Energy Use, Analysis');
     expect(entries[0].sourceKinds).toEqual(['utility', 'predictor', 'energy-use', 'analysis']);

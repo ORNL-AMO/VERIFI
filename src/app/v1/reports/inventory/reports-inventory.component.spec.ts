@@ -1,3 +1,4 @@
+import type { WritableSignal } from '@angular/core';
 import { reportTypeChoices } from '@app/v1/reports/catalog/report-catalog';
 import { WorkspaceNavigationService } from '@app/v1/shell/workspace-navigation.service';
 import { TestBed } from '@angular/core/testing';
@@ -120,13 +121,13 @@ describe('report browse state', () => {
     state.set({ facilityGuid: 'facility-b' }); fixture.detectChanges();
     store.publish({ ...store.snapshot()!, account: { ...saved.account, displayEmissions: false } }); fixture.detectChanges();
     state.set({ accountGuid: 'account-a' }); TestBed.inject(WorkspaceNavigationService).inventoryFacilityGuid;
-    (TestBed.inject(WorkspaceNavigationService).inventoryFacilityGuid as import('@angular/core').WritableSignal<string | undefined>).set('facility-a'); fixture.detectChanges();
+    (TestBed.inject(WorkspaceNavigationService).inventoryFacilityGuid as WritableSignal<string | undefined>).set('facility-a'); fixture.detectChanges();
     expect(component.filtersForm.controls.type.value).toBe('all');
     expect(component.filters().type).toBe('all');
     expect(component.filteredEntries().map(entry => entry.report.guid)).toEqual(['report-a']);
     state.set({ facilityGuid: 'facility-b' }); fixture.detectChanges();
     state.set({ accountGuid: 'account-a' }); TestBed.inject(WorkspaceNavigationService).inventoryFacilityGuid;
-    (TestBed.inject(WorkspaceNavigationService).inventoryFacilityGuid as import('@angular/core').WritableSignal<string | undefined>).set('facility-a'); fixture.detectChanges();
+    (TestBed.inject(WorkspaceNavigationService).inventoryFacilityGuid as WritableSignal<string | undefined>).set('facility-a'); fixture.detectChanges();
     expect(component.filtersForm.controls.type.value).toBe('all');
   });
 
@@ -165,7 +166,7 @@ describe('report browse state', () => {
     expect(returned.componentInstance.inventory.detail()).toBe('summary');
     expect(returned.componentInstance.inventory.overrides()[key]).toBe('detailed'); returned.destroy();
     state.set({ accountGuid: 'account-a' }); TestBed.inject(WorkspaceNavigationService).inventoryFacilityGuid;
-    (TestBed.inject(WorkspaceNavigationService).inventoryFacilityGuid as import('@angular/core').WritableSignal<string | undefined>).set('facility-a');
+    (TestBed.inject(WorkspaceNavigationService).inventoryFacilityGuid as WritableSignal<string | undefined>).set('facility-a');
     const facility = TestBed.createComponent(ReportsInventoryComponent); facility.detectChanges();
     expect(facility.componentInstance.filtersForm.controls.search.value).toBe('');
     expect(facility.componentInstance.inventory.detail()).toBe('summary'); expect(facility.componentInstance.inventory.overrides()).toEqual({});

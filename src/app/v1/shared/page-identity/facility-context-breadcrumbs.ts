@@ -7,5 +7,5 @@ export function facilityContextBreadcrumbs(
   facility: PageBreadcrumb,
   resource: PageBreadcrumb
 ): readonly PageBreadcrumb[] {
-  return singleSite ? [resource] : [account, facility];
+  return singleSite ? [resource] : [{ icon: 'account', ...account }, { icon: 'facility', ...facility }];
 }

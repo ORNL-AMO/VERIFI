@@ -94,17 +94,6 @@ describe('facility analysis report journey in Chromium', () => {
       }
     }
     root.className = 'v1-root v1-palette-blueprint';
-    if (category === 'energy' && !source) {
-      await page.viewport(1200, 900);
-      root.querySelector<HTMLElement>('main.report-workbench-content')!.scrollTop = 0;
-      await new Promise(requestAnimationFrame);
-      await page.screenshot({ element: root, path: './__screenshots__/facility-analysis-setup.png' });
-      await page.viewport(390, 900); root.classList.add('v1-theme-dark', 'v1-contrast-strong');
-      root.querySelector<HTMLElement>('main.report-workbench-content')!.scrollTop = 0;
-      await new Promise(requestAnimationFrame);
-      await page.screenshot({ element: root, path: './__screenshots__/facility-analysis-setup-narrow.png' });
-      root.classList.remove('v1-theme-dark', 'v1-contrast-strong');
-    }
     if (regression) {
       await view.open('facility-report', 'report'); await waitFor(state => state.state === 'review-required');
       await view.open('facility-report', 'data-checks'); await waitFor(state => !!state.value?.checks);
@@ -147,12 +136,6 @@ describe('facility analysis report journey in Chromium', () => {
       expect(table.querySelector('.v1-analysis-results-table__section-heading--use')).not.toBeNull();
       expect(table.querySelector('tbody tr:last-child')?.classList.contains('v1-analysis-results__fiscal-year-end')).toBe(true);
     }
-    if (category === 'energy' && !source) {
-      await page.viewport(1440, 1400);
-      for (let parent = annual.parentElement; parent; parent = parent.parentElement) parent.scrollTop = 0;
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      await page.screenshot({ element: root, path: './__screenshots__/facility-analysis-continuous-desktop.png' });
-    }
     for (const classes of ['', ' v1-theme-dark', ' v1-theme-dark v1-contrast-strong']) {
       root.className = 'v1-root v1-palette-blueprint' + classes;
       for (const width of [1440, 1024, 640, 390]) {
@@ -173,11 +156,6 @@ describe('facility analysis report journey in Chromium', () => {
           expect(canvas.getBoundingClientRect().width).toBeLessThanOrEqual(root.clientWidth);
         }
       }
-    }
-    if (category === 'energy' && !source) {
-      for (let parent = annual.parentElement; parent; parent = parent.parentElement) parent.scrollTop = 0;
-      await new Promise(requestAnimationFrame);
-      await page.screenshot({ element: root, path: './__screenshots__/facility-analysis-continuous-narrow.png' });
     }
     const deepCanvas = groupMonthly.querySelector<HTMLElement>('.v1-meter-results-chart__chart')!;
     deepCanvas.scrollIntoView({ block: 'center' });
@@ -218,7 +196,6 @@ describe('facility analysis report journey in Chromium', () => {
         await portal.whenStable(); view.harness.detectChanges();
         expect(preview.querySelector('article.report-document')).toBeNull();
         expect((portal.nativeElement as HTMLElement).querySelectorAll('article.report-document').length).toBe(papers.length);
-        await page.screenshot({ element: (portal.nativeElement as HTMLElement).querySelector<HTMLElement>('[role=dialog]')!, path: './__screenshots__/facility-analysis-presentation.png' });
         const presentedPaper = (portal.nativeElement as HTMLElement).querySelector<HTMLElement>('article.report-document')!;
         const paperWidth = presentedPaper.getBoundingClientRect().width;
         await page.getByRole('button', { name: 'Zoom in', exact: true }).click(); await portal.whenStable();

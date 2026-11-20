@@ -12,7 +12,7 @@ import { IndexedDbTransactionContext, IndexedDbTransactionService } from '@data/
 import { IdbFacility } from '@data/models/idbModels/facility';
 import { IdbUtilityMeterGroup } from '@data/models/idbModels/utilityMeterGroup';
 import { IdbUtilityMeter } from '@data/models/idbModels/utilityMeter';
-import { EnergyUseBatchChange, EnergyUseCommandIdentity, EnergyUseGroupIdentity, EnergyUseGroupDeletion, EnergyUseGroupSettings, EnergyUseOwner, energyUseMeterLinksError } from './energy-use-command.models';
+import { EnergyUseTransferRequest, EnergyUseTransferResult, EnergyUseBatchChange, EnergyUseCommandIdentity, EnergyUseGroupIdentity, EnergyUseGroupDeletion, EnergyUseGroupSettings, EnergyUseOwner, energyUseMeterLinksError } from './energy-use-command.models';
 
 @Injectable({ providedIn: 'root' })
 export class EnergyUseCommandHandler {
@@ -28,18 +28,11 @@ export class EnergyUseCommandHandler {
     return this.insertItem(owner, item, newGroup, validateLinks);
   }
 
-  async copyItem(identity: EnergyUseCommandIdentity, reviewed: IdbFacilityEnergyUseEquipment,
-    copy: IdbFacilityEnergyUseEquipment): Promise<IdbFacilityEnergyUseEquipment> {
-    return this.insertItem(identity, structuredClone(copy), undefined, false, { identity: { ...identity }, item: structuredClone(reviewed) });
-  }
-
   private async insertItem(owner: EnergyUseOwner, item: IdbFacilityEnergyUseEquipment,
-    newGroup: IdbFacilityEnergyUseGroup | undefined, validateLinks: boolean,
-    source?: { readonly identity: EnergyUseCommandIdentity; readonly item: IdbFacilityEnergyUseEquipment }): Promise<IdbFacilityEnergyUseEquipment> {
+    newGroup: IdbFacilityEnergyUseGroup | undefined, validateLinks: boolean): Promise<IdbFacilityEnergyUseEquipment> {
     return this.transactions.runTransaction(['facilities', 'facilityEnergyUseGroups', 'facilityEnergyUseEquipment', 'utilityMeterGroups', 'utilityMeter'], 'readwrite', async tx => {
       await this.requireFacility(tx, owner);
       this.requireItemOwner(item, owner);
-      if (source) await this.requireCurrentItem(tx, source.identity, source.item);
       if (newGroup && (newGroup.id !== undefined || !newGroup.name.trim() || newGroup.guid !== item.energyUseGroupId
         || newGroup.accountId !== owner.accountGuid || newGroup.facilityId !== owner.facilityGuid)) this.reject('The new energy-use group is invalid.');
       const existing = await tx.getAllByIndex<IdbFacilityEnergyUseEquipment>('facilityEnergyUseEquipment', 'guid', item.guid);
@@ -98,20 +91,62 @@ export class EnergyUseCommandHandler {
     });
   }
 
-  /** Move within one facility without rewriting settings, history, or utility links. */
-  async transferItem(identity: EnergyUseCommandIdentity, reviewed: IdbFacilityEnergyUseEquipment,
-    target: IdbFacilityEnergyUseGroup): Promise<IdbFacilityEnergyUseEquipment> {
-    const before = structuredClone(reviewed), destination = structuredClone(target);
+  /** Every reviewed item and an optional destination group commit together. */
+  async transferItems(request: EnergyUseTransferRequest): Promise<EnergyUseTransferResult> {
+    const review = structuredClone(request);
     return this.transactions.runTransaction(['facilities', 'facilityEnergyUseGroups', 'facilityEnergyUseEquipment'], 'readwrite', async tx => {
-      await this.requireFacility(tx, identity);
-      await this.requireCurrentItem(tx, identity, before);
-      const group = await this.requireGroup(tx, identity, destination.guid);
-      if (group.guid === before.energyUseGroupId || group.guid === 'unavailable' || JSON.stringify(group) !== JSON.stringify(destination)) {
-        this.reject('The destination group changed or is invalid. Choose another group and review the transfer again.');
+      const { accountGuid, mode, sources, destinationFacility, destinationGroup, copyIdentities } = review;
+      if (!sources.length || new Set(sources.map(row => row.item.guid)).size !== sources.length
+        || !['move', 'copy'].includes(mode)) this.reject('Choose a nonempty set of unique energy uses.');
+      const targetOwner = { accountGuid, facilityGuid: destinationFacility.guid };
+      const requireReviewedFacility = async (before: IdbFacility) => {
+        await this.requireFacility(tx, { accountGuid, facilityGuid: before.guid });
+        const current = await tx.getAllByIndex<IdbFacility>('facilities', 'guid', before.guid);
+        if (JSON.stringify(current[0]) !== JSON.stringify(before)) this.reject('Facility settings changed. Review the transfer again.');
+      };
+      await requireReviewedFacility(destinationFacility);
+      let group = destinationGroup.group;
+      if (group.guid === 'unavailable' || group.accountId !== accountGuid || group.facilityId !== destinationFacility.guid) this.reject('The destination group is invalid.');
+      if (destinationGroup.kind === 'new') {
+        if (group.id !== undefined || !group.guid || !group.name.trim()
+          || (await tx.getAllByIndex('facilityEnergyUseGroups', 'guid', group.guid)).length) this.reject('The new destination group is invalid or already exists.');
+        group = { ...group, name: group.name.trim() };
+      } else if (destinationGroup.kind === 'existing') {
+        const current = await this.requireGroup(tx, targetOwner, group.guid);
+        if (JSON.stringify(current) !== JSON.stringify(group)) this.reject('The destination group changed. Review the transfer again.');
+      } else this.reject('Choose a destination group.');
+      if (mode === 'copy' && (copyIdentities.length !== sources.length
+        || new Set(copyIdentities.map(row => row.guid)).size !== sources.length)) this.reject('Copy identities are invalid.');
+      for (const [index, row] of sources.entries()) {
+        await requireReviewedFacility(row.facility);
+        const identity = { accountGuid, facilityGuid: row.facility.guid, energyUseGuid: row.item.guid };
+        await this.requireCurrentItem(tx, identity, row.item);
+        if (mode === 'move' && row.item.facilityId === destinationFacility.guid && row.item.energyUseGroupId === group.guid) this.reject('Choose a different group when moving energy uses.');
+        if (mode === 'copy') {
+          const entry = copyIdentities[index];
+          if (!entry.guid || entry.id !== undefined || !(entry.createdDate instanceof Date) || !Number.isFinite(entry.createdDate.getTime())
+            || !(entry.modifiedDate instanceof Date) || !Number.isFinite(entry.modifiedDate.getTime())
+            || (await tx.getAllByIndex('facilityEnergyUseEquipment', 'guid', entry.guid)).length) this.reject('A copy identity is invalid or already exists.');
+        }
       }
-      const saved = { ...before, energyUseGroupId: group.guid, modifiedDate: new Date() };
-      await tx.put('facilityEnergyUseEquipment', saved);
-      return saved;
+      if (destinationGroup.kind === 'new') {
+        const id = await tx.add('facilityEnergyUseGroups', group);
+        group = { ...group, id: Number(id) };
+      }
+      const items: IdbFacilityEnergyUseEquipment[] = [];
+      for (const [index, { item }] of sources.entries()) {
+        const saved = { ...structuredClone(item), facilityId: destinationFacility.guid, energyUseGroupId: group.guid,
+          utilityMeterGroupIds: item.facilityId === destinationFacility.guid ? [...item.utilityMeterGroupIds] : [], modifiedDate: new Date() };
+        if (mode === 'copy') {
+          const entry = copyIdentities[index];
+          Object.assign(saved, { guid: entry.guid, createdDate: entry.createdDate, modifiedDate: entry.modifiedDate,
+            name: `${item.name || 'Untitled energy use'} (copy)`, selected: false });
+          delete saved.id;
+          saved.id = Number(await tx.add('facilityEnergyUseEquipment', saved));
+        } else await tx.put('facilityEnergyUseEquipment', saved);
+        items.push(saved);
+      }
+      return { mode, items, group };
     });
   }
 

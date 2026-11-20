@@ -68,7 +68,6 @@ describe('header facility chooser presentation', () => {
     fixture.nativeElement.className = 'v1-root'; fixture.detectChanges();
     const toggle = () => fixture.nativeElement.querySelector('.v1-facility-picker__toggle') as HTMLButtonElement;
     expect(fixture.nativeElement.querySelector('.v1-workspace__account-link').title).toBe(account.name);
-    await page.screenshot({ element: fixture.nativeElement.querySelector('header'), path: '../../../../../.angular/facility-scope/header-wide.png' });
     for (const palette of PORTFOLIO_PALETTES) {
       for (const mode of ['', 'v1-theme-dark', 'v1-contrast-strong', 'v1-theme-dark v1-contrast-strong']) {
         fixture.nativeElement.className = `v1-root v1-palette-${palette} ${mode}`;
@@ -96,7 +95,6 @@ describe('header facility chooser presentation', () => {
     expect(menu.getBoundingClientRect().bottom).toBeLessThanOrEqual(400);
     expect(fixture.nativeElement.querySelector('header').scrollWidth).toBeLessThanOrEqual(480);
     await userEvent.keyboard('{Escape}'); fixture.detectChanges();
-    await page.screenshot({ element: fixture.nativeElement.querySelector('header'), path: '../../../../../.angular/facility-scope/header-narrow.png' });
     navigation.singleFacilityContext.set(facility); fixture.detectChanges();
     const identity = fixture.nativeElement.querySelector('.v1-workspace__single-identity') as HTMLElement;
     expect(identity.title).toBe(facility.name);

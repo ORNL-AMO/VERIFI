@@ -4,7 +4,7 @@ import { defineConfig } from 'vitest/config';
 export default defineConfig({
   test: {
     env: {
-      VERIFI_CAPTURE_CHART_SCREENSHOTS: process.env['VERIFI_CAPTURE_CHART_SCREENSHOTS'] ?? ''
+      VERIFI_EXPORT_ARTIFACT_DIR: process.env['VERIFI_EXPORT_ARTIFACT_DIR'] ?? ''
     }
   },
   optimizeDeps: {

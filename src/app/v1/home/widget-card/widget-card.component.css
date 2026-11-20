@@ -1,0 +1,14 @@
+:host { display: block; min-width: 0; border: 1px solid var(--v1-border); border-radius: 0; background: var(--v1-surface); padding: 1rem; color: var(--v1-text); }
+h2, p, a { overflow-wrap: anywhere; }
+h2 { font-size: 1.2rem; margin: 0 0 .75rem; }
+.widget-controls { display: flex; flex-wrap: wrap; gap: .35rem; }
+.widget-settings { display: grid; gap: .6rem; margin-block: .75rem; }
+label { display: grid; gap: .25rem; min-width: 0; }
+input[type=text], textarea { min-width: 0; width: 100%; padding: .5rem; color: var(--v1-text); background: var(--v1-control-surface); border: 1px solid var(--v1-border); }
+.widget-sizes { min-width: 0; display: flex; align-items: center; flex-wrap: wrap; gap: .75rem; }
+.widget-sizes legend { float: none; width: auto; font-size: 1rem; margin: 0; }
+.widget-sizes label { display: inline-flex; align-items: center; gap: .3rem; }
+.widget-resize { touch-action: none; }
+.widget-context, .widget-hint { font-size: .9rem; color: var(--v1-muted); }
+.home-note { white-space: pre-wrap; overflow-wrap: anywhere; }
+@media print { :host { break-inside: avoid; } .widget-controls, .widget-settings { display: none !important; } }

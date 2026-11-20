@@ -3,9 +3,9 @@ import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace
 import { WorkspaceCommandBoundary } from '@data/account-workspace/workspace-command-boundary.service';
 import { WorkspaceWriteError } from '@data/account-workspace/workspace-commands.models';
 import { EnergyUseCommandHandler } from '@data/account-workspace/handlers/energy-use-command-handler.service';
-import { EnergyUseBatchChange, EnergyUseGroupIdentity, EnergyUseGroupDeletion, EnergyUseGroupSettings, energyUseMeterLinksError } from '@data/account-workspace/handlers/energy-use-command.models';
+import { EnergyUseTransferRequest, EnergyUseTransferResult, EnergyUseBatchChange, EnergyUseGroupIdentity, EnergyUseGroupDeletion, EnergyUseGroupSettings, energyUseMeterLinksError } from '@data/account-workspace/handlers/energy-use-command.models';
 import { IdbFacilityEnergyUseGroup, getNewIdbFacilityEnergyUseGroup, getRandomFlatHexColor } from '@data/models/idbModels/facilityEnergyUseGroups';
-import { IdbEntry, getNewIdbEntry } from '@data/models/idbModels/idbEntry';
+import { getNewIdbEntry } from '@data/models/idbModels/idbEntry';
 import { IdbFacilityEnergyUseEquipment } from '@data/models/idbModels/facilityEnergyUseEquipment';
 import { EditorConflictError, draftEqual } from '@app/v1/data/editing/draft-reconciliation';
 import { EnergyUseSetupValues, SetupRemovalReviews, applyEnergyUseSetup, energyUseSetup, normalizeEnergyUseSetup, reconcileEnergyUseSetup } from './models/energy-use-setup.models';
@@ -66,25 +66,19 @@ export class EnergyUseActionsService {
     });
     return result.value;
   }
-  async copy(identity: EnergyUseIdentity, request: IdbEntry = getNewIdbEntry()): Promise<IdbFacilityEnergyUseEquipment> {
-    const result = await this.boundary.execute({ entityKind: 'energyUseEquipment', changeKind: 'add', label: 'Copying energy use',
-      notification: { successTitle: 'Energy use copied' } }, async () => {
-      this.requireFacility(identity.accountGuid, identity.facilityGuid);
-      const current = this.requireItem(identity);
-      const copy = { ...structuredClone(current), ...request, name: `${current.name || 'Untitled energy use'} (copy)`, selected: false };
-      delete copy.id;
-      return this.handler.copyItem(identity, current, copy);
-    });
-    return result.value;
-  }
-  async transfer(identity: EnergyUseIdentity, reviewed: IdbFacilityEnergyUseEquipment,
-    target: IdbFacilityEnergyUseGroup): Promise<IdbFacilityEnergyUseEquipment> {
-    const before = structuredClone(reviewed), destination = structuredClone(target);
-    const result = await this.boundary.execute({ entityKind: 'energyUseEquipment', changeKind: 'update', entityGuid: identity.energyUseGuid,
-      label: 'Transferring energy use', notification: { successTitle: 'Energy use transferred' } }, async () => {
-      this.requireFacility(identity.accountGuid, identity.facilityGuid);
-      if (!draftEqual(this.requireItem(identity), before)) this.reject('The saved energy use changed. Review its transfer again.');
-      return this.handler.transferItem(identity, before, destination);
+  async transferItems(request: EnergyUseTransferRequest): Promise<EnergyUseTransferResult> {
+    const submitted = structuredClone(request);
+    const copying = submitted.mode === 'copy';
+    const result = await this.boundary.execute({ entityKind: 'energyUseEquipment', changeKind: 'bulk',
+      entityGuid: submitted.accountGuid, label: copying ? 'Copying energy uses' : 'Transferring energy uses',
+      publication: { mode: 'reload' }, notification: { successTitle: copying ? 'Energy uses copied' : 'Energy uses transferred' } }, async () => {
+      this.requireFacility(submitted.accountGuid, submitted.destinationFacility.guid);
+      for (const row of submitted.sources) {
+        this.requireFacility(submitted.accountGuid, row.facility.guid);
+        const identity = { accountGuid: submitted.accountGuid, facilityGuid: row.facility.guid, energyUseGuid: row.item.guid };
+        if (!draftEqual(this.requireItem(identity), row.item)) this.reject('Selected energy uses changed. Review the transfer again.');
+      }
+      return this.handler.transferItems(submitted);
     });
     return result.value;
   }

@@ -1,0 +1,3 @@
+:host { display: block; min-width: 0; }
+a { overflow-wrap: anywhere; }
+@media print { :host { display: none; } }

@@ -1,5 +1,5 @@
 import { AnalysisTableColumns } from '@data/models/analysis';
-import { AnalysisReportSettings, DataQualityReportSettings, EmissionFactorsReportSettings, getAnalysisReportSettings, getDataQualityReportSettings } from '@data/models/idbModels/facilityReport';
+import { AnalysisReportSettings, DataQualityReportSettings, ModelingReportSettings, EmissionFactorsReportSettings, getAnalysisReportSettings, getDataQualityReportSettings, getModelingReportSettings } from '@data/models/idbModels/facilityReport';
 import { validEmissionFactorYear } from '@domain/reports/emission-factors/emission-factors-period';
 import { WorkspaceWriteError } from './workspace-commands.models';
 
@@ -12,7 +12,26 @@ export interface FacilityReportSetupChanges {
     readonly analysisTableColumns?: Partial<AnalysisTableColumns>;
   };
   readonly dataQualityReportSettings?: DataQualityReportSetupChanges;
+  readonly modelingReportSettings?: Partial<Omit<ModelingReportSettings, 'reportYear'>> & { readonly reportYear?: number | null };
   readonly emissionFactorsReportSettings?: { readonly startYear?: number | null; readonly endYear?: number | null };
+}
+
+export function mergeFacilityModelingSettings(saved: ModelingReportSettings,
+  changes: FacilityReportSetupChanges['modelingReportSettings']): ModelingReportSettings {
+  const defaults = getModelingReportSettings();
+  const settings = { ...defaults, ...saved };
+  for (const [key, value] of Object.entries(changes ?? {})) {
+    if (value === undefined) continue;
+    const invalidSetting = () => { throw new WorkspaceWriteError('validation-failed', 'A Modeling report setting is invalid.'); };
+    if (key === 'reportYear') {
+      if (value !== null && (!Number.isInteger(value) || Number(value) < 1800 || Number(value) > 9999)) invalidSetting();
+      settings.reportYear = value === null ? undefined : value as number;
+    } else {
+      if (!Object.hasOwn(defaults, key) || typeof value !== 'boolean') invalidSetting();
+      Object.assign(settings, { [key]: value });
+    }
+  }
+  return settings;
 }
 
 export function mergeFacilityEmissionFactorsSettings(saved: EmissionFactorsReportSettings,

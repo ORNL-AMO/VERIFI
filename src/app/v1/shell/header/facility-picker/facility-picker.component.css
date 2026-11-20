@@ -19,8 +19,9 @@
   border-radius: var(--v1-radius-sm);
   background: var(--v1-surface);
   color: var(--v1-text);
-  font-size: .85rem;
+  font-size: 1rem;
   font-weight: 700;
+  line-height: 1.25;
   text-align: left;
   cursor: pointer;
   transition: border-color .18s ease, background-color .18s ease;

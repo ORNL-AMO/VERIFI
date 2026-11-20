@@ -1,0 +1,19 @@
+<section aria-labelledby="home-add-widget-title">
+  <h2 id="home-add-widget-title" tabindex="-1">Add widget</h2>
+  <label>Widget type <select class="v1-select" [formControl]="form.controls.kind"><option value="note">Plain-text note</option><option value="visualization">Existing saved visualization</option><option value="shortcut">Internal shortcut</option></select></label>
+  @switch (choice().kind) {
+    @case ('note') { <p>Add a note, then edit its plain text in the widget.</p> }
+    @case ('visualization') {
+      <p>Choose an existing same-account visualization. Its source scope and settings remain its own; adding a widget does not copy or change the chart.</p>
+      <app-visualization-resource-picker label="Saved visualizations" [singleSelection]="true" [control]="form.controls.visualizationGuids" [options]="chartOptions()" icon="dataVisualization"/>
+      @if (!charts().length) { <p>No available saved visualizations can be linked. Create or repair visualizations in the Visualizations workspace first.</p> }
+    }
+    @case ('shortcut') {
+      <p>Choose an owner-qualified internal destination.</p>
+      <app-visualization-resource-picker label="Internal destinations" [singleSelection]="true" [control]="form.controls.shortcutKeys" [options]="shortcutOptions()" icon="link"/>
+    }
+  }
+  <div class="widget-add-actions"><button type="button" class="v1-btn v1-btn--action" [disabled]="!canAdd()" (click)="add()">Add widget to draft</button>
+    <button type="button" class="v1-btn v1-btn--quiet" [disabled]="!editor.canEdit()" (click)="cancel()">Clear widget selection</button></div>
+  @if (editor.pendingWidgetChoice()) { <p role="status">Add the selected widget or clear the selection before saving the dashboard.</p> }
+</section>
