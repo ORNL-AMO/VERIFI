@@ -14,6 +14,7 @@ import { createVisualizationDefinition } from '@domain/visualizations/visualizat
 import { storageBlueprints } from '@data/home/testing/home-command-fixtures';
 import { HOME_COMPLETE_RECIPES } from '../home-template-catalog.service';
 import { HomeWidgetBoardComponent } from '../widget-board/widget-board.component';
+import { PORTFOLIO_PALETTES, textContrast } from '@app/v1/shared/inventory/inventory-browser-test.helpers';
 import { HomePrintState } from '../home-print-state.service';
 import { getNewIdbHomeOwner } from '@data/models/idbModels/homeOwner';
 import { getNewIdbUtilityMeter } from '@data/models/idbModels/utilityMeter';
@@ -93,6 +94,7 @@ describe('Home lifecycle with native storage and routing in Chromium', () => {
     await page.getByRole('combobox', { name: 'Widget type', exact: true }).selectOptions('note'); await settle();
     await click('Add widget to draft');
     const note = page.getByRole('article', { name: 'Note', exact: true });
+    expect(document.activeElement).toBe([...root.querySelectorAll<HTMLElement>('[data-widget-id]')].at(-1)?.querySelector('[data-widget-title]'));
     await note.getByRole('textbox', { name: 'Widget title', exact: true }).fill(title); await settle();
     await page.getByRole('article', { name: title, exact: true }).getByRole('textbox', { name: 'Note text', exact: true }).fill(text); await settle();
     return TestBed.inject(HomeEditor).session()!.definition!.widgets.at(-1)!;
@@ -132,6 +134,20 @@ describe('Home lifecycle with native storage and routing in Chromium', () => {
     await click('Remove Second note'); await click('Remove widget');
     expect(widgetIds()).toEqual([first.id]); expect(document.activeElement).toBe(widgetCard(first.id).querySelector('h2'));
     await click('Save dashboard'); expect(definition(board.guid).widgets).toHaveLength(1);
+    await click('Edit dashboard'); await click('Remove First note'); await click('Remove widget');
+    expect(document.activeElement).toBe(root.querySelector('#home-add-widget-title'));
+    await click('Save dashboard'); expect(definition(board.guid).widgets).toEqual([]);
+  });
+
+  it('keeps widget text, hints and editable fields readable across every workspace palette and light/dark theme', async () => {
+    await create('Palette widgets'); await click('Edit dashboard'); const note = await addNote('Readable note', 'Readable plain text');
+    const card = widgetCard(note.id);
+    for (const palette of PORTFOLIO_PALETTES) for (const dark of [false, true]) {
+      root.className = `v1-root v1-palette-${palette}${dark ? ' v1-theme-dark' : ''}`; await settle();
+      for (const selector of ['h2', '.widget-hint', '.home-note']) expect(textContrast(card.querySelector<HTMLElement>(selector)!, card)).toBeGreaterThanOrEqual(4.5);
+      expect(textContrast(card.querySelector<HTMLTextAreaElement>('textarea')!)).toBeGreaterThanOrEqual(4.5);
+    }
+    root.className = 'v1-root';
   });
 
   it('uses real pointer movement and resize handles with the same saved source order', async () => {
