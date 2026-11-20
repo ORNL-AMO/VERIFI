@@ -21,10 +21,11 @@ export function resolveHomeViews(input: {
   const prefs = input.preferences;
   const permitted = input.candidates.filter(candidate => {
     const ref = candidate.reference, key = homeViewKey(ref);
+    if (prefs?.deleted.some(item => homeViewKey(item) === key)) return false;
     if (ref.kind === 'saved') return true;
     if (input.initialization === 'unavailable' || input.deletedStarters.includes(ref.template)) return false;
     if (!prefs) return input.initialization === 'new';
-    return prefs.catalog.some(item => homeViewKey(item) === key) && !prefs.deleted.some(item => homeViewKey(item) === key);
+    return prefs.catalog.some(item => homeViewKey(item) === key);
   });
   const order = prefs?.order.map(homeViewKey) ?? input.legacyOrder.map(dashboardGuid => homeViewKey({ kind: 'saved', dashboardGuid }));
   const entries = [...permitted].sort((a, b) => {

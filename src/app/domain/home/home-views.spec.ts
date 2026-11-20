@@ -32,6 +32,14 @@ describe('built-in Home identities and explicit view preferences', () => {
     expect(result.default).toEqual(saved);
     expect(decodeHomeOwnerState({ ...homeOwnerState(), views: { ...preferences, version: 9 } }).state).toBe('unsupported');
   });
+  it('excludes explicitly deleted saved views and falls back without rewriting their retained default', () => {
+    const preferences = { ...captureHomeViewPreferences(candidates, saved), deleted: [saved] };
+    const result = resolveHomeViews({ ...input, initialization: 'initialized', preferences });
+    expect(result.entries.map(item => item.reference)).not.toContainEqual(saved);
+    expect(result.visible.map(item => item.reference)).not.toContainEqual(saved);
+    expect(result.default).toEqual(home);
+    expect(preferences.default).toEqual(saved);
+  });
   it('validates typed chart references and preferences without confusing versions with resource identities', () => {
     const widget = { kind: 'built-in-chart' as const, id: 'widget', size: 'half' as const, visibility: 'always' as const,
       reference: { kind: 'built-in' as const, recipe: 'reporting-rolling-improvement', version: 99, owner: { kind: 'facility' as const, guid: 'facility' } }, inherit: [], overrides: {} };
