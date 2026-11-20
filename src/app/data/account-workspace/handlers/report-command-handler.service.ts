@@ -16,7 +16,7 @@ import { IdbFacility } from '@data/models/idbModels/facility';
 import { IdbAnalysisItem } from '@data/models/idbModels/analysisItem';
 import { IdbAccountAnalysisItem } from '@data/models/idbModels/accountAnalysisItem';
 import { buildSingleFacilityAnalysisPair, singleFacilityAnalysisPairCandidates, singleFacilityAnalysisPairIsCurrent } from '../single-facility-analysis-pairs';
-import { FacilityReportSetupChanges, mergeFacilityAnalysisSettings, mergeFacilityDataQualitySettings } from '../facility-report-setup.models';
+import { FacilityReportSetupChanges, mergeFacilityAnalysisSettings, mergeFacilityDataQualitySettings, mergeFacilityEmissionFactorsSettings } from '../facility-report-setup.models';
 import { IdbUtilityMeter } from '@data/models/idbModels/utilityMeter';
 import { IdbPredictor } from '@data/models/idbModels/predictor';
 import { resolveDataQualitySelection } from '@domain/reports/data-quality-report-selection';
@@ -62,6 +62,13 @@ export class ReportCommandHandler {
         throw new WorkspaceWriteError('validation-failed', 'These settings belong to a Data Quality report.');
       }
       let updated = { ...report, ...(changes.name !== undefined ? { name: changes.name.trim() } : {}) };
+      if (changes.emissionFactorsReportSettings !== undefined) {
+        if (report.facilityReportType !== 'emissionFactors') {
+          throw new WorkspaceWriteError('validation-failed', 'These settings belong to an Emission Factors report.');
+        }
+        updated = { ...updated, emissionFactorsReportSettings:
+          mergeFacilityEmissionFactorsSettings(report.emissionFactorsReportSettings, changes.emissionFactorsReportSettings) };
+      }
       if (changes.analysisItemId !== undefined || changes.analysisReportSettings !== undefined) {
         if (report.facilityReportType !== 'analysis') throw new WorkspaceWriteError('validation-failed', 'These settings belong to a facility Analysis report.');
         if (changes.analysisItemId !== undefined) {

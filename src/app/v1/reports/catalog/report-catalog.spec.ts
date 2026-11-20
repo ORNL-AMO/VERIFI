@@ -1,6 +1,11 @@
 import { ACCOUNT_REPORT_TYPES, FACILITY_REPORT_TYPES, reportDefinition, reportTypeChoices, reportTypePresentation } from './report-catalog';
 
 describe('report catalog', () => {
+  it('implements facility emission factors independently of the pending account report', () => {
+    expect(reportDefinition('facility', 'emissionFactors')).toMatchObject({ contentImplemented: true, hasDataChecks: false,
+      supportsAnalysisReturn: false, requiresOtherImpacts: true });
+    expect(reportDefinition('account', 'accountEmissionFactors')?.contentImplemented).toBe(false);
+  });
   it('supports facility Data Quality analysis inspection without adding a data checks stage', () => {
     expect(reportDefinition('facility', 'dataQuality')).toMatchObject({
       contentImplemented: true, hasDataChecks: false, supportsAnalysisReturn: true, requiresOtherImpacts: false

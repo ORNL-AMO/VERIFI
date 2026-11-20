@@ -27,7 +27,7 @@ const ACCOUNT_REPORT_CATALOG = {
 const FACILITY_REPORT_CATALOG = {
   analysis: { label: 'Analysis', icon: 'facilityAnalysisReport', requiresOtherImpacts: false, hasDataChecks: true, contentImplemented: true, supportsAnalysisReturn: true },
   overview: { label: 'Data Overview', icon: 'report', requiresOtherImpacts: false, hasDataChecks: false, contentImplemented: false, supportsAnalysisReturn: false },
-  emissionFactors: { label: 'Emission Factors', icon: 'report', requiresOtherImpacts: true, hasDataChecks: false, contentImplemented: false, supportsAnalysisReturn: false },
+  emissionFactors: { label: 'Emission Factors', icon: 'report', requiresOtherImpacts: true, hasDataChecks: false, contentImplemented: true, supportsAnalysisReturn: false },
   savings: { label: 'Savings', icon: 'report', requiresOtherImpacts: false, hasDataChecks: true, contentImplemented: false, supportsAnalysisReturn: false },
   modeling: { label: 'Modeling', icon: 'report', requiresOtherImpacts: false, hasDataChecks: false, contentImplemented: false, supportsAnalysisReturn: false },
   costSavings: { label: 'Cost Savings', icon: 'report', requiresOtherImpacts: false, hasDataChecks: true, contentImplemented: false, supportsAnalysisReturn: false },

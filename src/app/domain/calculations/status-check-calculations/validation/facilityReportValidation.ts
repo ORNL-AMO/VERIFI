@@ -1,5 +1,6 @@
 import { IdbFacilityReport } from "@data/models/idbModels/facilityReport";
 import { AnalysisSetupErrors, FacilityReportErrors } from "@data/models/validation";
+import { validEmissionFactorYear, validEmissionFactorsPeriod } from '@domain/reports/emission-factors/emission-factors-period';
 
 export function getFacilityReportErrors(facilityReport: IdbFacilityReport,
     analysisSetupErrors: Array<AnalysisSetupErrors>): FacilityReportErrors {
@@ -52,14 +53,10 @@ export function getFacilityReportErrors(facilityReport: IdbFacilityReport,
     } else if (facilityReport.facilityReportType == 'emissionFactors') {
         //startYear
         //endYear
-        errors.missingBaselineYear = facilityReport.emissionFactorsReportSettings.startYear !== undefined && !isNaN(facilityReport.emissionFactorsReportSettings.startYear) ? false : true;
-        errors.missingReportYear = facilityReport.emissionFactorsReportSettings.endYear !== undefined && !isNaN(facilityReport.emissionFactorsReportSettings.endYear) ? false : true;
+        errors.missingBaselineYear = !validEmissionFactorYear(facilityReport.emissionFactorsReportSettings?.startYear);
+        errors.missingReportYear = !validEmissionFactorYear(facilityReport.emissionFactorsReportSettings?.endYear);
         if (!errors.missingBaselineYear && !errors.missingReportYear) {
-            const startDate = new Date(facilityReport.emissionFactorsReportSettings.startYear, 0, 1);
-            const endDate = new Date(facilityReport.emissionFactorsReportSettings.endYear, 0, 1);
-            if (startDate.getTime() >= endDate.getTime()) {
-                errors.invalidDateRange = true;
-            }
+            errors.invalidDateRange = !validEmissionFactorsPeriod(facilityReport.emissionFactorsReportSettings);
         }
     } else if (facilityReport.facilityReportType == 'savings') {
         //endYear

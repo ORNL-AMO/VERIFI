@@ -1,0 +1,4 @@
+@import '../../../shared/document/report-document-surface.css';
+:host { display: block; min-width: 0; padding-block-start: 1.25rem; }
+.document-title h2 { font-weight: 800; overflow-wrap: anywhere; }
+.document-section { border-bottom: 0; }
