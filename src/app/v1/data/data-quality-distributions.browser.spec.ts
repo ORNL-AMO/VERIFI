@@ -1,7 +1,7 @@
 import { signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { Router } from '@angular/router';
-import { page, server, userEvent } from 'vitest/browser';
+import { page, userEvent } from 'vitest/browser';
 import { getNewIdbUtilityMeter } from '@data/models/idbModels/utilityMeter';
 import { getNewIdbUtilityMeterData } from '@data/models/idbModels/utilityMeterData';
 import { getNewIdbPredictor } from '@data/models/idbModels/predictor';
@@ -103,10 +103,6 @@ describe('Workbench quality distributions in Chromium', () => {
     await userEvent.click(plot.querySelector('button')!);
     expect(download).toHaveBeenCalledWith(kind === 'meter' ? 'Electricity-consumption-distribution' : 'production-value-distribution');
     expect(host.scrollWidth).toBeLessThanOrEqual(width + 1);
-    // Opt in to manual inspection images with VERIFI_CAPTURE_CHART_SCREENSHOTS=true.
-    if (server.config.env['VERIFI_CAPTURE_CHART_SCREENSHOTS'] === 'true') {
-      await page.screenshot({ element: plot, path: `../../../../.angular/workbench-distribution-${kind}.png` });
-    }
     const chartHosts = plots().map(element => element.querySelector<HTMLElement>('.quality-dot-plot__chart')!);
     if (kind === 'meter') meterData.set(meterData().map(row => ({ ...row, totalEnergyUse: NaN, totalCost: NaN })));
     else predictorData.set(predictorData().map(row => ({ ...row, amount: NaN })));

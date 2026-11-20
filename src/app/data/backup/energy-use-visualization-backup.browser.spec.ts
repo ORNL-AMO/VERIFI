@@ -109,17 +109,15 @@ describe('populated Energy Use visualization backup acceptance', () => {
       const styled = option.series.find(series => series.name === 'Saved annual estimate')!;
       expect(styled.type).toBe('bar'); expect(option.yAxis[styled.yAxisIndex].position).toBe('right');
       if (mode === 'facility') {
-        for (const [width, theme, label] of [[1100, '', 'wide-light'], [390, 'v1-theme-dark', 'narrow-dark']] as const) {
+        for (const [width, theme] of [[1100, ''], [390, 'v1-theme-dark']] as const) {
           await page.viewport(width, 850); root.className = `v1-root ${theme}`; fixture.detectChanges();
           await vi.waitFor(() => expect(chart.getWidth()).toBeLessThanOrEqual(width));
-          await page.screenshot({ element: root, path: `../../../../.angular/energy-e3-restored-${kind}-${label}.png` });
         }
         const media = cdp() as { send(method: string, params: { media: string }): Promise<unknown> };
         await page.viewport(1100, 850); root.className = 'v1-root'; await media.send('Emulation.setEmulatedMedia', { media: 'print' });
         try {
           expect(root.querySelector('.time-series-actions, table')).toBeNull();
           expect(previewValuesText(fixture!)).toBe(table);
-          await page.screenshot({ element: root, path: `../../../../.angular/energy-e3-restored-${kind}-print.png` });
         } finally { await media.send('Emulation.setEmulatedMedia', { media: '' }); }
       }
     }

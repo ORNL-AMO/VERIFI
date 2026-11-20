@@ -107,7 +107,6 @@ describe('energy uses browser journeys', () => {
     for (const [width, theme] of [[1200, ''], [390, 'v1-theme-dark v1-contrast-strong']] as const) {
       await page.viewport(width, 850); view.root.className = `v1-root ${theme}`; await settle(view);
       expect(dialog.element().scrollWidth).toBeLessThanOrEqual(dialog.element().clientWidth + 1);
-      await page.screenshot({ element: dialog.element(), path: `../../../../../../.angular/phase5/transfer-energy-use-${width}.png` });
     }
     await userEvent.keyboard('{Escape}'); await settle(view);
     expect(document.activeElement).toBe(transfer.element()); expect(view.actions.transferItems).not.toHaveBeenCalled();
@@ -154,7 +153,6 @@ describe('energy uses browser journeys', () => {
     for (const [width, theme] of [[1200, ''], [390, 'v1-theme-dark v1-contrast-strong']] as const) {
       await page.viewport(width, 850); view.root.className = `v1-root ${theme}`; await settle(view);
       expect(dialog.element().scrollWidth).toBeLessThanOrEqual(dialog.element().clientWidth + 1);
-      await page.screenshot({ element: dialog.element(), path: `../../../../../../.angular/transfer-copy/stepped-groups-${width}.png` });
     }
 
     await expect.element(dialog.getByRole('checkbox', { name: 'Create Copy', exact: true })).not.toBeInTheDocument();
@@ -191,7 +189,6 @@ describe('energy uses browser journeys', () => {
     for (const [width, theme] of [[1200, ''], [390, 'v1-theme-dark v1-contrast-strong']] as const) {
       await page.viewport(width, 850); view.root.className = `v1-root ${theme}`; await settle(view);
       expect(dialog.element().scrollWidth).toBeLessThanOrEqual(dialog.element().clientWidth + 1);
-      await page.screenshot({ element: dialog.element(), path: `../../../../../../.angular/transfer-copy/bulk-${width}.png` });
     }
     await confirm.click(); await settle(view);
     expect(selected()).toEqual([]); expect(view.router.url).toBe(`${groupUrl()}/setup`);
@@ -230,7 +227,6 @@ describe('energy uses browser journeys', () => {
     for (const [width, theme] of [[1200, ''], [390, 'v1-theme-dark v1-contrast-strong']] as const) {
       await page.viewport(width, 850); view.root.className = `v1-root ${theme}`; await settle(view);
       expect(dialog.element().scrollWidth).toBeLessThanOrEqual(dialog.element().clientWidth + 1);
-      await page.screenshot({ element: dialog.element(), path: `../../../../../../.angular/phase5/group-delete-${width}.png` });
     }
     view.actions.deleteGroups.mockImplementationOnce(async (_accountGuid, rows) => {
       const ids = new Set(rows.map(row => row.group.guid));
@@ -262,7 +258,6 @@ describe('energy uses browser journeys', () => {
       await settle(view);
       const panel = dialog.element();
       expect(panel.scrollWidth).toBeLessThanOrEqual(panel.clientWidth + 1);
-      await page.screenshot({ element: panel, path: `../../../../../../.angular/phase5/export-${width}-${theme.includes('contrast') ? 'contrast' : theme ? 'dark' : 'light'}.png` });
     }
     await userEvent.keyboard('{Escape}');
     await settle(view);
@@ -287,8 +282,8 @@ describe('energy uses browser journeys', () => {
     const view = setup();
     await view.router.navigateByUrl(`${groupUrl()}/setup`); await settle(view);
     view.root.style.background = 'linear-gradient(135deg, #236f91, #c1d8df)';
-    for (const [width, theme, name] of [[1200, '', 'rounded-light'], [390, 'v1-theme-dark', 'rounded-dark'],
-      [390, 'v1-theme-dark v1-contrast-strong v1-corners-square', 'square-contrast']] as const) {
+    for (const [width, theme] of [[1200, ''], [390, 'v1-theme-dark'],
+      [390, 'v1-theme-dark v1-contrast-strong v1-corners-square']] as const) {
       await page.viewport(width, 850); view.root.className = `v1-root ${theme}`; await settle(view);
       const sticky = view.root.querySelector<HTMLElement>('.v1-data-workbench-sticky')!;
       const header = sticky.querySelector<HTMLElement>('.v1-data-workbench-header')!;
@@ -298,7 +293,6 @@ describe('energy uses browser journeys', () => {
       expect(getComputedStyle(workspace).borderBottomRightRadius).toBe(getComputedStyle(header).borderTopRightRadius);
       expect(getComputedStyle(workspace).overflow).toBe('hidden');
       expect(view.root.scrollWidth).toBeLessThanOrEqual(view.root.clientWidth + 1);
-      await page.screenshot({ element: view.root, path: `../../../../../../tmp/energy-use-results/workbench-corners-${name}.png` });
     }
     view.fixture.destroy();
   });
@@ -323,7 +317,6 @@ describe('energy uses browser journeys', () => {
     await opener.click(); await settle(view);
     dialog = page.getByRole('dialog', { name: 'Delete Group?', exact: true });
     expect((dialog.element() as HTMLElement).scrollWidth).toBeLessThanOrEqual((dialog.element() as HTMLElement).clientWidth + 1);
-    await page.screenshot({ element: dialog.element(), path: '../../../../../../tmp/energy-use-results/delete-group-narrow-contrast.png' });
     let finish!: () => void;
     view.actions.deleteGroup.mockImplementationOnce(async (_identity, group, items) => {
       await new Promise<void>(resolve => finish = resolve);
@@ -415,7 +408,6 @@ describe('energy uses browser journeys', () => {
       await page.viewport(width, 850); view.root.className = `v1-root ${theme}`; await settle(view);
       expect(card().scrollWidth).toBeLessThanOrEqual(card().clientWidth + 1);
       expect(textContrast(links[0], card())).toBeGreaterThanOrEqual(4.5);
-      await page.screenshot({ element: view.root, path: `../../../../../../tmp/energy-use-pivot/energy-use-group-summary-${width}-${theme.includes('contrast') ? 'contrast' : theme ? 'dark' : 'light'}.png` });
     }
     const pump = links.find(link => link.textContent?.trim() === 'Pump A')!; pump.focus(); await userEvent.keyboard('{Enter}'); await settle(view);
     expect(view.router.url).toBe(`${groupUrl('group-a')}/items/energy-a`);
@@ -443,7 +435,6 @@ describe('energy uses browser journeys', () => {
       await page.viewport(width, 850); view.root.className = `v1-root ${theme}`; await settle(view);
       expect(view.root.scrollWidth).toBeLessThanOrEqual(view.root.clientWidth + 1);
       expect(view.root.querySelectorAll('[role=dialog]')).toHaveLength(0);
-      await page.screenshot({ element: view.root, path: `../../../../../../tmp/energy-use-group-setup/setup-group-${width}-${theme.includes('contrast') ? 'contrast' : theme ? 'dark' : 'light'}.png` });
     }
     await name.fill(' '); await settle(view);
     const discard = vi.spyOn(TestBed.inject(UnsavedChangesService), 'confirmDiscard').mockReturnValue(false);
@@ -478,7 +469,6 @@ describe('energy uses browser journeys', () => {
       } else { expect(strip.scrollWidth).toBeGreaterThan(strip.clientWidth); }
       const active = strip.querySelector<HTMLElement>('[aria-current="page"]')!;
       expect(textContrast(active)).toBeGreaterThanOrEqual(4.5);
-      await page.screenshot({ element: view.root, path: `../../../../../../tmp/energy-use-item-sidebar/energy-use-group-workbench-${width}-${theme.includes('contrast') ? 'contrast' : theme ? 'dark' : 'light'}.png` });
     }
     expect(view.root.querySelector('input[type=search]')).toBeNull();
     expect(view.root.querySelector('.energy-use-workbench__chips')).toBeNull();
@@ -522,7 +512,6 @@ describe('energy uses browser journeys', () => {
       expect(region.scrollWidth).toBeLessThanOrEqual(region.clientWidth + 1);
       expect([...table.querySelectorAll('tbody td, tbody th')].every(cell => getComputedStyle(cell).verticalAlign === 'middle')).toBe(true);
       expect(textContrast(link.element() as HTMLElement, table as HTMLElement)).toBeGreaterThanOrEqual(4.5);
-      await page.screenshot({ element: view.root, path: `../../../../../../tmp/energy-use-group-table/group-table-${width}-${theme.includes('contrast') ? 'contrast' : theme ? 'dark' : 'light'}.png` });
     }
     (link.element() as HTMLElement).focus(); await userEvent.keyboard('{Enter}'); await settle(view);
     expect(view.router.url).toBe(`${groupUrl('group-a')}/items/fan`);
@@ -616,7 +605,7 @@ describe('energy uses browser journeys', () => {
     expect(TestBed.inject(ModalPortalService).activePortal()).not.toBeNull();
     expect(controller.selection.affected()).toBe(30); expect(applyBatch).not.toHaveBeenCalled();
     const dialog = page.getByRole('dialog', { name: 'Update selected energy uses', exact: true });
-    await page.viewport(390, 850); await page.screenshot({ element: dialog.element(), path: '../../../../../../tmp/energy-use-pivot/energy-use-manage-review.png' });
+    await page.viewport(390, 850);
     await dialog.getByRole('button', { name: 'Confirm changes', exact: true }).click(); await settle(view);
     expect(applyBatch).toHaveBeenCalledTimes(1); expect(view.store.energyUseEquipment()).toHaveLength(0); expect(view.store.energyUseGroups()).toHaveLength(1);
     expect(view.router.url).toBe(`${groupUrl('group-a')}/setup`);
@@ -760,7 +749,6 @@ describe('energy uses browser journeys', () => {
       expect(source.textContent).toContain('Other Energy');
       expect(source.scrollWidth).toBeLessThanOrEqual(source.clientWidth + 1);
       expect([...view.root.querySelectorAll('select')].every(select => select.classList.contains('v1-select'))).toBe(true);
-      await page.screenshot({ element: view.root, path: `../../../../../../tmp/energy-use-pivot/energy-uses-${width}-${theme.includes('contrast') ? 'contrast' : theme ? 'dark' : 'light'}.png` });
     }
     const search = view.root.querySelector<HTMLInputElement>('input[type="search"]')!;
     search.focus(); await userEvent.keyboard('{Tab}');
@@ -773,7 +761,6 @@ describe('energy uses browser journeys', () => {
     expect(view.root.scrollWidth).toBeLessThanOrEqual(view.root.clientWidth + 1);
     const panel = view.root.querySelector<HTMLElement>('app-energy-use-settings section')!;
     expect(getComputedStyle(panel).borderRadius).toBe('0px');
-    await page.screenshot({ element: view.root, path: '../../../../../../tmp/energy-use-pivot/energy-use-workbench-narrow-contrast.png' });
     view.fixture.destroy();
   });
 });

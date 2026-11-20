@@ -59,7 +59,6 @@ describe('Energy Use treemap in Chromium', () => {
         expect(textColors).toContain(getComputedStyle(plot).getPropertyValue('--v1-text').trim());
         const labels = chart.getZr().storage.getDisplayList().filter(element => element.type === 'tspan');
         expect(labels.filter(element => (element as unknown as { style: { opacity: number } }).style.opacity === 1).length).toBeGreaterThan(0);
-        await page.screenshot({ element: root, path: `../../../../../../../tmp/energy-use-results/treemap-${width}-${theme || 'light'}.png` });
       }
       plot.focus(); await userEvent.keyboard('{Home}'); await settle();
       expect(component.active()).toBeUndefined();
@@ -107,7 +106,6 @@ describe('Energy Use treemap in Chromium', () => {
         expect(text).toContain('Steam Boiler'); expect(text.some(value => value.includes('%'))).toBe(true);
         expect(text.some(value => /\d{4}-\d{2}-\d{2}/.test(value))).toBe(false);
         expect(plot.scrollHeight).toBeLessThanOrEqual(plot.clientHeight + 1);
-        await page.screenshot({ element: root, path: `../../../../../../../tmp/energy-use-results/treemap-only-${width}-${theme.includes('contrast') ? 'contrast' : theme ? 'dark' : 'light'}.png` });
       }
       await page.viewport(1400, 850); root.className = 'v1-root'; await settle();
       await clickLabel('Utilities'); expect(component.active()?.name).toBe('Utilities');
@@ -153,7 +151,6 @@ describe('Energy Use treemap in Chromium', () => {
       const main = await hover('Main');
       expect(main).toContain('50% of Facility Usage'); expect(main).toContain('25% of Account Usage');
       expect(main).not.toContain('Matching Fiscal'); expect(main).not.toContain('Energy Balance'); expect(main).not.toMatch(/\d{4}-\d{2}-\d{2}/);
-      await page.screenshot({ element: root, path: '../../../../../../../tmp/energy-use-results/treemap-facility-account-hover.png' });
       const tiny = await hover('Tiny'); expect(tiny).toContain('<1% of Facility Usage'); expect(tiny).toContain('<1% of Account Usage');
       fixture.componentInstance.shownGuids.set(['main']); await settle();
       const filtered = await hover('Main'); expect(filtered).toContain('50% of Facility Usage'); expect(filtered).toContain('25% of Account Usage');

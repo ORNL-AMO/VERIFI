@@ -71,7 +71,7 @@ describe('simple Energy Use creation in Chromium', () => {
   });
 
   it('fits the progressive choices and pinned selections in light, dark, and high-contrast windows', async () => {
-    for (const [width, theme, label] of [[1200, '', 'light'], [390, 'v1-theme-dark', 'dark'], [390, 'v1-theme-dark v1-contrast-strong', 'contrast']] as const) {
+    for (const [width, theme] of [[1200, ''], [390, 'v1-theme-dark'], [390, 'v1-theme-dark v1-contrast-strong']] as const) {
       await page.viewport(width, 850);
       const view = setup(); view.root.className = `v1-root ${theme}`;
       try {
@@ -81,7 +81,6 @@ describe('simple Energy Use creation in Chromium', () => {
           const panel = dialog.element() as HTMLElement;
           expect(panel.scrollWidth).toBeLessThanOrEqual(panel.clientWidth + 1);
           expect(view.root.querySelectorAll('select,input[type="number"],textarea,app-energy-use-settings-fields')).toHaveLength(0);
-          await page.screenshot({ element: panel, path: `../../../../../../tmp/energy-use-results/creation-${step}-${width}-${label}.png` });
           if (step === 'facility') await dialog.getByRole('button', { name: 'North plant', exact: true }).click();
           if (step === 'category') await dialog.getByRole('button', { name: 'Pump', exact: true }).click();
           if (step === 'group') await dialog.getByRole('button', { name: 'Production', exact: true }).click();

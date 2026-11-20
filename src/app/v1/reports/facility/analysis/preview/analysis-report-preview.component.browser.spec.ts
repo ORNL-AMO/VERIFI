@@ -113,11 +113,9 @@ describe('continuous report with multiple groups in Chromium', () => {
     root.className = 'v1-root v1-palette-blueprint';
     await page.viewport(1440, 1100); contributions.scrollIntoView({ block: 'start' });
     await new Promise(requestAnimationFrame); await new Promise(requestAnimationFrame);
-    await page.screenshot({ element: contributions, path: './__screenshots__/facility-analysis-contributions-desktop-light.png' });
     root.className = 'v1-root v1-palette-blueprint v1-theme-dark';
     await page.viewport(390, 1100); contributions.scrollIntoView({ block: 'start' });
     await new Promise(requestAnimationFrame); await new Promise(requestAnimationFrame);
-    await page.screenshot({ element: contributions, path: './__screenshots__/facility-analysis-contributions-narrow-dark.png' });
     root.style.cssText = rootStyle;
     expect(report).toEqual(before);
     fixture.destroy();

@@ -37,7 +37,6 @@ describe('Footprint import mapping presentation', () => {
     await page.viewport(1100, 850);
     await page.getByRole('button', { name: 'Main Plant', exact: true }).click(); await settle();
     expect(state.draft().selectedFacilityId).toBe('facility-1');
-    await page.screenshot({ element: root, path: '../../../../../../../../.angular/phase5/footprint-facility.png' });
     fixture.componentInstance.equipment.set(true); await settle();
     await page.getByRole('button', { name: 'Link meter groups', exact: true }).click(); await settle();
     let dialog = page.getByRole('dialog', { name: 'Select Meter Groups' });
@@ -72,11 +71,9 @@ describe('Footprint import mapping presentation', () => {
     for (const [width, theme] of [[1100, ''], [390, 'v1-theme-dark v1-contrast-strong']] as const) {
       await page.viewport(width, 850); root.className = `v1-root import-page ${theme}`; await settle();
       expect(root.scrollWidth).toBeLessThanOrEqual(root.clientWidth + 1);
-      await page.screenshot({ element: root, path: `../../../../../../../../.angular/phase5/footprint-table-${width}.png` });
     }
     await page.getByRole('button', { name: 'Select meter groups for Boiler', exact: true }).click(); await settle();
     dialog = page.getByRole('dialog', { name: 'Select Meter Groups', exact: true });
-    await page.screenshot({ element: dialog.element(), path: '../../../../../../../../.angular/phase5/footprint-meter-slideout.png' });
     await dialog.getByRole('checkbox', { name: 'gas', exact: true }).click();
     await dialog.getByRole('button', { name: 'Apply', exact: true }).click(); await settle();
     expect(state.draft().facilityEnergyUseEquipment.map(item => item.utilityMeterGroupIds)).toEqual([['electric'], [], []]);

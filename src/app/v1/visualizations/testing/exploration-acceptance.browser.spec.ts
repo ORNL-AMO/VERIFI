@@ -83,7 +83,6 @@ describe('VIS7 saved exploration acceptance', () => {
       const panels = [...root.querySelectorAll<HTMLElement>('app-exploration-pair-panel')];
       expect(root.getBoundingClientRect().bottom).toBeGreaterThanOrEqual(panels.at(-1)!.getBoundingClientRect().bottom);
       expect((echarts.getInstanceByDom(root.querySelector<HTMLElement>('.pair-chart')!)!.getOption() as any).dataZoom).toEqual([]);
-      await page.screenshot({ element: root, path: '../../../../../.angular/vis7-pairs-print.png' });
     } finally { await printPairs.send('Emulation.setEmulatedMedia', { media: '' }); window.dispatchEvent(new Event('afterprint')); await page.viewport(1100, 850); }
     component.setSection('chart', true); host.detectChanges();
     let settings = host.debugElement.query(By.directive(ExplorationSettingsComponent)).componentInstance as ExplorationSettingsComponent;
@@ -116,7 +115,7 @@ describe('VIS7 saved exploration acceptance', () => {
     settings.form.controls.normalization.setValue('z-score'); await wait();
     expect(model().chart).toMatchObject({ kind: 'heatmap', dimension: 'series-period', normalization: 'z-score', scale: 'diverging' });
     const currentRoot = host.nativeElement as HTMLElement;
-    for (const [width, theme, label] of [[1100, '', 'wide'], [390, 'v1-theme-dark', 'dark'], [390, 'v1-theme-dark v1-contrast-strong', 'contrast']] as const) {
+    for (const [width, theme] of [[1100, ''], [390, 'v1-theme-dark'], [390, 'v1-theme-dark v1-contrast-strong']] as const) {
       await page.viewport(width, 850); currentRoot.querySelector('main')!.className = `v1-root ${theme}`; host.detectChanges();
       const canvas = currentRoot.querySelector<HTMLElement>('.heatmap-chart')!; canvas.scrollIntoView();
       await vi.waitFor(() => expect(echarts.getInstanceByDom(canvas)?.getWidth()).toBeGreaterThan(200));
@@ -125,13 +124,12 @@ describe('VIS7 saved exploration acceptance', () => {
       expect(canvas.getAttribute('aria-label')).toContain('10 kWh');
       expect(canvas.getAttribute('aria-label')).toContain('constant or insufficient series');
       expect(currentRoot.scrollWidth).toBeLessThanOrEqual(document.documentElement.clientWidth + 1);
-      await page.screenshot({ element: currentRoot, path: `../../../../../.angular/vis7-${label}.png` });
     }
     await page.viewport(1100, 850); currentRoot.querySelector('main')!.className = 'v1-root';
     const print = cdp() as { send: (method: 'Emulation.setEmulatedMedia', parameters: { media: string }) => Promise<unknown> };
     window.dispatchEvent(new Event('beforeprint'));
     await print.send('Emulation.setEmulatedMedia', { media: 'print' });
-    try { expect(currentRoot.querySelector('.inspection')).toBeNull(); await page.screenshot({ element: currentRoot, path: '../../../../../.angular/vis7-print.png' }); }
+    try { expect(currentRoot.querySelector('.inspection')).toBeNull(); }
     finally { await print.send('Emulation.setEmulatedMedia', { media: '' }); window.dispatchEvent(new Event('afterprint')); }
     expect(await component.editor.flush()).toBe(true); const savedHeatmap = component.editor.definition();
     host.destroy(); host = TestBed.createComponent(ExplorationHost); host.detectChanges(); await wait();

@@ -18,7 +18,7 @@ it('keeps the shared unit chevron visible before, during and after focus in each
   shared.add(new Option('MMBtu', 'MMBtu')); root.append(shared);
   try {
     await page.viewport(600, 850);
-    for (const [theme, name] of [['', 'light'], ['v1-theme-dark', 'dark'], ['v1-theme-dark v1-contrast-strong', 'contrast']] as const) {
+    for (const [theme] of [[''], ['v1-theme-dark'], ['v1-theme-dark v1-contrast-strong']] as const) {
       root.className = `v1-root ${theme}`; fixture.detectChanges(); await fixture.whenStable(); fixture.detectChanges();
       const units = root.querySelector<HTMLSelectElement>('[formcontrolname="energyUseUnit"]')!;
       for (const select of [units, shared]) {
@@ -29,7 +29,6 @@ it('keeps the shared unit chevron visible before, during and after focus in each
         select.blur(); expect(getComputedStyle(select).backgroundImage).toContain('linear-gradient');
       }
       units.focus();
-      await page.screenshot({ element: units.parentElement!, path: `../../../../../../../tmp/energy-use-results/unit-chevron-${name}.png` });
     }
   } finally { fixture.destroy(); root.remove(); }
 });

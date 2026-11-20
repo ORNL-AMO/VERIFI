@@ -53,7 +53,6 @@ describe('visualization resource picker in Chromium', () => {
             }
           }
         }
-        await page.screenshot({ element: root, path: `../../../../../../.angular/vis3-alignment/resource-picker-${width}.png` });
       }
 
       control.disable({ emitEvent: false }); fixture.changeDetectorRef.markForCheck(); fixture.detectChanges();

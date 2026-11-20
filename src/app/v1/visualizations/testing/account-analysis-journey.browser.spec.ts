@@ -47,11 +47,10 @@ describe('A2 saved account analysis native journey', () => {
       expect(lifecycle.canContinueAnalysis()).toBe(true);
       expect(root.querySelector('.creation-selections')?.textContent).toContain('Portfolio baseline');
       expect(root.querySelector('.creation-selections')?.textContent).not.toContain('Unavailable analysis');
-      for (const [width, theme, label] of [[1100, '', 'wide-light'], [390, 'v1-theme-dark', 'narrow-dark']] as const) {
+      for (const [width, theme] of [[1100, ''], [390, 'v1-theme-dark']] as const) {
         await page.viewport(width, 850); root.className = `v1-root ${theme}`;
         const dialog = root.querySelector<HTMLElement>('[role=dialog]')!;
         expect(dialog.scrollWidth).toBeLessThanOrEqual(dialog.clientWidth + 1);
-        await page.screenshot({ element: dialog, path: `../../../../../.angular/analysis-a2-picker-${label}.png` });
       }
       lifecycle.selectFacilities({ kind: 'fixed', facilityGuids: ['facility-a', 'facility-b'] }); drawer.detectChanges();
       expect(lifecycle.analysisResourceOptions().some(option => option.guid === 'account-analysis')).toBe(false);
@@ -123,14 +122,10 @@ describe('A2 saved account analysis native journey', () => {
     if (reopened.state !== 'valid') throw new Error('Expected reopened account chart');
     await mount(reopened.definition); expect(requests).toHaveLength(1);
     expect(previewValuesText(preview!)).toContain('Account improvement'); expect(previewValuesText(preview!)).toContain('%');
-    for (const [width, theme, label] of [[1100, '', 'wide-light'], [390, 'v1-theme-dark', 'narrow-dark']] as const) {
-      await page.viewport(width, 850); root.className = `v1-root ${theme}`; root.style.background = 'var(--v1-bg)';
-      await page.screenshot({ element: root, path: `../../../../../.angular/analysis-a2-${label}.png` });
-    }
     await page.viewport(1100, 850); root.className = 'v1-root';
     const print = cdp() as { send: (method: 'Emulation.setEmulatedMedia', parameters: { media: string }) => Promise<unknown> };
     await print.send('Emulation.setEmulatedMedia', { media: 'print' });
-    try { expect(root.querySelector('.time-series-actions, table')).toBeNull(); await page.screenshot({ element: root, path: '../../../../../.angular/analysis-a2-print.png' }); }
+    try { expect(root.querySelector('.time-series-actions, table')).toBeNull(); }
     finally { await print.send('Emulation.setEmulatedMedia', { media: '' }); }
     expect(await harness.getAll('analysisItems')).toEqual(before.facility); expect(await harness.getAll('accountAnalysisItems')).toEqual(before.account); expect(await harness.getAll('utilityMeterData')).toEqual(before.readings);
     preview.componentRef.setInput('active', false); preview.detectChanges();

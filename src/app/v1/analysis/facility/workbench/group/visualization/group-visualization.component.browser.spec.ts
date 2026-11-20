@@ -122,7 +122,6 @@ describe('group visualization in Chromium', () => {
     await vi.waitFor(() => expect((chart.getOption() as any).yAxis).toHaveLength(1));
     expect(component.facade.correlations().map(correlation => correlation.summary)).toEqual(rawCorrelations);
     await page.getByRole('button', { name: 'Reset zoom', exact: true }).click(); fixture.detectChanges();
-    await page.screenshot({ element: host, path: '../../../../../../../../.angular/group-visualization-wide.png' });
     for (const palette of PORTFOLIO_PALETTES) for (const dark of [false, true]) for (const contrast of [false, true]) {
       host.className = `v1-root v1-palette-${palette}${dark ? ' v1-theme-dark' : ''}${contrast ? ' v1-contrast-strong' : ''}`;
       await new Promise(resolve => requestAnimationFrame(resolve));
@@ -139,7 +138,6 @@ describe('group visualization in Chromium', () => {
     const narrowPanels = correlationPanels.map(panel => panel.getBoundingClientRect());
     expect(narrowPanels[1].top).toBeGreaterThanOrEqual(narrowPanels[0].bottom);
     expect(narrowPanels[0].left).toBeCloseTo(narrowPanels[1].left, 0);
-    await page.screenshot({ element: host, path: '../../../../../../../../.angular/group-visualization-narrow.png' });
     expect(echarts.getInstanceByDom(timeHost)).toBe(chart);
     expect(host.querySelectorAll('canvas')).toHaveLength(3);
     expect(host.textContent).not.toContain('paired months');

@@ -143,7 +143,6 @@ describe('monthly meter capture through native storage and canonical calculation
           const toggle = root.querySelector('.v1-meter-yearly-data__mode')!, controls = root.querySelector('.v1-meter-results-chart__series-controls')!;
           expect(toggle.getBoundingClientRect().left).toBe(controls.getBoundingClientRect().left);
           expect(root.textContent).not.toContain('Some totals have partial');
-          await page.screenshot({ path: `../../../../../.angular/vis9-yearly/ytd-${width}.png` });
         }
       } finally { await page.viewport(1280, 900); main.classList.remove('v1-theme-dark'); }
       const print = cdp() as { send: (method: 'Emulation.setEmulatedMedia', params: { media: string }) => Promise<unknown> };
@@ -151,7 +150,6 @@ describe('monthly meter capture through native storage and canonical calculation
       try {
         expect(getComputedStyle(root.querySelector('.v1-meter-results-chart__controls')!).display).toBe('none');
         expect(root.querySelector('.v1-meter-yearly-data__table caption')?.textContent).toContain('March');
-        await page.screenshot({ path: '../../../../../.angular/vis9-yearly/ytd-print.png' });
       } finally { await print.send('Emulation.setEmulatedMedia', { media: '' }); }
     }
     button('Visualize').click(); await settle();
@@ -230,7 +228,6 @@ describe('monthly meter capture through native storage and canonical calculation
       for (const width of [1280, 390]) {
         await page.viewport(width, 900); dialog.classList.toggle('v1-theme-dark', width === 390); await settle();
         expect(dialog.scrollWidth).toBeLessThanOrEqual(dialog.clientWidth + 1);
-        await page.screenshot({ path: `../../../../../.angular/vis9-capture/meter-data-to-chart-${width}.png` });
       }
     } finally { await page.viewport(1280, 900); dialog.classList.remove('v1-theme-dark'); }
     button('Continue').click(); await settle();
@@ -251,7 +248,6 @@ describe('monthly meter capture through native storage and canonical calculation
       for (const width of [1280, 390]) {
         await page.viewport(width, 900); main.classList.toggle('v1-theme-dark', width === 390); await settle();
         expect(main.scrollWidth).toBeLessThanOrEqual(main.clientWidth + 1);
-        await page.screenshot({ path: `../../../../../.angular/vis9-capture/source-groups-${width}.png` });
       }
     } finally { await page.viewport(1280, 900); main.classList.remove('v1-theme-dark'); }
     expect(await workbench().editor.flush()).toBe(true);
@@ -290,7 +286,6 @@ describe('monthly meter capture through native storage and canonical calculation
       for (const width of [1280, 390]) {
         await page.viewport(width, 900); root.classList.toggle('v1-theme-dark', width === 390); await settle();
         expect(root.scrollWidth).toBeLessThanOrEqual(root.clientWidth + 1);
-        await page.screenshot({ path: `../../../../../.angular/vis9-patterns/utility-${width}.png` });
       }
     } finally { await page.viewport(1280, 900); root.classList.remove('v1-theme-dark'); }
     const print = cdp() as { send: (method: 'Emulation.setEmulatedMedia', params: { media: string }) => Promise<unknown> };
@@ -302,7 +297,6 @@ describe('monthly meter capture through native storage and canonical calculation
       expect(printedChart.height).toBeGreaterThan(0);
       expect(printedChart.bottom).toBeLessThanOrEqual(root.getBoundingClientRect().bottom);
       expect(fixture.nativeElement.querySelector('app-monthly-patterns-chart details')).toBeNull();
-      await page.screenshot({ path: '../../../../../.angular/vis9-patterns/utility-print.png' });
     } finally { await print.send('Emulation.setEmulatedMedia', { media: '' }); }
 
     expect((await harness.getAll('savedVisualizations'))[0].captureOrigin).toBeUndefined();
@@ -364,7 +358,6 @@ describe('monthly meter capture through native storage and canonical calculation
       for (const width of [1280, 390]) {
         await page.viewport(width, 900); root.classList.toggle('v1-theme-dark', width === 390); await settle();
         expect(root.scrollWidth).toBeLessThanOrEqual(root.clientWidth + 1);
-        await page.screenshot({ path: `../../../../../.angular/vis9-patterns/predictor-${width}.png` });
       }
     } finally { await page.viewport(1280, 900); root.classList.remove('v1-theme-dark'); }
     expect(await workbench().editor.flush()).toBe(true); await workspaceReload(); expect(model().panels).toHaveLength(1);
@@ -552,7 +545,6 @@ describe('monthly meter capture through native storage and canonical calculation
         const field = panel.querySelector<HTMLInputElement>('input')!;
         expect(textContrast(field)).toBeGreaterThanOrEqual(4.5);
         expect(field.getBoundingClientRect().right).toBeLessThanOrEqual(panel.getBoundingClientRect().right);
-        await page.screenshot({ path: `../../../../../.angular/vis9-capture/naming-${width}.png` });
         await userEvent.keyboard('{Escape}'); await settle();
         expect(fixture.nativeElement.querySelector('[role="dialog"]')).toBeNull();
         expect(document.activeElement).toBe(button('Visualize'));

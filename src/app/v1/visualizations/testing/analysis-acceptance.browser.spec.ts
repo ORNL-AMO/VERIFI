@@ -169,10 +169,9 @@ describe('A4 composed analysis workbench acceptance', () => {
     expect(component.editor.conflicts().map(conflict => conflict.id)).toContain('configuration');
     component.editor.resolveConflicts({ configuration: 'saved' }); expect(await component.editor.flush()).toBe(true); host!.detectChanges(); await wait();
     expect(component.editor.definition()!.period).toEqual({ kind: 'all-history' });
-    for (const [width, theme, label] of [[1100, '', 'wide-light'], [390, 'v1-theme-dark', 'narrow-dark']] as const) {
+    for (const [width, theme] of [[1100, ''], [390, 'v1-theme-dark']] as const) {
       await page.viewport(width, 850); root.querySelector('main')!.className = `v1-root ${theme}`;
       expect(root.scrollWidth).toBeLessThanOrEqual(document.documentElement.clientWidth + 1);
-      await page.screenshot({ element: root, path: `../../../../../.angular/analysis-a4-${target}-${label}.png` });
     }
     await page.viewport(1100, 850); root.querySelector('main')!.className = 'v1-root';
     const print = cdp() as { send: (method: 'Emulation.setEmulatedMedia', params: { media: string }) => Promise<unknown> };
@@ -180,7 +179,6 @@ describe('A4 composed analysis workbench acceptance', () => {
     try {
       expect(getComputedStyle(root.querySelector('#visualization-settings')!).display).toBe('none');
       expect(getComputedStyle(root.querySelector('.v1-data-workbench-actions')!).display).toBe('none');
-      await page.screenshot({ element: root, path: `../../../../../.angular/analysis-a4-${target}-print.png` });
     }
     finally { await print.send('Emulation.setEmulatedMedia', { media: '' }); }
     const expected = component.editor.definition(); host!.destroy(); host = undefined;

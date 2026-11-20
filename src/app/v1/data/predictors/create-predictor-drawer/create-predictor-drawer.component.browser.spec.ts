@@ -79,7 +79,6 @@ describe('Predictor creation through inventory and Weather setup', () => {
         expect(body.scrollWidth).toBeLessThanOrEqual(body.clientWidth + 1);
         expect(getComputedStyle(panel.querySelector('.creation-selections')!).position).toBe('sticky');
         expect(panel.querySelector('.v1-workspace-slideout__footer')!.getBoundingClientRect().bottom).toBeLessThanOrEqual(800);
-        await page.screenshot({ element: panel, path: `../../../../../../.angular/predictor-${stage}-${width}-${theme.includes('contrast') ? 'contrast' : theme ? 'dark' : 'light'}.png` });
       }
     };
     try {

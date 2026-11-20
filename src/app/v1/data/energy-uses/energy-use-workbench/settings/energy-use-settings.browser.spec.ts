@@ -122,7 +122,6 @@ describe('Energy Uses creation and saved Settings in Chromium', () => {
       await page.viewport(width, 850); root.className = `v1-root ${theme}`; await settle(portal);
       const dialog = selection.element() as HTMLElement;
       expect(dialog.scrollWidth).toBeLessThanOrEqual(dialog.clientWidth + 1);
-      await page.screenshot({ element: root, path: `./__screenshots__/meter-groups-${width}-${theme.includes('contrast') ? 'contrast' : theme ? 'dark' : 'light'}.png` });
     }
     await userEvent.keyboard('{Tab}{Shift>}{Tab}{/Shift}');
     expect(selection.element().contains(document.activeElement)).toBe(true);
@@ -277,7 +276,6 @@ describe('Energy Uses creation and saved Settings in Chromium', () => {
       await page.viewport(width, 850); root.className = `v1-root ${theme}`; await settle(settings);
       expect(root.scrollWidth).toBeLessThanOrEqual(root.clientWidth + 1);
       expect(root.querySelectorAll('select:not(.v1-select)')).toHaveLength(0);
-      await page.screenshot({ element: root, path: `./__screenshots__/settings-${width}-${theme.includes('contrast') ? 'contrast' : theme ? 'dark' : 'light'}.png` });
     }
     await page.getByRole('button', { name: 'Select Utilities', exact: true }).click(); await settle(settings); await settle(portal);
     const utilities = page.getByRole('dialog', { name: 'Select Utilities', exact: true });
@@ -424,7 +422,6 @@ describe('Energy Uses creation and saved Settings in Chromium', () => {
     for (const [width, theme] of [[1100, ''], [390, 'v1-theme-dark'], [390, 'v1-theme-dark v1-contrast-strong']] as const) {
       await page.viewport(width, 850); root.className = `v1-root ${theme}`; await settle(portal);
       expect(hours.element().getBoundingClientRect().width).toBeLessThanOrEqual(width);
-      await page.screenshot({ element: hours.element(), path: `./__screenshots__/calculator-hours-${width}-${theme || 'light'}.png` });
     }
     await hours.getByRole('button', { name: 'Cancel', exact: true }).click(); await settle(portal);
     expect(document.activeElement).toBe(hoursOpener.element());
@@ -444,7 +441,6 @@ describe('Energy Uses creation and saved Settings in Chromium', () => {
     await load.getByRole('spinbutton', { name: 'Current (A)', exact: true }).fill('5');
     await load.getByRole('combobox', { name: 'Number of phases', exact: true }).selectOptions(load.getByRole('option', { name: '1', exact: true })); await settle(portal);
     expect(load.element().textContent).toContain('Calculated Power:'); expect(load.element().textContent).toContain('50.0%');
-    await page.screenshot({ element: load.element(), path: './__screenshots__/calculator-load-voltage.png' });
     await load.getByRole('button', { name: 'Measured power', exact: true }).click();
     await load.getByRole('spinbutton', { name: 'Measured power', exact: true }).fill('20'); await settle(portal);
     expect(load.element().textContent).toContain('200.0%'); expect(load.element().textContent).toContain('capped at 115%');

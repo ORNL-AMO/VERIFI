@@ -58,10 +58,8 @@ describe('Facility Modeling report Chromium journey', () => {
       const tables = root.querySelectorAll<HTMLElement>('.model-validation > .table-scroll');
       const rootFontSize = parseFloat(getComputedStyle(document.documentElement).fontSize);
       expect(tables[1].getBoundingClientRect().top - tables[0].getBoundingClientRect().bottom).toBeGreaterThanOrEqual(2.5 * rootFontSize - 1);
-      await page.screenshot({ element: root, path: './__screenshots__/modeling-report-desktop.png' });
       await page.viewport(390, 1400); root.classList.add('v1-theme-dark', 'v1-contrast-strong'); view.harness.detectChanges();
       expect(root.scrollWidth).toBeLessThanOrEqual(root.clientWidth + 1);
-      await page.screenshot({ element: root, path: './__screenshots__/modeling-report-narrow.png' });
     }
   });
   it('uses Setup → Report with native model checks, keeps diagnostics accessible, and preserves the session across stages', async () => {
@@ -98,8 +96,6 @@ describe('Facility Modeling report Chromium journey', () => {
       }
     }
     await page.viewport(1280, 1000); view.harness.detectChanges();
-    await page.screenshot({ element: root.querySelector('app-modeling-report-setup')!, path: './__screenshots__/modeling-setup-filters.png' });
-    await page.screenshot({ element: root.querySelector('#modeling-content-heading')!.parentElement!, path: './__screenshots__/modeling-content-alignment.png' });
     const select = root.querySelector<HTMLSelectElement>('#modeling-report-year')!;
     select.value = Array.from(select.options).find(option => option.textContent?.trim() === '2024')!.value;
     select.dispatchEvent(new Event('change')); view.harness.detectChanges();
@@ -127,7 +123,6 @@ describe('Facility Modeling report Chromium journey', () => {
     expect(notice.querySelector('.report-notice__heading app-ui-icon')).not.toBeNull();
     expect(notice.querySelector('strong')?.textContent).toContain('Predictor validation is unavailable');
     expect(getComputedStyle(notice).textAlign).toBe('center');
-    await page.screenshot({ element: notice, path: './__screenshots__/modeling-report-notice.png' });
     expect(view.store.facilityAnalyses()[0].dataCheckReviews).toBeUndefined();
     expect(view.store.accountAnalyses()).toEqual([]);
     for (const theme of ['', ' v1-theme-dark', ' v1-theme-dark v1-contrast-strong']) {

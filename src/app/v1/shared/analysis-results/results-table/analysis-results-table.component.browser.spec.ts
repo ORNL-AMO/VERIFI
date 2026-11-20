@@ -34,7 +34,6 @@ describe('Shared Analysis table styles in Chromium', () => {
           region.focus(); await userEvent.keyboard('{ArrowRight}');
           await vi.waitFor(() => expect(region.scrollLeft).toBeGreaterThan(0));
         }
-        await page.screenshot({ element: root, path: `../../../../../../tmp/energy-use-results/shared-analysis-table-${width}-${theme.includes('contrast') ? 'contrast' : theme ? 'dark' : 'light'}.png` });
       }
     } finally { fixture.destroy(); }
   });
