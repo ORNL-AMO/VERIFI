@@ -113,6 +113,18 @@ describe('Home atomic native commands and workspace publication', () => {
     expect((await commands.submit(commands.prepareDelete(second))).state).toBe('committed');
     expect(commands.ownerView(homeAccountOwner).state?.views).toEqual({ version: 1, catalog: [], order: [], hidden: [], deleted: [] });
   });
+  it('leaves mixed built-in default fallback to current catalog/visibility resolution after saved deletion', async () => {
+    await initialize();
+    const view = commands.ownerView(homeAccountOwner), first = view.records[0], second = view.records[1];
+    const builtIn = { kind: 'built-in' as const, template: 'home' as const, version: 1 };
+    const saved = (dashboardGuid: string) => ({ kind: 'saved' as const, dashboardGuid });
+    expect((await commands.submit(commands.prepareConfigure(homeAccountOwner, { ...view.state!, views: { version: 1, catalog: [builtIn],
+      order: [saved(first.guid), builtIn, saved(second.guid)], default: saved(first.guid), hidden: [], deleted: [] } }))).state).toBe('committed');
+    expect((await commands.submit(commands.prepareDelete(first))).state).toBe('committed');
+    const preferences = commands.ownerView(homeAccountOwner).state!.views!;
+    expect(preferences.order).toEqual([builtIn, saved(second.guid)]);
+    expect(preferences.default).toBeUndefined();
+  });
 
   it('initializes once, shares starter charts, hydrates after restart and publishes one complete graph', async () => {
     const committed = vi.fn(); TestBed.inject(WorkspaceCommandBoundary).committedChange$.subscribe(committed);

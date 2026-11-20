@@ -163,9 +163,11 @@ export class HomeCommandHandler {
           const definition = readHomeDashboard(current);
           const builtIn = definition.state === 'valid' ? definition.value.builtIn : undefined;
           if (builtIn && !cleaned.deleted.some(ref => homeViewKey(ref) === homeViewKey(builtIn))) cleaned.deleted.push(builtIn);
-          const replacement = selected && verified(selected, 'views.default') ? cleaned.order.find(ref => ref.kind === 'saved'
-            && visible(remaining).includes(ref.dashboardGuid) && ![...cleaned.hidden, ...cleaned.deleted].some(item => homeViewKey(item) === homeViewKey(ref))
-            && !references.some(issue => issue.path === `views.order.${homeViewKey(ref)}`)) : selected;
+          const fallback = cleaned.order.find(ref => (ref.kind === 'built-in' || visible(remaining).includes(ref.dashboardGuid))
+            && ![...cleaned.hidden, ...cleaned.deleted].some(item => homeViewKey(item) === homeViewKey(ref))
+            && !references.some(issue => issue.path === `views.order.${homeViewKey(ref)}`));
+          // Shipped availability/conditional visibility is resolved on read; never skip ahead to a saved view.
+          const replacement = selected && verified(selected, 'views.default') ? fallback?.kind === 'saved' ? fallback : undefined : selected;
           next = { ...next, views: { ...cleaned, ...(replacement ? { default: replacement } : {}) } };
         }
         if (resolution.defaultDashboardGuid === current.guid) next = withDefault(next,
