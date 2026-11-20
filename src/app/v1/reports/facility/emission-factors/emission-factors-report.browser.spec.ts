@@ -10,7 +10,7 @@ describe('Emission Factors report in Chromium', () => {
   afterEach(async () => { TestBed.resetTestingModule(); vi.unstubAllGlobals(); await page.viewport(1280, 900); });
   it.each([
     ['light', [], 1280], ['dark', ['v1-theme-dark'], 760], ['high-contrast', ['v1-theme-dark', 'v1-contrast-strong'], 390]
-  ] as const)('supports the complete journey, native year choices, and responsive category containers in %s', async (theme, classes, width) => {
+  ] as const)('supports the complete journey, native year choices, and responsive category containers in %s', async (_theme, classes, width) => {
     // UI/period coverage uses the shared service's synchronous fallback. Native Worker transport has its own suite.
     vi.stubGlobal('Worker', undefined);
     await page.viewport(width, 1000);
@@ -29,7 +29,6 @@ describe('Emission Factors report in Chromium', () => {
     const start = root.querySelector<HTMLSelectElement>('#emission-factors-start')!;
     start.focus(); await userEvent.keyboard('{ArrowDown}');
     expect(start.value).not.toBe('');
-    await page.screenshot({ element: root.querySelector<HTMLElement>('.report-setup')!, path: `./__screenshots__/emission-factors-setup-${theme}.png` });
     await page.getByRole('link', { name: 'Continue', exact: true }).click();
     await vi.waitFor(() => { view.harness.detectChanges(); expect(root.querySelectorAll('table')).toHaveLength(2); });
     expect(view.store.facilityReports()[0].name).toBe('Facility factors');
@@ -46,7 +45,6 @@ describe('Emission Factors report in Chromium', () => {
     await view.harness.fixture.whenStable();
     expect(root.querySelector('app-report-output-actions')).not.toBeNull();
     expect(root.querySelector('footer')?.textContent).toContain('Present');
-    await page.screenshot({ element: root.querySelector<HTMLElement>('app-emission-factors-report-preview')!, path: `./__screenshots__/emission-factors-${theme}.png` });
     await view.open(); expect(service.editor.name.value).toBe('Facility factors');
   });
 });

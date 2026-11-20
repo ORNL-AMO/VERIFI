@@ -47,7 +47,6 @@ describe('Emission Factors Present mode in Chromium', () => {
     else expect(dialog.querySelector('[role=status]')?.textContent).toContain('Fullscreen is unavailable');
     expect(preview.querySelector('article')).toBeNull();
     expect([...dialog.querySelectorAll('article')].map(article => article.textContent)).toEqual(contents);
-    await page.screenshot({ element: dialog, path: `../../../../../../../.angular/emission-factors-present-${mode}.png` });
     const width = dialog.querySelector('article')!.getBoundingClientRect().width;
     await page.getByRole('button', { name: 'Zoom in', exact: true }).click(); await portal.whenStable();
     expect(dialog.querySelector('article')!.getBoundingClientRect().width).toBeCloseTo(width * 1.1, 0);
