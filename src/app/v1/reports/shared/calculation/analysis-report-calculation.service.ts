@@ -2,6 +2,7 @@ import { analysisReviewFingerprint } from '@platform/reports/analysis-review-fin
 import { Injectable } from '@angular/core';
 import { Observable, defer, of, timeout } from 'rxjs';
 import { calculateAnalysisDataChecks } from '@domain/reports/analysis-data-checks';
+import { calculateModelingReport } from '@domain/reports/modeling-report-calculation';
 import { calculateBetterPlantsReport } from '@domain/reports/better-plants-report-calculation';
 import { AnalysisReportWorkerRequest, AnalysisReportWorkerResponse } from '@platform/web-workers/analysis-report-worker.contract';
 import { CALCULATION_WORKER_TIMEOUT_MS, runWorker } from '@platform/web-workers/run-worker';
@@ -23,7 +24,9 @@ export class AnalysisReportCalculationService {
         new Worker(new URL('../../../../platform/web-workers/analysis-report.worker', import.meta.url)), request);
       return of<AnalysisReportWorkerResponse>(request.operation === 'checks'
         ? { ok: true, operation: 'checks', value: request.years.map(year => calculateAnalysisDataChecks(request.inputs, year)) }
-        : { ok: true, operation: 'better-plants', value: calculateBetterPlantsReport(request.inputs, request.years) });
+        : request.operation === 'modeling'
+          ? { ok: true, operation: 'modeling', value: request.years.map(year => calculateModelingReport(request.inputs, year, request.chartMeters)) }
+          : { ok: true, operation: 'better-plants', value: calculateBetterPlantsReport(request.inputs, request.years) });
     }).pipe(timeout(CALCULATION_WORKER_TIMEOUT_MS));
   }
 }

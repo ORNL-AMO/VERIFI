@@ -3,6 +3,7 @@ import { calculateAnalysisDataChecks } from '@domain/reports/analysis-data-check
 import { calculateBetterPlantsReport } from '@domain/reports/better-plants-report-calculation';
 import { assertAnalysisReportYears } from '@domain/reports/analysis-report-inputs';
 import { AnalysisReportWorkerRequest, AnalysisReportWorkerResponse } from './analysis-report-worker.contract';
+import { calculateModelingReport } from '@domain/reports/modeling-report-calculation';
 
 addEventListener('message', ({ data }: MessageEvent<AnalysisReportWorkerRequest>) => {
   let response: AnalysisReportWorkerResponse;
@@ -10,7 +11,9 @@ addEventListener('message', ({ data }: MessageEvent<AnalysisReportWorkerRequest>
     assertAnalysisReportYears(data.inputs, data.years);
     response = data.operation === 'checks'
       ? { ok: true, operation: 'checks', value: data.years.map(year => calculateAnalysisDataChecks(data.inputs, year)) }
-      : { ok: true, operation: 'better-plants', value: calculateBetterPlantsReport(data.inputs, data.years) };
+      : data.operation === 'modeling'
+        ? { ok: true, operation: 'modeling', value: data.years.map(year => calculateModelingReport(data.inputs, year, data.chartMeters)) }
+        : { ok: true, operation: 'better-plants', value: calculateBetterPlantsReport(data.inputs, data.years) };
   } catch (error) {
     response = { ok: false, message: error instanceof Error ? error.message : 'The report calculation failed.' };
   }

@@ -1,3 +1,4 @@
+import type { EnergyUseTransferRequest } from '@data/account-workspace/handlers/energy-use-command.models';
 import { signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { vi } from 'vitest';
@@ -15,7 +16,7 @@ describe('Energy Use actions', () => {
     const store = { account: signal({ guid: 'account-a' }), canWrite: signal(true), facilities: signal([{ ...energyUseFacility(), energyUnit: 'kWh' }]),
       energyUseEquipment: signal([energyUseItem({ id: 1, utilityMeterGroupIds: [] })]), energyUseGroups: signal([energyUseGroup()]),
       meterGroups: signal([]), meters: signal([]) };
-    const handler = { transferItem: vi.fn(async (_identity, before, target) => ({ ...before, energyUseGroupId: target.guid })), createItem: vi.fn(async (_owner, item) => item), copyItem: vi.fn(async (_identity, _before, copy) => copy),
+    const handler = { transferItems: vi.fn(async (request: EnergyUseTransferRequest) => ({ mode: request.mode, group: request.destinationGroup.group, items: request.sources.map(row => row.item) })), transferItem: vi.fn(async (_identity, before, target) => ({ ...before, energyUseGroupId: target.guid })), createItem: vi.fn(async (_owner, item) => item), copyItem: vi.fn(async (_identity, _before, copy) => copy),
       saveItem: vi.fn(async (_identity, _before, updated) => updated),
       saveGroupSettings: vi.fn(async (_identity, before, value) => ({ ...before, ...value })), deleteItem: vi.fn(async () => {}), deleteGroupWithItems: vi.fn(async () => {}) };
     let prepare = () => {};
@@ -24,15 +25,18 @@ describe('Energy Use actions', () => {
       { provide: EnergyUseCommandHandler, useValue: handler }, { provide: WorkspaceCommandBoundary, useValue: boundary }] });
     return { service: TestBed.inject(EnergyUseActionsService), store, handler, boundary, beforePersist: (callback: () => void) => prepare = callback };
   }
-  it('queues a reviewed transfer and rejects an item changed before execution', async () => {
-    const { service, store, handler, beforePersist } = setup();
-    const before = structuredClone(store.energyUseEquipment()[0]), target = energyUseGroup({ guid: 'target' });
-    await expect(service.transfer(identity, before, target)).resolves.toMatchObject({ guid: before.guid, energyUseGroupId: target.guid });
-    expect(handler.transferItem).toHaveBeenCalledWith(identity, before, target);
-    handler.transferItem.mockClear();
+  it('queues one reviewed transfer and rejects a source changed before execution', async () => {
+    const { service, store, handler, beforePersist, boundary } = setup();
+    const before = structuredClone(store.energyUseEquipment()[0]);
+    const request: EnergyUseTransferRequest = { accountGuid: 'account-a', mode: 'move', sources: [{ item: before, facility: store.facilities()[0] }],
+      destinationFacility: store.facilities()[0], destinationGroup: { kind: 'existing', group: energyUseGroup({ guid: 'target' }) }, copyIdentities: [] };
+    await service.transferItems(request);
+    expect(handler.transferItems).toHaveBeenCalledWith(request);
+    expect(boundary.execute).toHaveBeenCalledWith(expect.objectContaining({ changeKind: 'bulk', publication: { mode: 'reload' } }), expect.any(Function));
+    handler.transferItems.mockClear();
     beforePersist(() => store.energyUseEquipment.set([{ ...before, notes: 'New edit' }]));
-    await expect(service.transfer(identity, before, target)).rejects.toThrow('Review its transfer');
-    expect(handler.transferItem).not.toHaveBeenCalled();
+    await expect(service.transferItems(request)).rejects.toThrow('Review the transfer');
+    expect(handler.transferItems).not.toHaveBeenCalled();
   });
   it('queues one reviewed group deletion and rejects a group changed before execution', async () => {
     const { service, store, handler, boundary, beforePersist } = setup();
@@ -82,17 +86,6 @@ describe('Energy Use actions', () => {
     beforePersist(() => store.account.set({ guid: 'account-b' }));
     await expect(service.updateSetup(identity, { ...base, name: 'Local' }, base, 'editor-a')).rejects.toThrow('no longer available');
     expect(handler.saveItem).not.toHaveBeenCalled();
-  });
-  it('copies the complete item with fresh identity and independent nested records', async () => {
-    const { service, store, handler } = setup(), original = store.energyUseEquipment()[0];
-    original.noLongerInUse = { isNoLongerInUse: true, year: 2023 };
-    const copy = await service.copy(identity);
-    expect(handler.copyItem).toHaveBeenCalledWith(identity, original, copy);
-    expect(handler.createItem).not.toHaveBeenCalled();
-    expect(copy).toMatchObject({ name: 'Pump A (copy)', energyUseGroupId: original.energyUseGroupId, utilityData: original.utilityData, noLongerInUse: original.noLongerInUse });
-    expect(copy.guid).not.toBe(original.guid); expect(copy.id).toBeUndefined();
-    copy.utilityData[0].energyUse[0].energyUse = 99; copy.noLongerInUse.year = 2024;
-    expect(original.utilityData[0].energyUse[0].energyUse).toBe(0); expect(original.noLongerInUse.year).toBe(2023);
   });
   it('revalidates reviewed deletion after a queued edit', async () => {
     const { service, store, handler, beforePersist } = setup(), reviewed = store.energyUseEquipment()[0];

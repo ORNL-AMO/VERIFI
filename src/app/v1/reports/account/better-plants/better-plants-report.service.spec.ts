@@ -20,6 +20,7 @@ import { AnalysisReportWorkerRequest, AnalysisReportWorkerResponse } from '@plat
 import { getNewAnalysisGroup } from '@data/models/idbModels/analysisItem';
 
 function calculate(request: AnalysisReportWorkerRequest) {
+  if (request.operation === 'modeling') throw new Error('Unexpected Modeling request in Better Plants');
   return of<AnalysisReportWorkerResponse>(request.operation === 'checks'
     ? { ok: true, operation: 'checks', value: request.years.map(year => calculateAnalysisDataChecks(request.inputs, year)) }
     : { ok: true, operation: 'better-plants', value: calculateBetterPlantsReport(request.inputs, request.years) });

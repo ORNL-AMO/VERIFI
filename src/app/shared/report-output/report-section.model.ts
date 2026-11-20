@@ -24,7 +24,10 @@ export interface TableSection extends BaseSection {
     headers: Array<string | TableHeaderCell>;
     subHeaders?: Array<string | TableHeaderCell>;
     rows: string[][];
+    equation?: ReportEquation;
 }
+
+export interface ReportEquation { readonly label: string; readonly expression: string; }
 
 export interface ChartSection extends BaseSection {
     type: 'chart';

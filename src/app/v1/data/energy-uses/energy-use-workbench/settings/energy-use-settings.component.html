@@ -1,4 +1,4 @@
-<app-transfer-energy-use #transferPanel [item]="item()" [canAct]="canTransfer()" (transferred)="openTransferred($event)"/>
+<app-transfer-energy-use #transferPanel [ownerKey]="key()" [items]="transferItems()" [canAct]="canTransfer()" (completed)="openTransferred($event.items[0])"/>
 @let settingsForm = form();
 @if (settingsForm) {
   <div class="energy-use-settings">
@@ -19,7 +19,6 @@
     }
     <app-editor-conflict-review [conflicts]="editor.conflicts()" [disabled]="editor.saving()" (resolved)="resolveConflicts($event)"/>
     <footer class="v1-workbench-section energy-use-settings__actions">
-      <button type="button" class="v1-btn v1-btn--secondary" [disabled]="!canCopy() || transferActive()" (click)="copy()"><app-ui-icon name="copy"/>Copy energy use</button>
       <button type="button" class="v1-btn v1-btn--secondary" [disabled]="!canTransfer() || transferActive()" (click)="transferPanel.open()"><app-ui-icon name="transfer"/>Transfer energy use</button>
       <app-energy-use-lifecycle-actions [item]="item()" [canAct]="canLifecycle() && !transferActive()"/>
       <button type="button" class="v1-btn v1-btn--danger" [disabled]="!canCommand() || transferActive()" (click)="requestDelete()"><app-ui-icon name="delete"/>Delete energy use</button>
