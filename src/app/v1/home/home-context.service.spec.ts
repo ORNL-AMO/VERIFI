@@ -66,10 +66,15 @@ describe('Home owner navigation', () => {
     expect(home.owner()).toBeUndefined(); expect(home.entries()).toEqual([]);
   });
   it('exposes the sole facility once only for a valid flagged account; invalid flags retain recovery', () => {
-    const { store, snapshot } = setupHome(); const home = TestBed.inject(HomeContext);
+    const { store, snapshot, route } = setupHome(); const home = TestBed.inject(HomeContext);
     expect(home.owner()).toEqual(homeAccountOwner);
     store.publish({ ...snapshot, account: { ...snapshot.account, isSingleFacilityCompany: true } });
     expect(home.owner()).toEqual({ kind: 'facility', guid: 'facility-a' });
+    route.set(parseWorkspaceRoute('/v1/workspace/account/account-a/home/dashboard/facility-board'));
+    store.publish({ ...snapshot, account: { ...snapshot.account, isSingleFacilityCompany: true }, homeDashboards: [homeRecord('facility-board', 'Facility', 'facility-a')] });
+    expect(home.owner()).toBeUndefined(); expect(home.entries()).toEqual([]); expect(home.selected()).toBeUndefined();
+    route.set(parseWorkspaceRoute('/v1/workspace/facility/facility-a/home/dashboard/facility-board'));
+    expect(home.owner()).toEqual({ kind: 'facility', guid: 'facility-a' }); expect(home.selected()?.record.guid).toBe('facility-board');
     store.publish({ ...snapshot, account: { ...snapshot.account, isSingleFacilityCompany: true }, facilities: [] });
     expect(home.owner()).toBeUndefined(); expect(store.homeOwners()).toEqual([]);
   });
