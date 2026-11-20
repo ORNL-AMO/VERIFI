@@ -1,0 +1,12 @@
+@if (model(); as chart) {
+  @if (chart.state === 'configured') {
+    <p class="chart-context">{{ chart.context }}</p>
+    <app-visualization-preview [definition]="chart.definition" [identity]="chart.identity" [active]="active()"/>
+    @if (values(); as details) {
+      <div class="chart-values"><table><caption>{{ details.caption }}</caption>
+        <thead><tr>@for (column of details.columns; track $index) { <th scope="col">{{ column }}</th> }</tr></thead>
+        <tbody>@for (row of details.rows; track $index) { <tr>@for (cell of row; track $index) { <td>{{ cell }}</td> }</tr> }</tbody>
+      </table></div>
+    }
+  } @else { <p role="status">{{ chart.message }}</p> }
+} @else { <p role="status">Loading chart context…</p> }

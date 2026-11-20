@@ -55,10 +55,10 @@ function compatiblePinnedUnit(definition: VisualizationDefinition, source: Utili
 
 function ensureSeries(definition: VisualizationDefinition, source: UtilityVisualizationSource | PredictorVisualizationSource | EnergyUseVisualizationSource | AnalysisResultVisualizationSource): VisualizationDefinition {
   if (source.kind === 'analysis') {
-    if (!source.analysisGuid || definition.series.some(series => series.sourceId === source.id && series.metric === source.measure)) return definition;
+    if ((!source.analysisGuid && !source.reporting) || definition.series.some(series => series.sourceId === source.id && series.metric === source.measure)) return definition;
     let id = `${source.id}-series`, index = 1;
     while (definition.series.some(series => series.id === id)) id = `${source.id}-series-${index++}`;
-    return { ...definition, series: [...definition.series, { id, sourceId: source.id, metric: source.measure, resourceGuid: source.groupGuid ?? source.analysisGuid, axis: 'left' }] };
+    return { ...definition, series: [...definition.series, { id, sourceId: source.id, metric: source.measure, ...(source.analysisGuid ? { resourceGuid: source.groupGuid ?? source.analysisGuid } : {}), axis: 'left' }] };
   }
   if (!source.selection && !(source.kind === 'energy-use' && source.equipmentTypes?.length)) return definition;
   const metric = source.kind === 'predictor' ? 'value' : source.kind === 'energy-use' ? 'consumption' : utilityMeasureKey(source);
@@ -605,10 +605,10 @@ export function prepareDecisionChange(definition: VisualizationDefinition, actio
     if (first.kind === 'utility' && action.measures.includes('charge') && (action.measures.length !== 1 || first.selectionMode !== 'meter' || first.selection?.kind !== 'fixed' || first.selection.resource !== 'meter' || first.selection.guids.length !== 1)) return { state: 'unchanged' };
     remove(members.filter(source => !action.measures.includes(source.measure)));
     const targets = first.kind === 'analysis' ? [...new Map(members.filter((source): source is AnalysisResultVisualizationSource => source.kind === 'analysis' && source.mode === 'result')
-      .map(source => [JSON.stringify([source.analysisGuid, source.groupGuid]), source])).values()] : [first];
+      .map(source => [JSON.stringify([source.analysisGuid, source.groupGuid, source.reporting]), source])).values()] : [first];
     for (const target of targets) for (const measure of action.measures) {
-      if (next.sources.some(source => source.kind === first.kind && source.measure === measure && (target.kind !== 'analysis' || source.kind === 'analysis' && source.analysisGuid === target.analysisGuid && source.groupGuid === target.groupGuid))) continue;
-      const id = `${target.kind}-${target.kind === 'analysis' ? encodeURIComponent(`${target.analysisGuid ?? 'setup'}/${target.groupGuid ?? 'total'}`) + '-' : ''}${measure}`;
+      if (next.sources.some(source => source.kind === first.kind && source.measure === measure && (target.kind !== 'analysis' || source.kind === 'analysis' && source.analysisGuid === target.analysisGuid && source.groupGuid === target.groupGuid && visualizationIntentEqual(source.mode === 'result' ? source.reporting : undefined, target.mode === 'result' ? target.reporting : undefined)))) continue;
+      const id = `${target.kind}-${target.kind === 'analysis' ? encodeURIComponent(`${target.mode === 'result' && target.reporting ? JSON.stringify(target.reporting) : target.analysisGuid ?? 'setup'}/${target.groupGuid ?? 'total'}`) + '-' : ''}${measure}`;
       const source = { ...target, id, measure, settings: undefined, ...(target.kind === 'utility' ? { charge: measure === 'charge' ? target.charge : undefined } : {}) } as VisualizationSource;
       next = { ...next, sources: [...next.sources, source] };
       if (source.kind !== 'analysis' || source.mode === 'result') next = ensureSeries(next, source);
@@ -635,6 +635,7 @@ export function prepareDecisionChange(definition: VisualizationDefinition, actio
     const choices = analysisChoices(context.snapshot, resolveVisualizationFacilities(definition, context.snapshot.facilities).scope, definition.facilitySelection.kind === 'all');
     if (action.targets.some(target => !choices.some(choice => choice.value === target.analysisGuid)
       || target.groupGuid && !analysisGroupChoices(context.snapshot, target.analysisGuid).some(choice => choice.value === target.groupGuid))) return { state: 'unchanged' };
+    if (members.some(source => source.reporting)) cleared.push('Active for reporting bindings');
     const selectedMeasures: AnalysisResultVisualizationSource['measure'][] = members.length ? [...new Set(members.map(source => source.measure))] : ['actual'];
     const banking = action.targets.length > 0 && action.targets.every(target => {
       const analysis = context.snapshot.facilityAnalyses.find(item => item.guid === target.analysisGuid && item.accountId === definition.accountGuid);

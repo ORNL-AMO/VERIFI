@@ -90,7 +90,7 @@ const source = variant({
   analysis: variant({
     result: object({ ...base, kind: enumeration('analysis'), mode: enumeration('result'), analysisGuid: text, groupGuid: text,
       reporting: (value, path, issues) => { if (!homeAnalysisBindingValid(value) || (value as { kind: string }).kind !== 'reporting') issue(issues, path, 'Choose an explicit reporting owner and category.'); },
-      measure: enumeration('actual', 'calculated', 'savings', 'losses', 'annual-improvement', 'total-improvement', 'banked-savings', 'banked-losses'),
+      measure: enumeration('actual', 'calculated', 'savings', 'losses', 'annual-improvement', 'total-improvement', 'banked-savings', 'banked-losses', 'rolling-improvement'),
       aggregation: enumeration('none') }, ['settings', 'analysisGuid', 'groupGuid', 'reporting']),
     model: object({ ...base, kind: enumeration('analysis'), mode: enumeration('model'), analysisGuid: text, groupGuid: text, modelId: text, comparisonModelId: text,
       measure: enumeration('actual', 'modeled', 'residual'), aggregation: enumeration('none') }, ['settings', 'analysisGuid', 'groupGuid', 'modelId', 'comparisonModelId'])

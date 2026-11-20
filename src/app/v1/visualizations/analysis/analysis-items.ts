@@ -4,6 +4,7 @@ import { accountAnalysisInclusionIssue, analysisMeasureLabels, analysisSeriesId,
 import { resolveVisualizationFacilities } from '@domain/visualizations/visualization-facilities';
 import type { VisualizationDecisionItem } from '../decisions/decision-types';
 import { itemKey, isCustomized, resolveItemPresentation } from '../shared/item-appearance';
+import { resolveReportingAnalysis } from '@domain/visualizations/analysis/reporting-analysis';
 
 /** Choices inspect saved identities only; never request calculation work. */
 export function facilityAnalysisChoices(snapshot: AccountWorkspaceSnapshot, scope: VisualizationScope) {
@@ -25,8 +26,12 @@ export function analysisGroupChoices(snapshot: AccountWorkspaceSnapshot, analysi
     .map(group => ({ value: group.idbGroupId, label: snapshot.meterGroups.find(item => item.guid === group.idbGroupId)?.name ?? group.idbGroupId })) ?? [];
 }
 export function projectAnalysisItems(definition: VisualizationDefinition, sourceId: string, snapshot: AccountWorkspaceSnapshot): readonly VisualizationDecisionItem[] {
-  const source = definition.sources.find(item => item.id === sourceId);
-  if (source?.kind !== 'analysis' || source.mode !== 'result' || !source.analysisGuid) return [];
+  const declared = definition.sources.find(item => item.id === sourceId);
+  if (declared?.kind !== 'analysis' || declared.mode !== 'result') return [];
+  const reporting = declared.reporting && resolveReportingAnalysis(declared.reporting, snapshot);
+  if (reporting && reporting.state !== 'ready') return [];
+  const source = { ...declared, ...(reporting?.state === 'ready' ? { analysisGuid: reporting.analysis.guid } : {}) };
+  if (!source.analysisGuid) return [];
   const facilityAnalysis = snapshot.facilityAnalyses.find(item => item.guid === source.analysisGuid && item.accountId === definition.accountGuid);
   const accountAnalysis = snapshot.accountAnalyses.find(item => item.guid === source.analysisGuid && item.accountId === definition.accountGuid);
   const analysis = facilityAnalysis ?? accountAnalysis;

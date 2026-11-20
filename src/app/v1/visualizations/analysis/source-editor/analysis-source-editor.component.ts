@@ -1,3 +1,4 @@
+import { resolveReportingAnalysis } from '@domain/visualizations/analysis/reporting-analysis';
 import { visualizationAnalysisBasisIssue } from '@domain/visualizations/visualization-display-settings';
 import { visualizationInterval } from '@domain/visualizations/visualization-interval';
 import { Component, DestroyRef, Input, computed, inject, signal } from '@angular/core';
@@ -21,6 +22,14 @@ export class AnalysisSourceEditorComponent {
     measure: new FormControl<AnalysisResultVisualizationSource['measure']>('actual', { nonNullable: true }), interval: new FormControl<'monthly' | 'yearly'>('monthly', { nonNullable: true }) });
   readonly selectedAnalyses = new FormControl<string[]>([], { nonNullable: true });
   readonly targetScopes = new FormRecord<FormControl<string[]>>({});
+  readonly reportingBindings = computed(() => {
+    const snapshot = this.workspace.snapshot();
+    return (this.view()?.definition.sources ?? []).flatMap(source => {
+      if (!snapshot || source.kind !== 'analysis' || source.mode !== 'result' || !source.reporting) return [];
+      const resolved = resolveReportingAnalysis(source.reporting, snapshot);
+      return [`Follow Active for reporting · ${source.reporting.category} · ${resolved.state === 'ready' ? resolved.analysis.name : resolved.message}`];
+    });
+  });
   readonly targets = computed(() => {
     const view = this.view();
     return [...new Map((view?.definition.sources ?? []).filter((item): item is AnalysisResultVisualizationSource => item.kind === 'analysis' && item.mode === 'result' && !!item.analysisGuid)

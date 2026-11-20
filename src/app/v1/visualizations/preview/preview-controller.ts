@@ -1,3 +1,4 @@
+import { resolveReportingVisualization } from '@domain/visualizations/analysis/reporting-analysis';
 import { yearToDateIssue } from '@domain/visualizations/utility/utility-year-to-date';
 import { compositionSourceDetails } from '../composition/composition.models';
 import { isCompositionChart } from '@domain/visualizations/visualization-composition';
@@ -67,7 +68,16 @@ export class PreviewController {
 
   update(definition: VisualizationDefinition | undefined, identity: PreviewIdentity | undefined, active = true): void {
     const snapshot = this.workspace.snapshot();
-    if (definition && snapshot?.account.guid === definition.accountGuid) definition = projectVisualizationDisplaySettings(definition, snapshot);
+    if (definition && snapshot?.account.guid === definition.accountGuid) {
+      const reporting = resolveReportingVisualization(definition, snapshot);
+      if (reporting.state !== 'ready') {
+        this.cancel();
+        this.context = { definition, identity, active };
+        if (!this.destroyed) this.value.set(active ? reporting : { state: 'inactive', message: 'Chart is inactive.' });
+        return;
+      }
+      definition = projectVisualizationDisplaySettings(reporting.definition, snapshot);
+    }
     const previous = this.context;
     if (!this.destroyed && this.resolving && active && previous?.active && (definition?.chart?.kind === 'monthly-patterns' || definition?.chart?.kind === 'time-series' || isExplorationChart(definition?.chart) || isCompositionChart(definition?.chart))
       && (previous.definition?.chart?.kind === 'monthly-patterns' || previous.definition?.chart?.kind === 'time-series' || isExplorationChart(previous?.definition?.chart) || isCompositionChart(previous?.definition?.chart)) && identity && previous.identity
