@@ -9,7 +9,6 @@
   padding: .7rem clamp(.85rem, 2vw, 1.25rem);
   border-bottom: 1px solid var(--v1-border);
   background: color-mix(in srgb, var(--v1-surface) 94%, transparent);
-  box-shadow: 0 .55rem 1.5rem var(--v1-shadow);
 }
 
 .v1-workspace__backdrop {
