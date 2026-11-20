@@ -106,6 +106,6 @@ export class AnalysisNavComponent {
     }
     const showCategory = analysisCategories(this.workspace.meters(), [...this.workspace.accountAnalyses(), ...this.workspace.facilityAnalyses()]).length > 1;
     return account ? buildAnalysisNavGroups(this.workspace.accountAnalyses(), account, active,
-      guid => this.navigation.accountAnalysisWorkbenchRoute(account.guid, guid), showCategory) : [];
+      guid => this.navigation.accountAnalysisWorkbenchRoute(account.guid, guid), showCategory, 'account') : [];
   });
 }

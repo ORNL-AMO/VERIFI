@@ -1,5 +1,6 @@
 import { signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
+import { By } from '@angular/platform-browser';
 import { provideRouter, Router } from '@angular/router';
 import { WorkbenchLayoutService } from '@app/v1/shared/workbench/workbench-layout.service';
 import { WorkspaceNavigationService } from '@app/v1/shell/workspace-navigation.service';
@@ -77,6 +78,17 @@ function configureHeader() {
 }
 
 describe('AccountAnalysisWorkbenchHeaderComponent', () => {
+  it('uses the account analysis identity and returns through the account breadcrumb without a duplicate inventory link', () => {
+    const { fixture } = configureHeader();
+    const links = fixture.nativeElement.querySelectorAll('app-page-identity nav a') as NodeListOf<HTMLAnchorElement>;
+    expect(links).toHaveLength(1);
+    expect(links[0].textContent?.trim()).toBe('Account A');
+    expect(links[0].getAttribute('href')).toBe('/v1/workspace/account/account-a/analysis/dashboard');
+    expect(fixture.debugElement.query(By.css('h1 > app-ui-icon')).componentInstance.name).toBe('accountAnalysis');
+    expect(fixture.debugElement.query(By.css('app-page-identity nav a app-ui-icon')).componentInstance.name).toBe('account');
+    expect(fixture.nativeElement.querySelector('h1').textContent).toContain('Portfolio Energy');
+  });
+
   it('shows Return to Report only for an available origin and waits for a successful save', async () => {
     const { fixture, reportOrigin, returnToReport, flush } = configureHeader();
     const button = () => [...fixture.nativeElement.querySelectorAll('button') as NodeListOf<HTMLButtonElement>].find(item => item.textContent?.includes('Return to Report'));

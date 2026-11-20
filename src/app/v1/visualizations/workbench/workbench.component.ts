@@ -150,8 +150,8 @@ export class WorkbenchComponent {
     const facilityGuid = scope?.kind === 'facility' ? scope.facilityGuid : undefined;
     const facility = this.workspace.facilities().find(item => item.guid === facilityGuid);
     return [
-      { label: this.workspace.account()?.name || 'Account', route },
-      ...(facilityGuid ? [{ label: facility?.name || 'Unavailable facility',
+      { label: this.workspace.account()?.name || 'Account', icon: 'account', route },
+      ...(facilityGuid ? [{ label: facility?.name || 'Unavailable facility', icon: 'facility' as const,
         ...(facility ? { route, queryParams: { facility: facility.guid } } : {}) }] : [])
     ];
   });

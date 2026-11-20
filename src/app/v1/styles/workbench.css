@@ -51,7 +51,7 @@
   margin: 0 0 .25rem;
   padding: 0;
   color: var(--v1-muted);
-  font-size: .85rem;
+  font-size: .95rem;
   font-weight: 800;
   line-height: 1.2;
   list-style: none;
@@ -64,7 +64,8 @@
 }
 
 .v1-root .v1-data-context-breadcrumb > ol > li > a,
-.v1-root .v1-data-context-breadcrumb > ol > li > button {
+.v1-root .v1-data-context-breadcrumb > ol > li > button,
+.v1-root .v1-data-context-breadcrumb > ol > li > span {
   display: inline-flex;
   gap: var(--v1-space-1);
   align-items: center;
@@ -112,7 +113,7 @@
   margin: 0;
   padding: 0;
   color: var(--v1-muted);
-  font-size: .82rem;
+  font-size: .95rem;
   font-weight: 800;
   list-style: none;
 }
@@ -125,7 +126,8 @@
 }
 
 .v1-root .v1-data-workbench-breadcrumb > ol > li > a,
-.v1-root .v1-data-workbench-breadcrumb > ol > li > button {
+.v1-root .v1-data-workbench-breadcrumb > ol > li > button,
+.v1-root .v1-data-workbench-breadcrumb > ol > li > span {
   display: inline-flex;
   gap: var(--v1-space-1);
   align-items: center;
@@ -159,6 +161,24 @@
 .v1-root .v1-data-workbench-breadcrumb > ol > li > button:focus-visible {
   border-radius: var(--v1-radius-sm);
   outline-offset: 3px;
+}
+
+.v1-root .v1-data-context-breadcrumb > ol > li > span,
+.v1-root .v1-data-workbench-breadcrumb > ol > li > span {
+  color: inherit;
+  cursor: auto;
+}
+
+/* Page identity icons scale with dashboard and workbench heading text. */
+.v1-root h1 > .v1-icon {
+  width: 1em;
+  height: 1em;
+  align-self: center;
+}
+
+.v1-root h1 > .v1-icon svg {
+  width: 1em;
+  height: 1em;
 }
 
 .v1-root .v1-data-workbench-title-row {
