@@ -197,7 +197,6 @@ describe('unified inventory charts in Chromium',()=>{
       await page.getByRole('button', { name: 'Collapse Facility A', exact: true }).click(); await settle(fixture);
       expect(chart.view().hiddenGuids).toEqual([]); expect(scope()).toBeUndefined();
       await finishChartAnimation(root);
-      await page.screenshot({ element: root, path: '../../../../../../.angular/meter-traces-grouped-wide.png' });
       await page.getByRole('button', { name: 'Hide traces', exact: true }).click(); await settle(fixture);
       measurements.push(await sizing.stable('traces hidden'));
       expect(root.querySelector('app-chart-trace-panel')).toBeNull();
@@ -226,7 +225,6 @@ describe('unified inventory charts in Chromium',()=>{
       }
       root.className = 'v1-root';
       measurements.push(await sizing.stable('themes changed'));
-      await page.screenshot({ element: root, path: '../../../../../../.angular/meter-charts-toolbar-wide.png' });
       await page.viewport(390, 800); await settle(fixture);
       measurements.push(await sizing.stable('narrow viewport'));
       const body = root.querySelector<HTMLElement>('.workspace-bottom-sheet__body')!;
@@ -239,7 +237,6 @@ describe('unified inventory charts in Chromium',()=>{
       expect(drawer.querySelectorAll('.chart-traces__group-name')).toHaveLength(0);
       expect(drawer.querySelector('.chart-traces__facility')?.textContent).toContain('Other plant');
       await finishChartAnimation(root);
-      await page.screenshot({ element: root, path: '../../../../../../.angular/meter-traces-drawer-narrow.png' });
       await userEvent.keyboard('{Escape}'); await settle(fixture);
       expect(root.querySelector('[aria-label="Choose traces"]')).toBeNull();
       expect(chart.open()).toBe(true); expect(document.activeElement).toBe(traceToggle.element());
@@ -310,7 +307,6 @@ describe('unified inventory charts in Chromium',()=>{
         expect(textContrast(root.querySelector<HTMLElement>('.inventory-tools__multiple')!, root)).toBeGreaterThanOrEqual(4.5);
       }
       root.className = 'v1-root'; await finishChartAnimation(root);
-      await page.screenshot({ element: root, path: '../../../../../../.angular/predictor-traces-wide.png' });
       scope.set('facility-b'); await settle(fixture); expect(chart.multiplePredictors()).toBe(false);
       expect(root.querySelectorAll('input[type="radio"]')).toHaveLength(12); expect(chart.open()).toBe(true);
       scope.set(undefined); await settle(fixture); expect(chart.multiplePredictors()).toBe(true);
@@ -320,7 +316,7 @@ describe('unified inventory charts in Chromium',()=>{
       const drawer = root.querySelector<HTMLElement>('[role="dialog"][aria-label="Choose traces"]')!;
       expect(drawer.contains(document.activeElement)).toBe(true);
       expect(root.scrollWidth).toBeLessThanOrEqual(root.clientWidth + 1);
-      await finishChartAnimation(root); await page.screenshot({ element: root, path: '../../../../../../.angular/predictor-traces-narrow.png' });
+      await finishChartAnimation(root);
       await userEvent.keyboard('{Escape}'); await settle(fixture); expect(document.activeElement).toBe(toggle.element());
       await (cdp() as any).send('Emulation.setEmulatedMedia', { media: 'print', features: [] }); await settle(fixture);
       expect(getComputedStyle(root.querySelector('.workspace-bottom-sheet-layer')!).display).toBe('none');

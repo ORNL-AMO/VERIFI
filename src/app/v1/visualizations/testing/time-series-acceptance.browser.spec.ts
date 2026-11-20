@@ -109,19 +109,18 @@ describe('VIS6 composed saved time-series acceptance', () => {
 
     expect(root.querySelector('table, .visualization-preview__accessible-data')).toBeNull();
     expect(previewValuesText(host!)).toContain('75% of visible selection');
-    for (const [width, theme, label] of [[1100, '', 'wide-light'], [390, 'v1-theme-dark', 'narrow-dark'], [390, 'v1-theme-dark v1-contrast-strong', 'narrow-contrast']] as const) {
+    for (const [width, theme] of [[1100, ''], [390, 'v1-theme-dark'], [390, 'v1-theme-dark v1-contrast-strong']] as const) {
       await page.viewport(width, 850); root.querySelector('main')!.className = `v1-root ${theme}`; host.detectChanges();
       root.querySelector<HTMLElement>('.visualization-workbench__chart')!.scrollTop = 0;
       root.querySelector<HTMLElement>('.visualization-workbench__controls')!.scrollTop = 0;
       await vi.waitFor(() => expect(echarts.getInstanceByDom(root.querySelector<HTMLElement>('.time-series-canvas')!)!.getWidth()).toBeGreaterThan(width === 1100 ? 500 : 200));
       expect(root.scrollWidth).toBeLessThanOrEqual(document.documentElement.clientWidth + 1);
-      await page.screenshot({ element: root, path: `../../../../../.angular/vis6-${label}.png` });
     }
     await page.viewport(1100, 850); root.querySelector('main')!.className = 'v1-root';
     root.querySelector<HTMLElement>('.visualization-workbench__chart')!.scrollTop = 0;
     const print = cdp() as { send: (method: 'Emulation.setEmulatedMedia', parameters: { media: string }) => Promise<unknown> };
     await print.send('Emulation.setEmulatedMedia', { media: 'print' });
-    try { expect(root.querySelector('table')).toBeNull(); await page.screenshot({ element: root, path: '../../../../../.angular/vis6-print.png' }); }
+    try { expect(root.querySelector('table')).toBeNull(); }
     finally { await print.send('Emulation.setEmulatedMedia', { media: '' }); }
 
     host.destroy(); host = undefined;

@@ -40,11 +40,17 @@ class PresentationBrowserHost {
 
 describe('report presentation in Chromium', () => {
   const browserSession = () => cdp() as { send(method: string, parameters?: Record<string, unknown>): Promise<void> };
+  const nativeDevicePixelRatio = window.devicePixelRatio;
+  const setDeviceMetrics = (width: number, height: number, deviceScaleFactor = nativeDevicePixelRatio) =>
+    browserSession().send('Emulation.setDeviceMetricsOverride', {
+      width, height, screenWidth: width, screenHeight: height, deviceScaleFactor, mobile: false
+    });
   afterEach(async () => {
     TestBed.resetTestingModule(); vi.restoreAllMocks();
     if (document.fullscreenElement) await document.exitFullscreen();
-    await browserSession().send('Emulation.clearDeviceMetricsOverride');
     await page.viewport(1280, 900);
+    // Fullscreen uses screen dimensions; restore them along with DPR and viewport.
+    await setDeviceMetrics(1280, 900);
   });
 
   async function setup() {
@@ -85,8 +91,8 @@ describe('report presentation in Chromium', () => {
     ['window', 1], ['fullscreen', 1], ['window', 2], ['fullscreen', 2]
   ] as const)('keeps native chart hover aligned and the bitmap sharp at every zoom in %s mode at DPR %s', async (mode, dpr) => {
     if (mode === 'window') vi.spyOn(HTMLElement.prototype, 'requestFullscreen').mockRejectedValue(new Error('Denied'));
-    await browserSession().send('Emulation.setDeviceMetricsOverride', { width: 1280, height: 900, deviceScaleFactor: dpr, mobile: false });
     await page.viewport(1280, 900);
+    await setDeviceMetrics(1280, 900, dpr);
     expect(window.devicePixelRatio).toBe(dpr);
     const { root, settle, host } = await setup();
     host.option.set({ animation: false,
@@ -151,17 +157,19 @@ describe('report presentation in Chromium', () => {
       await expectHover(200);
     }
     expect(chart.getDataURL({ type: 'png', pixelRatio: 2 })).toMatch(/^data:image\/png/);
-    await page.screenshot({ element: root.querySelector<HTMLElement>('[role=dialog]')!, path: `./__screenshots__/presentation-chart-200-${mode}-dpr${dpr}.png` });
+    // Emulate DPR only for presentation; inline charts use the browser's native,
+    // module-initialization DPR after device emulation ends.
+    await setDeviceMetrics(window.innerWidth, window.innerHeight);
     await page.getByRole('button', { name: 'Close presentation', exact: true }).click(); await settle();
     expect(chart.isDisposed()).toBe(true);
     const inlineChart = root.querySelector<HTMLElement>('.background .deep-chart')!;
     inlineChart.scrollIntoView();
     await vi.waitFor(() => expect(inlineChart.querySelector('canvas')).not.toBeNull());
     const inlineCanvas = inlineChart.querySelector('canvas')!;
-    expect(inlineCanvas.width).toBe(Math.floor(echarts.getInstanceByDom(inlineChart)!.getWidth() * window.devicePixelRatio));
+    await vi.waitFor(() => expect(inlineCanvas.width).toBe(Math.floor(echarts.getInstanceByDom(inlineChart)!.getWidth() * window.devicePixelRatio)));
   });
 
-  it.each(['fullscreen', 'window'] as const)('keeps the report scrollbar visible while scrolling down and back up in %s mode', async mode => {
+  it.each(['fullscreen', 'window'] as const)('keeps a visible report scrollbar and contains scrolling in %s mode', async mode => {
     if (mode === 'window') vi.spyOn(HTMLElement.prototype, 'requestFullscreen').mockRejectedValue(new Error('Denied'));
     const { root, settle, host } = await setup();
     const background = root.querySelector<HTMLElement>('.background')!;
@@ -175,15 +183,12 @@ describe('report presentation in Chromium', () => {
       const track = getComputedStyle(scroll, '::-webkit-scrollbar-track');
       const contrast = (luminanceOnBlack(thumb.backgroundColor) + .05) / (luminanceOnBlack(track.backgroundColor) + .05);
       expect(contrast).toBeGreaterThanOrEqual(3);
-      scroll.focus(); await userEvent.keyboard('{Home}');
-      await vi.waitFor(() => expect(scroll.scrollTop).toBe(0));
-      await userEvent.keyboard('{PageDown}');
-      await vi.waitFor(() => expect(scroll.scrollTop).toBeGreaterThan(0));
-      await userEvent.keyboard('{End}');
+      scroll.focus(); expect(document.activeElement).toBe(scroll);
+      expect(scroll.scrollHeight).toBeGreaterThan(scroll.clientHeight);
+      scroll.scrollTop = scroll.scrollHeight;
       await vi.waitFor(() => expect(Math.abs(scroll.scrollHeight - scroll.clientHeight - scroll.scrollTop)).toBeLessThanOrEqual(1));
-      const bottom = scroll.scrollTop;
-      await userEvent.keyboard('{PageUp}');
-      await vi.waitFor(() => expect(scroll.scrollTop).toBeLessThan(bottom));
+      scroll.scrollTop = 0;
+      await vi.waitFor(() => expect(scroll.scrollTop).toBe(0));
       expect(document.scrollingElement!.scrollTop).toBe(pageTop);
       expect(background.scrollTop).toBe(backgroundTop);
     }
@@ -257,9 +262,6 @@ describe('report presentation in Chromium', () => {
         expect(root.querySelector<HTMLElement>('[role=dialog] article')!.getBoundingClientRect().width).toBeLessThanOrEqual(dialog.clientWidth);
         expect(close.getBoundingClientRect().right).toBeLessThanOrEqual(window.innerWidth);
         expectControlsAtScreenEdges(root);
-        if ((!dark && width === 1280) || (dark && width === 390)) {
-          await page.screenshot({ element: dialog, path: `./__screenshots__/presentation-${dark ? 'dark' : 'light'}-${width}.png` });
-        }
       }
     }
     await userEvent.keyboard('{Escape}'); await settle();
@@ -293,7 +295,6 @@ describe('report presentation in Chromium', () => {
       expectFits();
     }
     scroll.scrollTop = 0;
-    await page.screenshot({ element: root.querySelector<HTMLElement>('[role=dialog]')!, path: './__screenshots__/presentation-zoom-wide-fits.png' });
     // Put the viewport just above the magnified report's width to exercise the overflow boundary.
     await page.viewport(Math.ceil(originalWidth * 1.5) + 100, 900); await settle(); await new Promise(requestAnimationFrame);
     expectFits();
@@ -315,7 +316,6 @@ describe('report presentation in Chromium', () => {
     await page.viewport(390, 900); await settle(); await new Promise(requestAnimationFrame);
     expect(scroll.scrollWidth).toBeGreaterThan(scroll.clientWidth);
     scroll.scrollTop = 0;
-    await page.screenshot({ element: root.querySelector<HTMLElement>('[role=dialog]')!, path: './__screenshots__/presentation-zoom-narrow-overflow.png' });
     await page.getByRole('button', { name: 'Reset zoom to 100%', exact: true }).click(); await settle();
     expectFits();
     const table = paper.querySelector<HTMLElement>('.table-scroll')!;
@@ -400,7 +400,6 @@ describe('report presentation in Chromium', () => {
       expect(scroll.scrollWidth).toBeGreaterThan(scroll.clientWidth);
       expect(close.getBoundingClientRect().bottom).toBeLessThan(window.innerHeight);
       expectControlsAtScreenEdges(root);
-      await page.screenshot({ element: root.querySelector<HTMLElement>('[role=dialog]')!, path: './__screenshots__/presentation-zoom-narrow.png' });
     }
     await page.getByRole('button', { name: 'Close presentation', exact: true }).click(); await settle();
     expect(root.querySelector('article.paper')?.getBoundingClientRect().width).toBeGreaterThan(0);

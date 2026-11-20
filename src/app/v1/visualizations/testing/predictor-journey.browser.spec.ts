@@ -81,7 +81,6 @@ describe('saved predictor native journey', () => {
       expect(february.cell).toMatchObject({ value: null, marker: '', text: expect.stringContaining('No saved reading') });
       expect(options.series[1].data.map(point => point.value[2])).toEqual(index ? [2, 6] : [0, 3]);
     });
-    await page.screenshot({ element: root, path: '../../../../../.angular/vis7-facility-labels.png' });
     expect(await harness.getAll('predictorData')).toEqual(readings);
   });
 
@@ -131,7 +130,6 @@ describe('saved predictor native journey', () => {
     expect(initialOptions.yAxis.map(axis => axis.name)).toEqual(['']);
     expect(initialOptions.series.map(series => series.yAxisIndex)).toEqual([0, 0]);
     expect(previewValuesText(fixture!)).toContain('100 widgets');
-    await page.screenshot({ element: initialRoot, path: '../../../../../.angular/predictor-multi-shared-axis.png' });
     const reopened = (await TestBed.inject(SavedVisualizationsDbService).getStoredByGuid(savedGuid))!;
     const styled = prepareDecisionChange(decode(reopened), { kind: 'item-style', sourceId: 'source-1', item: { resourceGuid: predictor.guid },
       changes: { traceType: 'bar', label: 'Saved temperature', color: '#23684d', axis: 'right' } }, { snapshot: store.snapshot()! });
@@ -148,11 +146,10 @@ describe('saved predictor native journey', () => {
     expect(await harness.getAll('predictorData')).toEqual(before);
     expect(await harness.getAll('predictor')).toEqual([predictor, production]);
     expect(meterDemand).not.toHaveBeenCalled();
-    for (const [width, theme, label] of [[1100, '', 'wide'], [390, 'v1-theme-dark', 'narrow-dark']] as const) {
+    for (const [width, theme] of [[1100, ''], [390, 'v1-theme-dark']] as const) {
       await page.viewport(width, 850); root.className = `v1-root ${theme}`; root.style.width = '100%'; root.style.background = 'var(--v1-bg)';
       fixture!.detectChanges();
       await vi.waitFor(() => expect(root.querySelector('canvas')).not.toBeNull());
-      await page.screenshot({ element: root, path: `../../../../../.angular/predictor-p1-chart-${label}.png` });
     }
   });
   it('supports keyboard selection and native month inputs at narrow and wide sizes in light and dark themes', async () => {
@@ -193,14 +190,12 @@ describe('saved predictor native journey', () => {
       expect(start.type).toBe('month'); expect(periodRoot.querySelector('input[type="date"]')).toBeNull();
       await userEvent.fill(start, '2024-02'); period.detectChanges();
       expect(changed).toHaveBeenLastCalledWith({ period: { kind: 'fixed', start: '2024-02-01', end: '2024-03-31', basis: 'calendar' }, comparison: { kind: 'none' } });
-      for (const [width, theme, label] of [[1100, '', 'wide'], [390, 'v1-theme-dark', 'narrow-dark']] as const) {
+      for (const [width, theme] of [[1100, ''], [390, 'v1-theme-dark']] as const) {
         await page.viewport(width, 850);
         for (const root of [sourceRoot, periodRoot]) { root.className = `v1-root ${theme}`; root.style.width = '100%'; root.style.background = 'var(--v1-bg)'; root.style.padding = '12px'; }
         source.detectChanges(); period.detectChanges();
         expect(sourceRoot.scrollWidth).toBeLessThanOrEqual(sourceRoot.clientWidth + 1);
         expect(periodRoot.scrollWidth).toBeLessThanOrEqual(periodRoot.clientWidth + 1);
-        await page.screenshot({ element: sourceRoot, path: `../../../../../.angular/predictor-p1-picker-${label}.png` });
-        await page.screenshot({ element: periodRoot, path: `../../../../../.angular/predictor-p1-months-${label}.png` });
       }
     } finally { source.destroy(); period.destroy(); host.remove(); }
   });

@@ -230,10 +230,9 @@ describe('saved All Predictors and mixed monthly charts', () => {
       expect(document.activeElement === all).toBe(true);
       picker.componentRef.setInput('allMode', true); picker.componentRef.setInput('selected', Array.from({ length: 9 }, (_, index) => `p-${index}`)); picker.detectChanges();
       expect(all.getAttribute('aria-pressed')).toBe('true');
-      for (const [width, theme, label] of [[1100, '', 'wide'], [390, 'v1-theme-dark', 'narrow-dark']] as const) {
+      for (const [width, theme] of [[1100, ''], [390, 'v1-theme-dark']] as const) {
         await page.viewport(width, 850); root.className = `v1-root ${theme}`;
         expect(root.scrollWidth).toBeLessThanOrEqual(width);
-        await page.screenshot({ element: root, path: `../../../../../.angular/predictor-p3-add-${label}.png` });
       }
     } finally { picker.destroy(); }
   });
@@ -282,10 +281,9 @@ describe('saved All Predictors and mixed monthly charts', () => {
     const current = fixture!.componentInstance.editor.definition()!;
     fixture!.componentInstance.editor.applyDefinition({ ...current, period: { kind: 'rolling', count: 2, unit: 'month', basis: 'calendar', anchor: 'latest-data', includeIncomplete: false } });
     fixture!.detectChanges(); await fixture!.componentInstance.editor.flush(); await ready(root);
-    for (const [width, theme, label] of [[1100, '', 'wide'], [390, 'v1-theme-dark', 'narrow-dark']] as const) {
+    for (const [width, theme] of [[1100, ''], [390, 'v1-theme-dark']] as const) {
       await page.viewport(width, 950); root.className = `v1-root ${theme}`; fixture!.detectChanges();
       expect(root.scrollWidth).toBeLessThanOrEqual(width);
-      await page.screenshot({ element: root, path: `../../../../../.angular/predictor-p3-${label}.png` });
     }
     const reopened = mount(), restored = await ready(reopened), restoredOptions = restored.getOption() as any;
     expect(restoredOptions.series[1]).toMatchObject({ type: 'bar', yAxisIndex: 1 });

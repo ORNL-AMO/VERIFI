@@ -82,7 +82,6 @@ describe('Data Quality report presentation in Chromium', () => {
     expect(dialog.scrollTop).toBe(0);
     expect(close.getBoundingClientRect().top).toBeGreaterThanOrEqual(dialog.getBoundingClientRect().top);
     expect(close.getBoundingClientRect().bottom).toBeLessThanOrEqual(scroll.getBoundingClientRect().top);
-    await page.screenshot({ element: dialog, path: `../../../../../../../.angular/data-quality-presentation-${mode}.png` });
     if (mode === 'window') await userEvent.keyboard('{Escape}');
     else await page.getByRole('button', { name: 'Close presentation', exact: true }).click();
     await portal.whenStable(); await vi.waitFor(() => expect(document.fullscreenElement).toBeNull());

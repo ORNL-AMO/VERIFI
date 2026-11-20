@@ -89,7 +89,6 @@ describe('Themed pagination in Chromium', () => {
       }
     }
     host.disabled.set(false); fixture.detectChanges();
-    await page.screenshot({ element: root, path: '../../../../../.angular/pagination-dark-contrast.png' });
     fixture.destroy();
   });
 
@@ -117,7 +116,6 @@ describe('Themed pagination in Chromium', () => {
       }
       await page.viewport(320, 900); document.documentElement.style.fontSize = '16px';
       host.total.set(132); host.current.set(6); fixture.detectChanges();
-      await page.screenshot({ element: root, path: '../../../../../.angular/pagination-320.png' });
       await emulateMedia('print');
       expect(getComputedStyle(root.querySelector('app-pagination')!).display).toBe('none');
     } finally {

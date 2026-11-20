@@ -2,7 +2,6 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideIndexedDb } from 'ngx-indexed-db';
 import { LocalStorageService } from 'ngx-webstorage';
 import { vi } from 'vitest';
-import { page } from 'vitest/browser';
 import { AccountWorkspaceService } from '@data/account-workspace/account-workspace.service';
 import { AccountWorkspaceStore } from '@data/account-workspace/account-workspace.store';
 import { IndexedDbTestHarness } from '@data/indexedDB/testing/indexed-db-test-harness';
@@ -68,11 +67,6 @@ describe('exploration backup and monthly heatmap acceptance', () => {
         expect(root.querySelectorAll('.heatmap-panel')).toHaveLength(2);
         expect(root.querySelector('table, .inspection')).toBeNull();
         expect(state.presentation.details.rows.some(row => row.join(' ').includes('Duplicate'))).toBe(true);
-        for (const [width, theme, label] of [[1100, '', 'wide'], [390, 'v1-theme-dark', 'dark'], [390, 'v1-theme-dark v1-contrast-strong', 'contrast']] as const) {
-          await page.viewport(width, 850); root.className = `v1-root ${theme}`; root.querySelector('.heatmap-chart')!.scrollIntoView(); fixture.detectChanges();
-          await page.screenshot({ element: root, path: `../../../../.angular/vis7-month-year-${kind}-${label}.png` });
-        }
-        await page.viewport(1100, 850);
       }
     }
     expect(await harness.getAll('predictorData')).toEqual(before); expect(demand).not.toHaveBeenCalled();

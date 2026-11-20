@@ -53,7 +53,6 @@ describe('account sidebar Recents in Chromium', () => {
         expect(textContrast(primary, panel)).toBeGreaterThanOrEqual(4.5); expect(textContrast(secondary, panel)).toBeGreaterThanOrEqual(4.5);
       }
       root.className = 'v1-root';
-      await page.screenshot({ element: root, path: '../../../../../../.angular/recents-analysis-wide.png' });
       await page.viewport(390, 844); await settle(); expect(panel.scrollWidth).toBeLessThanOrEqual(panel.clientWidth + 1);
       first.focus(); await userEvent.keyboard('{Enter}'); await settle();
       expect(navigation.contextFacility()?.guid).toBe(latest.facilityId); expect(navigation.activeAnalysisGuid()).toBe(latest.guid);
@@ -63,7 +62,6 @@ describe('account sidebar Recents in Chromium', () => {
       const reportRecents = root.querySelector<HTMLElement>('app-recent-items-nav')!;
       expect(reportRecents.querySelectorAll('a')).toHaveLength(1); expect(reportRecents.textContent).toContain('Facility annual report');
       expect(reportRecents.textContent).toContain(base.facilities[1].name); expect(root.textContent).toContain('Account report');
-      await page.screenshot({ element: root, path: '../../../../../../.angular/recents-reports-narrow.png' });
     } finally { sidebar.destroy(); fixture.destroy(); }
   });
 });

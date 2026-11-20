@@ -75,8 +75,6 @@ describe('Data Quality dot-plot distributions in Chromium', () => {
       const option = echarts.getInstanceByDom(charts()[0])?.getOption();
       expect((option?.series as { data: unknown[] }[] | undefined)?.[1].data).toHaveLength(1);
     });
-    await page.screenshot({ element: charts()[0].closest<HTMLElement>('app-data-quality-dot-plot')!,
-      path: `../../../../../../../.angular/data-quality-dot-plot-${theme}.png` });
   });
 
   it('stacks constant values and removes stale charts when values become invalid', async () => {

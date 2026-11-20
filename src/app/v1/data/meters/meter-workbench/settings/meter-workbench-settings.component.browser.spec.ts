@@ -67,7 +67,6 @@ describe('meter source and group settings in Chromium', () => {
       expect(root.textContent).not.toContain('The meter source is incompatible with its group.');
       expect(root.scrollWidth).toBeLessThanOrEqual(root.clientWidth + 1);
       expect(groupSelect.getBoundingClientRect().right).toBeLessThanOrEqual(root.getBoundingClientRect().right + 1);
-      await page.screenshot({ element: root, path: '../../../../../../../.angular/meter-source-group-review.png' });
 
       groupSelect.focus();
       expect(document.activeElement).toBe(groupSelect);
@@ -95,7 +94,6 @@ describe('meter source and group settings in Chromium', () => {
       expect(grouping().getAttribute('aria-describedby')).toBeNull();
       expect(fixture.componentInstance.hasUnsavedChanges()).toBe(false);
       expect(root.scrollWidth).toBeLessThanOrEqual(root.clientWidth + 1);
-      await page.screenshot({ element: root, path: '../../../../../../../.angular/meter-source-group-saved.png' });
     } finally {
       fixture.destroy(); root.remove(); await page.viewport(1100, 850);
     }

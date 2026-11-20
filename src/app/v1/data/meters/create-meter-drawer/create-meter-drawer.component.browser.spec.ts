@@ -69,7 +69,6 @@ describe('portfolio meter creation in the shell portal', () => {
         body.scrollTop = body.scrollHeight; await fixture.whenStable();
         expect(selections.getBoundingClientRect().top).toBeCloseTo(top, 0);
         body.scrollTop = 0;
-        await page.screenshot({ element: panel, path: `../../../../../../.angular/verifi-meter-${step}-${width}-${theme.includes('contrast') ? 'contrast' : theme ? 'dark' : 'light'}.png` });
       }
     };
     const opener = page.getByRole('button', { name: 'Add meter', exact: true });

@@ -87,16 +87,11 @@ describe('saved equipment history native journey', () => {
       const root = fixture.nativeElement as HTMLElement; root.className = 'v1-root'; root.style.width = '100%';
       await vi.waitFor(() => { fixture!.detectChanges(); expect(previewValuesText(fixture!)).toContain('108 MJ'); });
       expect(previewValuesText(fixture!)).toContain('Facility equipment');
-      for (const [width, theme, label] of [[1100, '', 'wide-light'], [390, 'v1-theme-dark', 'narrow-dark']] as const) {
-        await page.viewport(width, 850); root.className = `v1-root ${theme}`; root.style.background = 'var(--v1-bg)'; fixture.detectChanges();
-        await page.screenshot({ element: root, path: `../../../../../.angular/equipment-e2-facility-chart-${label}.png` });
-      }
       await page.viewport(1100, 850); root.className = 'v1-root';
       const printSession = cdp() as { send: (method: 'Emulation.setEmulatedMedia', parameters: { media: string }) => Promise<unknown> };
       await printSession.send('Emulation.setEmulatedMedia', { media: 'print' });
       try {
         expect(root.querySelector('.time-series-actions, table')).toBeNull();
-        await page.screenshot({ element: root, path: '../../../../../.angular/equipment-e2-facility-print.png' });
       } finally { await printSession.send('Emulation.setEmulatedMedia', { media: '' }); }
       expect(await harness.getAll('facilityEnergyUseEquipment')).toEqual(seeded);
       expect(seeded.slice(0, 2)).toEqual(before);
@@ -159,17 +154,12 @@ describe('saved equipment history native journey', () => {
     const provider = TestBed.inject(EquipmentSourceProvider), identity = { accountGuid: account.guid, workspaceRevision: store.revision(), definitionGuid: reopened.guid, definitionRevision: 2, requestId: 'canceled', sourceId: 'source-1', scope: { kind: 'facility' as const, facilityGuid: facility.guid, facilityGuids: [facility.guid] } };
     const abort = new AbortController(); abort.abort();
     expect((await provider.resolve({ identity, source: edited.sources[0], chart: edited.chart!, period: edited.period, comparison: edited.comparison, series: edited.series, dateContext: { calendarDate: '2026-11-16' } }, abort.signal)).state).toBe('error');
-    for (const [width, theme, label] of [[1100, '', 'wide-light'], [390, 'v1-theme-dark', 'narrow-dark']] as const) {
-      await page.viewport(width, 850); root.className = `v1-root ${theme}`; root.style.background = 'var(--v1-bg)';
-      fixture!.detectChanges(); await page.screenshot({ element: root, path: `../../../../../.angular/equipment-e1-chart-${label}.png` });
-    }
     await page.viewport(1100, 850); root.className = 'v1-root';
     const printSession = cdp() as { send: (method: 'Emulation.setEmulatedMedia', parameters: { media: string }) => Promise<unknown> };
     await printSession.send('Emulation.setEmulatedMedia', { media: 'print' });
     try {
       expect(root.querySelector('.time-series-actions, table')).toBeNull();
       expect(previewValuesText(fixture!)).toContain('Source FY 2026');
-      await page.screenshot({ element: root, path: '../../../../../.angular/equipment-e1-print.png' });
     } finally { await printSession.send('Emulation.setEmulatedMedia', { media: '' }); }
     fixture!.componentInstance.preview.update({ ...edited, sources: edited.sources.map(source => ({ ...source, selection: { kind: 'fixed', resource: 'equipment', guids: ['deleted-equipment'] } })) }, { accountGuid: account.guid, workspaceRevision: store.revision(), definitionGuid: reopened.guid, definitionRevision: 3 });
     await vi.waitFor(() => expect(fixture!.componentInstance.preview.state().state).toBe('missing-source'));
@@ -194,10 +184,9 @@ describe('saved equipment history native journey', () => {
       pin.focus(); await userEvent.keyboard('{Enter}'); period.detectChanges();
       await userEvent.fill((period.nativeElement as HTMLElement).querySelector<HTMLInputElement>('input[formcontrolname="year"]')!, '2029');
       expect(changed).toHaveBeenLastCalledWith({ period: { kind: 'fiscal-year', year: 2029 }, comparison: { kind: 'none' } });
-      for (const [width, theme, label] of [[1100, '', 'wide-light'], [390, 'v1-theme-dark', 'narrow-dark']] as const) {
+      for (const [width, theme] of [[1100, ''], [390, 'v1-theme-dark']] as const) {
         await page.viewport(width, 850); host.className = `v1-root ${theme}`; host.style.background = 'var(--v1-bg)'; host.style.padding = '12px';
         expect(host.scrollWidth).toBeLessThanOrEqual(host.clientWidth + 1);
-        await page.screenshot({ element: host, path: `../../../../../.angular/equipment-${mode === 'equipment' ? 'e1' : 'e2-facility'}-controls-${label}.png` });
       }
       source.componentRef.setInput('context', { definition, sourceId: 'source-1', disabled: true, changed: () => {}, request: requested }); source.detectChanges();
       expect([...(source.nativeElement as HTMLElement).querySelectorAll<HTMLButtonElement>('button')].every(button => button.disabled || button.classList.contains('decision-section__toggle'))).toBe(true);

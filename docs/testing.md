@@ -81,6 +81,14 @@ For agent documentation, run `npm run docs:check`. It validates local Markdown d
 - Do not assert ordinary HTML copy, option order, CSS class names, or layout structure unless that text, order, class, or structure is the behavior being protected. For beginner guidance, marketing copy, dashboard labels, and visual hierarchy, prefer a focused manual/visual review or an accessibility assertion tied to a real user outcome.
 - A valuable test should fail for a plausible regression and make the broken contract clear from its name and failure output.
 
+### Screenshots and visual evidence
+
+Required browser tests assert observable behavior: rendered values, layout bounds, reading order, focus, keyboard interaction, chart models and export contracts. Do not add routine `page.screenshot()` calls to these tests. Saving an image without comparing it to an expected result does not verify appearance and adds capture, timing and filesystem failure points.
+
+Take optional development or PR-evidence images in a separate local browser/debug session. Keep them outside tracked source, use a supported output location, and do not broaden filesystem permissions or hard-code temporary machine paths to make evidence capture pass CI. Such images need a named inspection purpose; they are not automated coverage.
+
+Preserve the runner's automatic failure screenshots as diagnostics. Collecting those images in CI should be failure-only with limited retention. Deliberate visual regression tests require a specific visual contract, deterministic rendering, expected baselines, an automated comparison and a review process for differences.
+
 ### Direct construction or TestBed
 
 Instantiate a class directly when the subject is ordinary TypeScript and Angular is not part of the behavior. This keeps setup small and dependencies explicit.

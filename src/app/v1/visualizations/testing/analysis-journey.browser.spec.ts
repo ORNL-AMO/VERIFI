@@ -50,11 +50,10 @@ describe('A1 saved facility analysis native journey', () => {
       radio.focus(); await userEvent.keyboard(' '); drawer.detectChanges();
       expect(lifecycle.draftDefinition()!.sources[0]).toMatchObject({ analysisGuid: 'analysis-a', mode: 'result', measure: 'actual' });
       expect(lifecycle.step()).toBe('analysis'); expect(next.disabled).toBe(false);
-      for (const [width, theme, label] of [[1100, '', 'wide-light'], [390, 'v1-theme-dark', 'narrow-dark']] as const) {
+      for (const [width, theme] of [[1100, ''], [390, 'v1-theme-dark']] as const) {
         await page.viewport(width, 850); root.className = `v1-root ${theme}`;
         const dialog = root.querySelector<HTMLElement>('[role=dialog]')!;
         expect(dialog.scrollWidth).toBeLessThanOrEqual(dialog.clientWidth + 1);
-        await page.screenshot({ element: dialog, path: `../../../../../.angular/analysis-a1-add-picker-${label}.png` });
       }
     } finally { drawer.destroy(); }
   });
@@ -122,14 +121,10 @@ describe('A1 saved facility analysis native journey', () => {
     expect(options.series[0]).toMatchObject({ name: 'Production improvement', type: 'bar' });
     expect(options.yAxis[options.series[0].yAxisIndex].position).toBe('right');
     expect(previewValuesText(preview!)).toContain('%');
-    for (const [width, theme, label] of [[1100, '', 'wide-light'], [390, 'v1-theme-dark', 'narrow-dark']] as const) {
-      await page.viewport(width, 850); root.className = `v1-root ${theme}`; root.style.background = 'var(--v1-bg)';
-      await page.screenshot({ element: root, path: `../../../../../.angular/analysis-a1-${label}.png` });
-    }
     await page.viewport(1100, 850); root.className = 'v1-root';
     const print = cdp() as { send: (method: 'Emulation.setEmulatedMedia', parameters: { media: string }) => Promise<unknown> };
     await print.send('Emulation.setEmulatedMedia', { media: 'print' });
-    try { expect(root.querySelector('.time-series-actions, table')).toBeNull(); await page.screenshot({ element: root, path: '../../../../../.angular/analysis-a1-print.png' }); }
+    try { expect(root.querySelector('.time-series-actions, table')).toBeNull(); }
     finally { await print.send('Emulation.setEmulatedMedia', { media: '' }); }
     const validSnapshot = store.snapshot()!;
     store.publishCommitted({ ...validSnapshot, facilityAnalyses: [{ ...validSnapshot.facilityAnalyses[0], groups: [...validSnapshot.facilityAnalyses[0].groups,
@@ -182,10 +177,9 @@ describe('A1 saved facility analysis native journey', () => {
       await userEvent.fill(period.nativeElement.querySelector('input[formcontrolname="start"]'), '2021-01');
       await userEvent.fill(period.nativeElement.querySelector('input[formcontrolname="end"]'), '2021-12');
       expect(changed).toHaveBeenLastCalledWith({ period: { kind: 'fixed', basis: 'calendar', start: '2021-01-01', end: '2021-12-31' }, comparison: { kind: 'none' } });
-      for (const [width, theme, label] of [[1100, '', 'wide-light'], [390, 'v1-theme-dark', 'narrow-dark']] as const) {
+      for (const [width, theme] of [[1100, ''], [390, 'v1-theme-dark']] as const) {
         await page.viewport(width, 850); host.className = `v1-root ${theme}`; host.style.background = 'var(--v1-bg)';
         expect(host.scrollWidth).toBeLessThanOrEqual(host.clientWidth + 1);
-        await page.screenshot({ element: host, path: `../../../../../.angular/analysis-a1-controls-${label}.png` });
       }
       source.componentRef.setInput('context', { definition: analysisDefinition(), sourceId: 'source-1', disabled: true, changed: () => {}, request: requested }); source.detectChanges(); expect(select.disabled).toBe(true);
     } finally { source.destroy(); period.destroy(); host.remove(); }

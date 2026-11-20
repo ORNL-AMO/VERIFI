@@ -90,7 +90,6 @@ describe('Energy Use group results in Chromium', () => {
         expect(period()!.getBoundingClientRect().height).toBeGreaterThan(10);
         expect(view.root.querySelector('.energy-use-results-graphs select')).toBeNull();
         expect(view.root.scrollWidth).toBeLessThanOrEqual(view.root.clientWidth + 1);
-        await page.screenshot({ element: view.root, path: `../../../../../../../tmp/energy-use-results/review-2892-year-${width}-${theme.includes('contrast') ? 'contrast' : theme ? 'dark' : 'light'}.png` });
       }
       await view.router.navigateByUrl(`${groupUrl.replace('group-a', 'older')}/group-footprint`); await view.settle();
       expect(period()!.textContent).toContain('FY 2023');
@@ -98,7 +97,6 @@ describe('Energy Use group results in Chromium', () => {
       await media.send('Emulation.setEmulatedMedia', { media: 'print' }); await view.settle();
       expect(period()!.getBoundingClientRect().height).toBeGreaterThan(10);
       expect(period()!.textContent).toContain('FY 2023');
-      await page.screenshot({ element: view.root, path: '../../../../../../../tmp/energy-use-results/review-2892-year-print.png' });
       expect(JSON.stringify(view.store.snapshot())).toBe(before);
     } finally { await media.send('Emulation.setEmulatedMedia', { media: '', features: [] }); view.destroy(); }
   });
@@ -134,7 +132,6 @@ describe('Energy Use group results in Chromium', () => {
         expect(Math.abs(input.getBoundingClientRect().top - top), `facts shift: ${facts.getBoundingClientRect().height - factsHeight}`).toBeLessThanOrEqual(1);
         expect(Math.abs(facts.getBoundingClientRect().height - factsHeight)).toBeLessThanOrEqual(1);
         expect(view.root.textContent).not.toContain('Loading energy-use group');
-        await page.screenshot({ element: view.root, path: '../../../../../../../tmp/energy-use-results/stable-facts-calculating.png' });
       } finally { finish?.(); }
       await saving; await view.settle();
       await vi.waitFor(async () => { await view.settle(); expect(facts.querySelector('[role="status"]')?.textContent).toContain('Updated'); });
@@ -212,7 +209,6 @@ describe('Energy Use group results in Chromium', () => {
         expect(view.root.scrollWidth).toBeLessThanOrEqual(view.root.clientWidth + 1);
         const content = view.root.querySelector<HTMLElement>('.energy-use-workbench__content')!;
         content.scrollTop = 0; await view.settle();
-        await page.screenshot({ element: view.root, path: `../../../../../../../tmp/energy-use-results/footprint-batch-${width}-${theme.includes('contrast') ? 'contrast' : theme ? 'dark' : 'light'}.png` });
       }
       expect(JSON.stringify(view.store.snapshot())).toBe(before);
     } finally { view.destroy(); }
@@ -232,13 +228,11 @@ describe('Energy Use group results in Chromium', () => {
       expect(view.root.querySelector('.energy-use-results-graphs__accessible-data')).toBeNull();
       expect(view.chart().series[0].type).toBe('sankey');
       expect(view.chart().series[0].links!.reduce((sum, link) => sum + link.value, 0)).toBeCloseTo(380, 8);
-      await page.screenshot({ element: view.root, path: '../../../../../../../tmp/energy-use-results/group-flow-light.png' });
       for (const [width, theme] of [[1200, ''], [390, 'v1-theme-dark'], [390, 'v1-theme-dark v1-contrast-strong']] as const) {
         await page.viewport(width, 950); view.root.className = `v1-root ${theme}`; await view.settle();
         expect(footprintTable.scrollWidth).toBeLessThanOrEqual(footprintTable.clientWidth + 1);
         const equipmentLink = footprintTable.querySelector<HTMLElement>('tbody a')!;
         expect(textContrast(equipmentLink, footprintTable.querySelector('section')!)).toBeGreaterThanOrEqual(4.5);
-        await page.screenshot({ element: footprintTable, path: `../../../../../../../tmp/energy-use-results/footprint-source-table-${width}-${theme.includes('contrast') ? 'contrast' : theme ? 'dark' : 'light'}.png` });
       }
       await page.viewport(1200, 950); view.root.className = 'v1-root'; await view.settle();
       await page.getByRole('button', { name: 'Group Summary', exact: true }).click(); await view.settle();
@@ -247,17 +241,14 @@ describe('Energy Use group results in Chromium', () => {
       expect(view.root.querySelector('app-energy-use-footprint-table')).toBeNull();
       expect(view.root.querySelectorAll('app-energy-use-summary-table tbody tr')).toHaveLength(8);
       expect(view.root.querySelector('.energy-use-results-graphs select')).toBeNull();
-      await page.screenshot({ element: view.root, path: '../../../../../../../tmp/energy-use-results/group-comparison-light.png' });
       await page.getByRole('checkbox', { name: 'Show history', exact: true }).click(); await view.settle();
       expect(view.chart().series).toHaveLength(8);
-      await page.screenshot({ element: view.root, path: '../../../../../../../tmp/energy-use-results/group-history-light.png' });
       const history = page.getByRole('checkbox', { name: 'Show history', exact: true }).element() as HTMLInputElement;
       history.focus(); await userEvent.keyboard('{Tab}'); expect(view.root.contains(document.activeElement)).toBe(true);
       for (const [width, theme] of [[1200, ''], [390, 'v1-theme-dark'], [390, 'v1-theme-dark v1-contrast-strong']] as const) {
         await page.viewport(width, 950); view.root.className = `v1-root ${theme}`; await view.settle();
         expect(view.root.scrollWidth).toBeLessThanOrEqual(view.root.clientWidth + 1);
         expect(view.root.querySelector('app-energy-use-results-table')).toBeNull();
-        await page.screenshot({ element: view.root, path: `../../../../../../../tmp/energy-use-results/split-summary-${width}-${theme.includes('contrast') ? 'contrast' : theme ? 'dark' : 'light'}.png` });
       }
       await page.getByRole('button', { name: 'Facility Footprint', exact: true }).click(); await view.settle();
       expect(view.router.url).toBe(`${groupUrl}/facility-footprint`);
@@ -307,7 +298,6 @@ describe('Energy Use group results in Chromium', () => {
         expect(link.getBoundingClientRect().height).toBeLessThan(30);
       }
       expect(view.root.querySelector('.energy-use-results-graphs select')).toBeNull();
-      await page.screenshot({ element: view.root, path: '../../../../../../../tmp/energy-use-results/summary-batch-snapshot.png' });
       await page.getByRole('checkbox', { name: 'Show history', exact: true }).click(); await view.settle();
       for (const [width, theme] of [[1400, ''], [700, ''], [390, 'v1-theme-dark'], [390, 'v1-theme-dark v1-contrast-strong']] as const) {
         await page.viewport(width, 1100); view.root.className = `v1-root ${theme}`; await view.settle();
@@ -336,19 +326,16 @@ describe('Energy Use group results in Chromium', () => {
         expect(table.scrollHeight).toBeLessThanOrEqual(table.clientHeight + 1);
         const content = view.root.querySelector<HTMLElement>('.energy-use-workbench__content')!;
         content.scrollTop = 0; await view.settle();
-        await page.screenshot({ element: view.root, path: `../../../../../../../tmp/energy-use-results/summary-batch-${width}-${theme.includes('contrast') ? 'contrast' : theme ? 'dark' : 'light'}.png` });
       }
       await page.viewport(1400, 1100); view.root.className = 'v1-root'; await view.settle();
       await media.send('Emulation.setEmulatedMedia', { media: 'print' }); await view.settle();
       expect(getComputedStyle(table).overflowX).toBe('visible');
       expect(getComputedStyle(table.querySelector<HTMLElement>('tbody th')!).position).toBe('static');
       expect(getComputedStyle(view.root.querySelector<HTMLElement>('.energy-use-results-graphs__scroller')!).overflowX).toBe('visible');
-      await page.screenshot({ element: table, path: '../../../../../../../tmp/energy-use-results/summary-batch-print.png' });
       await view.router.navigateByUrl(`${groupUrl}/group-footprint`); await view.settle();
       const footprint = view.root.querySelector<HTMLElement>('.energy-use-footprint-table__scroller')!;
       expect(getComputedStyle(footprint).overflowX).toBe('visible');
       expect(view.chart().series[0].type).toBe('sankey');
-      await page.screenshot({ element: footprint, path: '../../../../../../../tmp/energy-use-results/footprint-batch-print.png' });
       expect(JSON.stringify(view.store.snapshot())).toBe(before);
     } finally { await media.send('Emulation.setEmulatedMedia', { media: '', features: [] }); view.destroy(); }
   });
@@ -383,7 +370,6 @@ describe('Energy Use group results in Chromium', () => {
         expect(plot.scrollHeight).toBeLessThanOrEqual(plot.clientHeight + 1);
         const name = view.root.querySelector<HTMLElement>('.facility-footprint__group a')!;
         expect(textContrast(name, name.closest('section')!)).toBeGreaterThanOrEqual(4.5);
-        await page.screenshot({ element: view.root, path: `../../../../../../../tmp/energy-use-results/facility-footprint-${width}-${theme.includes('contrast') ? 'contrast' : theme ? 'dark' : 'light'}.png` });
       }
       await page.viewport(1400, 1100); view.root.className = 'v1-root'; await view.settle();
       const link = view.root.querySelector<HTMLAnchorElement>('.facility-footprint__group a[href$="group-a/group-footprint"]')!;
@@ -393,7 +379,6 @@ describe('Energy Use group results in Chromium', () => {
       await media.send('Emulation.setEmulatedMedia', { media: 'print' }); await view.settle();
       expect(getComputedStyle(view.root.querySelector<HTMLElement>('.facility-footprint__table-scroll')!).overflowX).toBe('visible');
       expect(getComputedStyle(view.root.querySelector<HTMLElement>('.facility-footprint__plot-scroll')!).overflowX).toBe('visible');
-      await page.screenshot({ element: view.root, path: '../../../../../../../tmp/energy-use-results/facility-footprint-print.png' });
       expect(JSON.stringify(view.store.snapshot())).toBe(before);
     } finally { await media.send('Emulation.setEmulatedMedia', { media: '', features: [] }); view.destroy(); }
   });
@@ -445,14 +430,12 @@ describe('Energy Use group results in Chromium', () => {
       expect(balance().querySelector('.facility-footprint__source-balances')?.textContent).toMatch(/Accounted for\s*75%/);
       await view.router.navigateByUrl(`${groupUrl}/group-summary`); await view.settle();
       expect(facts().querySelector('dl')?.textContent).toMatch(/Metered Consumption\s*180/);
-      await page.screenshot({ element: view.root, path: '../../../../../../../tmp/energy-use-results/group-header-facts-light.png' });
       for (const theme of ['v1-theme-dark', 'v1-theme-dark v1-contrast-strong']) {
         await page.viewport(390, 850); view.root.className = `v1-root ${theme}`; await view.settle();
         expect(view.root.scrollWidth).toBeLessThanOrEqual(view.root.clientWidth + 1);
         expect(view.root.querySelector<HTMLElement>('.energy-use-workbench__content')!.clientHeight).toBeGreaterThan(60);
         const label = facts().querySelector<HTMLElement>('dt')!;
         expect(textContrast(label, label.parentElement!)).toBeGreaterThanOrEqual(4.5);
-        await page.screenshot({ element: view.root, path: `../../../../../../../tmp/energy-use-results/group-header-facts-${theme.includes('contrast') ? 'contrast' : 'dark'}.png` });
       }
       await page.viewport(1400, 1200); view.root.className = 'v1-root'; await view.settle();
       await view.router.navigateByUrl(`${groupUrl}/facility-footprint`); await view.settle();
@@ -466,18 +449,15 @@ describe('Energy Use group results in Chromium', () => {
       expect(view.root.querySelectorAll('.facility-footprint__group')).toHaveLength(1);
       expect(view.root.querySelector('.facility-footprint__table-scroll')?.textContent).toContain('No energy-use groups assigned to this source');
       expect(JSON.stringify(view.store.snapshot())).toBe(before);
-      await page.screenshot({ element: view.root, path: '../../../../../../../tmp/energy-use-results/facility-energy-balance-light.png' });
       for (const theme of ['v1-theme-dark', 'v1-theme-dark v1-contrast-strong']) {
         await page.viewport(390, 1200); view.root.className = `v1-root ${theme}`; await view.settle();
         expect(view.root.scrollWidth).toBeLessThanOrEqual(view.root.clientWidth + 1);
         const label = balance().querySelector<HTMLElement>('dt')!;
         expect(textContrast(label, label.parentElement!)).toBeGreaterThanOrEqual(4.5);
-        await page.screenshot({ element: balance(), path: `../../../../../../../tmp/energy-use-results/facility-energy-balance-${theme.includes('contrast') ? 'contrast' : 'dark'}.png` });
       }
       await page.viewport(1400, 1200); view.root.className = 'v1-root';
       await media.send('Emulation.setEmulatedMedia', { media: 'print' }); await view.settle();
       expect(getComputedStyle(view.root.querySelector<HTMLElement>('.facility-footprint__table-scroll')!).overflowX).toBe('visible');
-      await page.screenshot({ element: balance(), path: '../../../../../../../tmp/energy-use-results/facility-energy-balance-print.png' });
       await media.send('Emulation.setEmulatedMedia', { media: '', features: [] }); await view.settle();
       view.store.publish({ ...snapshot, energyUseEquipment: [] });
       await vi.waitFor(async () => { await view.settle(); expect(balance()?.textContent).toContain('0% accounted for'); });
@@ -490,7 +470,6 @@ describe('Energy Use group results in Chromium', () => {
       await vi.waitFor(async () => { await view.settle(); expect(balance()?.textContent).toContain('Equipment use exceeds metered consumption'); });
       expect(balance().querySelector('dl')?.textContent).toMatch(/Over allocated\s*20/);
       expect(view.chart().series[0].links!.every(link => link.value > 0)).toBe(true);
-      await page.screenshot({ element: view.root, path: '../../../../../../../tmp/energy-use-results/facility-energy-balance-over-allocated.png' });
     } finally { await media.send('Emulation.setEmulatedMedia', { media: '', features: [] }); view.destroy(); }
   });
 });

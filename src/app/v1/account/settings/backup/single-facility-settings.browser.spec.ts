@@ -87,7 +87,6 @@ describe('single-facility Settings and Backup browser presentation', () => {
     try {
       expect(matchMedia('(prefers-reduced-motion: reduce)').matches).toBe(true);
       expect(getComputedStyle(view.root.querySelector('h1')!).display).not.toBe('none');
-      await page.screenshot({ element: view.root, path: '../../../../../../.angular/phase5-settings-print.png' });
     } finally { await (cdp() as any).send('Emulation.setEmulatedMedia', { media: '', features: [] }); }
     view.fixture.destroy();
   });
