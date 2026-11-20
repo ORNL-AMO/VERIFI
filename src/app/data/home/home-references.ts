@@ -4,6 +4,7 @@ import { HomeReferenceIssue, homeRecordOwner } from '@data/models/idbModels/home
 import { IdbHomeDashboard } from '@data/models/idbModels/homeDashboard';
 import { IdbHomeOwner } from '@data/models/idbModels/homeOwner';
 import { readHomeDashboard } from './home-record';
+import { homeViewKey } from '@domain/home/home-views';
 
 export { homeReferences } from './home-widget-references';
 export type { HomeReference } from './home-widget-references';
@@ -26,7 +27,15 @@ export function sameHomeJson(a: unknown, b: unknown): boolean {
 export function homeOwnerResolutionState(record: Readonly<IdbHomeOwner>, state: HomeOwnerState): HomeOwnerState {
   const blocked = record.preservation?.references ?? [];
   const { defaultDashboardGuid, ...rest } = state;
-  return { ...rest, dashboardOrder: state.dashboardOrder.filter(guid => !blocked.some(ref => ref.path === `dashboardOrder.${guid}`)),
+  const views = state.views;
+  const available = (ref: import('@domain/home/home-dashboard').HomeDashboardReference, collection: string) =>
+    !blocked.some(issue => issue.path === `views.${collection}.${homeViewKey(ref)}`);
+  return { ...rest, ...(views ? { views: { ...views,
+    order: views.order.filter(ref => available(ref, 'order')),
+    hidden: views.hidden.filter(ref => available(ref, 'hidden')),
+    deleted: views.deleted.filter(ref => available(ref, 'deleted')),
+    ...(blocked.some(issue => issue.path === 'views.default') ? { default: undefined } : {}) } } : {}),
+    dashboardOrder: state.dashboardOrder.filter(guid => !blocked.some(ref => ref.path === `dashboardOrder.${guid}`)),
     ...(defaultDashboardGuid && !blocked.some(ref => ref.path === 'defaultDashboardGuid') ? { defaultDashboardGuid } : {}) };
 }
 export function homeDashboardVisible(record: Readonly<IdbHomeDashboard>, catalog: {

@@ -11,6 +11,23 @@ import { WorkspaceBackupSnapshotBuilder } from './backup-snapshot-builder.servic
 import { visualizationBackupSnapshot } from './visualization-backup.testing';
 
 describe('Home backup contracts and verified mappings', () => {
+  it('remaps built-in owner resources while retaining recipe/version/baseline identities and unavailable view preferences', () => {
+    const widget = { id: 'rolling', kind: 'built-in-chart' as const, size: 'half' as const, visibility: 'always' as const,
+      reference: { kind: 'built-in' as const, recipe: 'facility-a', version: 99, owner: { kind: 'facility' as const, guid: 'facility-a' } }, inherit: [], overrides: {} };
+    const source = getNewIdbHomeDashboard('account-a', owner, homeDefinition([widget]));
+    const result = transferHomeDashboard(source, 'account-b', maps, 'copy', []);
+    expect((result.definition as any).widgets[0]).toMatchObject({ id: 'rolling', reference: { recipe: 'facility-a', version: 99, owner: { guid: 'facility-b' } } });
+    const unavailable = transferHomeDashboard(source, 'account-b', { facility: maps.facility }, 'copy', []);
+    expect(readHomeWidget(unavailable, 'rolling').state).toBe('valid');
+    const view = { kind: 'built-in' as const, template: 'home' as const, version: 99 };
+    const state = getNewIdbHomeOwner('account-a', owner, { ...homeOwnerState(), views: { version: 1, catalog: [view], order: [view, { kind: 'saved', dashboardGuid: 'missing' }],
+      default: { kind: 'saved', dashboardGuid: 'missing' }, hidden: [], deleted: [view] } });
+    const first = transferHomeOwner(state, 'account-b', maps, 'owner-copy', []);
+    const second = transferHomeOwner(first, 'account-c', { facility: { 'facility-b': 'facility-c' }, dashboard: { missing: 'collision' } }, 'owner-copy-2', []);
+    expect((second.state as any).views).toMatchObject({ catalog: [view], deleted: [view], default: { dashboardGuid: 'missing' } });
+    expect(homeOwnerResolutionState(second, second.state as any).views?.default).toBeUndefined();
+    expect(homeOwnerResolutionState(second, second.state as any).views?.order).toEqual([view]);
+  });
   const owner = { kind: 'facility' as const, guid: 'facility-a' };
   const definition = homeDefinition([
     chartWidget('shared', 'first'), chartWidget('shared', 'second'),

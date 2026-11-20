@@ -3,6 +3,7 @@ import { ConvertValue } from '@domain/calculations/conversions/convertValue';
 import { createVisualizationDefinition } from '../visualizations/visualization-definition';
 import { decodeVisualizationDefinition } from '../visualizations/visualization-validation';
 import { HOME_FORMAT_VERSION, HOME_STARTERS, HomeDashboardDefinition, HomeOwnerState } from './home-dashboard';
+import { homeViewKey } from './home-views';
 
 type JsonObject = Record<string, any>;
 const object = (value: unknown): value is JsonObject => !!value && typeof value === 'object' && !Array.isArray(value);
@@ -42,11 +43,32 @@ export function homeDefaultsValid(value: unknown): boolean {
   return value.emissionsTreatment === undefined || ['market', 'location'].includes(value.emissionsTreatment);
 }
 
+export function homeDashboardReferenceValid(value: unknown): boolean {
+  return object(value) && (value.kind === 'saved'
+    ? keys(value, ['kind', 'dashboardGuid']) && homeText(value.dashboardGuid)
+    : value.kind === 'built-in' && keys(value, ['kind', 'template', 'version'])
+      && HOME_STARTERS.includes(value.template) && homePositiveInteger(value.version));
+}
+function homeViewPreferencesValid(value: unknown): boolean {
+  const refs = (items: unknown): boolean => Array.isArray(items) && items.every(homeDashboardReferenceValid)
+    && new Set(items.map(homeViewKey)).size === items.length;
+  return object(value) && keys(value, ['version', 'catalog', 'order', 'default', 'hidden', 'deleted']) && value.version === 1
+    && refs(value.catalog) && value.catalog.every(item => item.kind === 'built-in') && refs(value.order) && refs(value.hidden) && refs(value.deleted)
+    && (value.default === undefined || homeDashboardReferenceValid(value.default));
+}
 function widgetValid(widget: unknown): boolean {
   if (!object(widget) || !homeText(widget.id) || !['half', 'full'].includes(widget.size)
-    || !['always', 'water', 'emissions'].includes(widget.visibility) || widget.title !== undefined && typeof widget.title !== 'string') return false;
-  const base = ['id', 'size', 'visibility', 'title', 'kind'];
+    || !['always', 'water', 'emissions'].includes(widget.visibility) || widget.title !== undefined && typeof widget.title !== 'string'
+    || widget.templateKey !== undefined && !homeText(widget.templateKey)) return false;
+  const base = ['id', 'size', 'visibility', 'title', 'templateKey', 'kind'];
   switch (widget.kind) {
+    case 'built-in-chart': {
+      const ref = widget.reference;
+      return keys(widget, [...base, 'reference', 'inherit', 'overrides']) && object(ref) && keys(ref, ['kind', 'recipe', 'version', 'owner'])
+        && ref.kind === 'built-in' && homeText(ref.recipe) && homePositiveInteger(ref.version) && homeOwnerValid(ref.owner)
+        && Array.isArray(widget.inherit) && new Set(widget.inherit).size === widget.inherit.length
+        && widget.inherit.every(key => ['period', 'units', 'energyTreatment', 'emissionsTreatment'].includes(key)) && homeDefaultsValid(widget.overrides);
+    }
     case 'visualization': return keys(widget, [...base, 'visualizationGuid', 'inherit', 'overrides']) && homeText(widget.visualizationGuid)
       && Array.isArray(widget.inherit) && new Set(widget.inherit).size === widget.inherit.length
       && widget.inherit.every(key => ['period', 'units', 'energyTreatment', 'emissionsTreatment'].includes(key)) && homeDefaultsValid(widget.overrides);
@@ -74,7 +96,8 @@ export type HomeDecode<T> = { readonly state: 'valid'; readonly value: T } | { r
 export function decodeHomeDashboard(value: unknown): HomeDecode<HomeDashboardDefinition> {
   if (!homeJson(value) || !object(value)) return { state: 'invalid', message: 'Dashboard intent must be serializable JSON.' };
   if (homePositiveInteger(value.version) && value.version !== HOME_FORMAT_VERSION) return { state: 'unsupported', message: 'Unsupported dashboard format.' };
-  if (!keys(value, ['version', 'name', 'widgets', 'defaults', 'visibility']) || value.version !== HOME_FORMAT_VERSION || !homeText(value.name)
+  if (!keys(value, ['version', 'name', 'widgets', 'defaults', 'visibility', 'builtIn']) || value.version !== HOME_FORMAT_VERSION || !homeText(value.name)
+    || value.builtIn !== undefined && (!homeDashboardReferenceValid(value.builtIn) || value.builtIn.kind !== 'built-in')
     || !['always', 'water', 'emissions', 'hidden'].includes(value.visibility) || !Array.isArray(value.widgets) || !value.widgets.every(widgetValid)
     || new Set(value.widgets.map(widget => widget.id)).size !== value.widgets.length || !homeDefaultsValid(value.defaults))
     return { state: 'invalid', message: 'Invalid dashboard name, widgets, layout or defaults.' };
@@ -83,7 +106,10 @@ export function decodeHomeDashboard(value: unknown): HomeDecode<HomeDashboardDef
 export function decodeHomeOwnerState(value: unknown): HomeDecode<HomeOwnerState> {
   if (!homeJson(value) || !object(value)) return { state: 'invalid', message: 'Owner state must be serializable JSON.' };
   if (homePositiveInteger(value.version) && value.version !== HOME_FORMAT_VERSION) return { state: 'unsupported', message: 'Unsupported owner state format.' };
-  if (!keys(value, ['version', 'initialized', 'dashboardOrder', 'defaultDashboardGuid', 'deletedStarters']) || value.version !== HOME_FORMAT_VERSION
+  if (object(value.views) && homePositiveInteger(value.views.version) && value.views.version !== 1)
+    return { state: 'unsupported', message: 'Unsupported Home view preferences. Saved choices are preserved.' };
+  if (!keys(value, ['version', 'initialized', 'dashboardOrder', 'defaultDashboardGuid', 'deletedStarters', 'views']) || value.version !== HOME_FORMAT_VERSION
+    || value.views !== undefined && !homeViewPreferencesValid(value.views)
     || typeof value.initialized !== 'boolean' || !strings(value.dashboardOrder) || value.defaultDashboardGuid !== undefined && !homeText(value.defaultDashboardGuid)
     || !strings(value.deletedStarters) || value.deletedStarters.some(key => ![...HOME_STARTERS, 'blank'].includes(key as any)))
     return { state: 'invalid', message: 'Invalid Home initialization, order or default state.' };

@@ -4,6 +4,25 @@ export const HOME_FORMAT_VERSION = 1;
 export const HOME_STARTERS = ['home', 'goal-progress', 'energy-use', 'costs', 'emissions', 'water'] as const;
 export type HomeTemplate = typeof HOME_STARTERS[number] | 'blank';
 export type HomeOwner = { readonly kind: 'account'; readonly guid: string } | { readonly kind: 'facility'; readonly guid: string };
+/** Recipe keys and versions are shipped intent, never resource GUIDs. */
+export interface HomeBuiltInChartReference {
+  readonly kind: 'built-in';
+  readonly recipe: string;
+  readonly version: number;
+  readonly owner: HomeOwner;
+}
+export type HomeChartReference = HomeBuiltInChartReference | { readonly kind: 'saved'; readonly visualizationGuid: string };
+export type HomeDashboardReference = { readonly kind: 'built-in'; readonly template: Exclude<HomeTemplate, 'blank'>; readonly version: number }
+  | { readonly kind: 'saved'; readonly dashboardGuid: string };
+/** A catalog snapshot is captured only by an explicit choice, so later releases cannot refill it. */
+export interface HomeViewPreferences {
+  readonly version: 1;
+  readonly catalog: readonly Extract<HomeDashboardReference, { kind: 'built-in' }>[];
+  readonly order: readonly HomeDashboardReference[];
+  readonly default?: HomeDashboardReference;
+  readonly hidden: readonly HomeDashboardReference[];
+  readonly deleted: readonly HomeDashboardReference[];
+}
 export interface ReportingAnalysisBinding {
   readonly kind: 'reporting';
   readonly owner: HomeOwner;
@@ -22,10 +41,13 @@ export interface HomeWidgetBase {
   readonly id: string;
   readonly size: 'half' | 'full';
   readonly title?: string;
+  readonly templateKey?: string;
   readonly visibility: 'always' | 'water' | 'emissions';
 }
 export type HomeWidget = HomeWidgetBase & (
   | { readonly kind: 'visualization'; readonly visualizationGuid: string;
+      readonly inherit: readonly HomeDisplayKey[]; readonly overrides: HomeDisplayDefaults }
+  | { readonly kind: 'built-in-chart'; readonly reference: HomeBuiltInChartReference;
       readonly inherit: readonly HomeDisplayKey[]; readonly overrides: HomeDisplayDefaults }
   | { readonly kind: 'note'; readonly text: string }
   | { readonly kind: 'shortcut'; readonly destination: { readonly area: 'data' | 'analysis' | 'reports' | 'visualizations' | 'settings';
@@ -43,6 +65,8 @@ export interface HomeDashboardDefinition {
   readonly widgets: readonly HomeWidget[];
   readonly defaults: HomeDisplayDefaults;
   readonly visibility: 'always' | 'water' | 'emissions' | 'hidden';
+  /** Present only on an explicitly saved customization of this shipped view. */
+  readonly builtIn?: Extract<HomeDashboardReference, { kind: 'built-in' }>;
 }
 export interface HomeOwnerState {
   readonly version: typeof HOME_FORMAT_VERSION;
@@ -50,6 +74,7 @@ export interface HomeOwnerState {
   readonly dashboardOrder: readonly string[];
   readonly defaultDashboardGuid?: string;
   readonly deletedStarters: readonly HomeTemplate[];
+  readonly views?: HomeViewPreferences;
 }
 export interface HomeTemplateProvenance {
   readonly template: HomeTemplate;

@@ -7,6 +7,7 @@ import { IdbHomeRecord, HomeReferenceIssue, homeRecordOwner } from '@data/models
 import { IdbSavedVisualization } from '@data/models/idbModels/savedVisualization';
 import { homeEnvelopeError } from '@data/home/home-record';
 import { sameHomeJson } from '@data/home/home-references';
+import { homeViewKey } from '@domain/home/home-views';
 
 export type HomeTransferMaps = VisualizationGuidMaps & {
   readonly visualization?: Readonly<Record<string, string>>;
@@ -62,6 +63,8 @@ export function remapHomeDefinition(definition: HomeDashboardDefinition, maps: H
   const widgets = definition.widgets.map(widget => {
     const path = `widgets.${widget.id}`;
     if (widget.kind === 'visualization') return { ...structuredClone(widget), visualizationGuid: move(`${path}.visualizationGuid`, 'visualization', widget.visualizationGuid) };
+    if (widget.kind === 'built-in-chart') return { ...structuredClone(widget), reference: { ...widget.reference, owner: { ...widget.reference.owner,
+      guid: move(`${path}.reference.owner.guid`, widget.reference.owner.kind, widget.reference.owner.guid) } } };
     if (widget.kind === 'goal') return { ...structuredClone(widget), binding: widget.binding.kind === 'exact'
       ? { ...widget.binding, analysisGuid: move(`${path}.binding.analysisGuid`, 'analysis', widget.binding.analysisGuid) }
       : { ...widget.binding, owner: { ...widget.binding.owner, guid: move(`${path}.binding.owner.guid`, widget.binding.owner.kind, widget.binding.owner.guid) } } };
@@ -133,8 +136,18 @@ export function transferHomeOwner(record: Readonly<IdbHomeOwner>, accountGuid: s
   };
   const state: HomeOwnerState = { ...structuredClone(read.value), dashboardOrder: read.value.dashboardOrder.map(id => move(`dashboardOrder.${id}`, id)),
     ...(read.value.defaultDashboardGuid ? { defaultDashboardGuid: move('defaultDashboardGuid', read.value.defaultDashboardGuid) } : {}) };
+  if (read.value.views) {
+    const views = read.value.views;
+    const remap = (ref: import('@domain/home/home-dashboard').HomeDashboardReference, path: string) => ref.kind === 'built-in' ? structuredClone(ref)
+      : { ...ref, dashboardGuid: move(path, ref.dashboardGuid) };
+    result.state = { ...state, views: { ...structuredClone(views),
+      order: views.order.map(ref => remap(ref, `views.order.${homeViewKey(ref)}`)),
+      hidden: views.hidden.map(ref => remap(ref, `views.hidden.${homeViewKey(ref)}`)),
+      deleted: views.deleted.map(ref => remap(ref, `views.deleted.${homeViewKey(ref)}`)),
+      ...(views.default ? { default: remap(views.default, 'views.default') } : {}) } };
+  } else result.state = state;
   for (const ref of record.preservation?.references ?? []) if (!references.some(item => item.path === ref.path)) references.push(structuredClone(ref));
-  result.state = state; result.preservation = { ...result.preservation!, references };
+  result.preservation = { ...result.preservation!, references };
   return result;
 }
 

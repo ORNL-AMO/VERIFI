@@ -46,6 +46,43 @@ describe('Home atomic native commands and workspace publication', () => {
   }
   function current(guid: string) { return store.homeDashboards().find(record => record.guid === guid)!; }
 
+  it('saves, duplicates, restores and reloads built-in references without creating library records', async () => {
+    const blueprint = { ...storageBlueprints()[0], charts: [], dashboard: homeDefinition([{
+      id: 'HOME.energy-trend', kind: 'built-in-chart' as const, size: 'half' as const, visibility: 'always' as const,
+      reference: { kind: 'built-in' as const, recipe: 'reporting-energy-rolling', version: 1, owner: homeAccountOwner }, inherit: [], overrides: {}
+    }]) };
+    expect(store.homeOwners()).toEqual([]);
+    const proposal = commands.prepareCreate(homeAccountOwner, blueprint);
+    expect((await commands.submit(proposal)).state).toBe('committed');
+    const original = store.homeDashboards()[0];
+    expect((await commands.submit(commands.prepareDuplicate(original))).state).toBe('committed');
+    expect((await commands.submit(commands.prepareTemplateReplacement(current(original.guid), blueprint))).state).toBe('committed');
+    expect(store.savedVisualizations()).toEqual([]);
+    expect(store.homeDashboards()).toHaveLength(2);
+    expect(definition(store.homeDashboards()[0]).widgets[0]).toMatchObject({ templateKey: 'HOME.energy-trend', reference: { recipe: 'reporting-energy-rolling', version: 1 } });
+    const before = store.snapshot();
+    await harness.reopen();
+    const loaded = await TestBed.inject(AccountWorkspaceLoaderService).load(account.guid);
+    expect(loaded.homeDashboards).toEqual(before!.homeDashboards);
+    expect(loaded.savedVisualizations).toEqual([]);
+    const foreign = { ...definition(original), widgets: definition(original).widgets.map(widget => widget.kind === 'built-in-chart'
+      ? { ...widget, reference: { ...widget.reference, owner: { kind: 'facility' as const, guid: facility.guid } } } : widget) };
+    expect((await commands.submit(commands.prepareUpdate(current(original.guid), foreign))).state).toBe('failed');
+  });
+
+  it('persists explicit owner-local view choices once and preserves them during unrelated layout changes', async () => {
+    const ref = { kind: 'built-in' as const, template: 'home' as const, version: 1 };
+    const views = { version: 1 as const, catalog: [ref], order: [ref], default: ref, hidden: [], deleted: [] };
+    const proposal = commands.prepareConfigure(homeAccountOwner, { version: 1, initialized: true, dashboardOrder: [], deletedStarters: [], views });
+    expect((await commands.submit(proposal)).state).toBe('committed');
+    expect(commands.ownerView(homeAccountOwner).state?.views).toEqual(views);
+    expect(store.homeDashboards()).toEqual([]); expect(store.savedVisualizations()).toEqual([]);
+    expect((await commands.submit(commands.prepareConfigure(homeAccountOwner, { ...commands.ownerView(homeAccountOwner).state!, views: { ...views, catalog: [] } }))).state).toBe('failed');
+    expect((await commands.submit(commands.prepareCreate(homeAccountOwner, { template: 'blank', version: 1, dashboard: homeDefinition(), charts: [] }))).state).toBe('committed');
+    expect(commands.ownerView(homeAccountOwner).state?.views).toEqual(views);
+    expect(commands.ownerView({ kind: 'facility', guid: facility.guid }).state).toBeUndefined();
+  });
+
   it('initializes once, shares starter charts, hydrates after restart and publishes one complete graph', async () => {
     const committed = vi.fn(); TestBed.inject(WorkspaceCommandBoundary).committedChange$.subscribe(committed);
     const view = await initialize();
