@@ -45,6 +45,27 @@ describe('Home protected lifecycle drafts', () => {
     await editor.retry(); expect(submit.mock.calls[1][0]).toBe(command);
     expect(editor.session()?.definition?.name).toBe('Blank board');
   });
+  it('retains structural widget edits and the exact rejected proposal, including reviewed reference paths', async () => {
+    const { editor, submit } = setupEditor(); editor.beginEdit();
+    const note = { id: 'note', kind: 'note' as const, text: 'Plain text', size: 'half' as const, visibility: 'always' as const };
+    const shortcut = { id: 'shortcut', kind: 'shortcut' as const, size: 'full' as const, visibility: 'always' as const,
+      destination: { area: 'settings' as const, owner: homeAccountOwner } };
+    editor.addWidget(note); editor.addWidget(shortcut); editor.moveWidget(shortcut.id, 0);
+    const path = 'widgets.shortcut.destination.owner.guid'; editor.updateWidget(shortcut, [path]);
+    await editor.save(); const proposal = editor.session()!.proposal!;
+    expect(proposal).toMatchObject({ kind: 'update', definition: { widgets: [shortcut, note] }, repairPaths: [path] });
+    editor.moveWidget(note.id, 0); editor.updateWidget({ ...note, text: 'Blocked change' });
+    expect(editor.session()?.definition?.widgets).toEqual([shortcut, note]);
+    await editor.retry(); expect(submit.mock.calls[1][0]).toBe(proposal);
+  });
+  it('protects a selected add-widget target across publications without treating an untouched chooser as a draft', () => {
+    const { editor, store, snapshot, record, owner } = setupEditor(); editor.beginEdit();
+    editor.setWidgetChoice({ kind: 'visualization', visualizationGuids: [], shortcutKeys: [] }); expect(editor.needsProtection()).toBe(false);
+    editor.setWidgetChoice({ kind: 'visualization', visualizationGuids: ['saved-chart'], shortcutKeys: [] });
+    store.publish({ ...snapshot, homeDashboards: [record], homeOwners: [owner] }); TestBed.tick();
+    expect(editor.needsProtection()).toBe(true); expect(editor.canSave()).toBe(false);
+    expect(editor.session()?.widgetChoice?.visualizationGuids).toEqual(['saved-chart']);
+  });
   it('blocks save duplicates and edits while a command is running', async () => {
     const { editor, submit } = setupEditor();
     let done!: (value: Awaited<ReturnType<HomeCommands['submit']>>) => void;

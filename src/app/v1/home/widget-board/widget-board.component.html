@@ -1,0 +1,6 @@
+@if (editing()) { <app-home-widget-adder/> }
+<div class="home-widget-grid" role="list" aria-label="Dashboard widgets in reading order" cdkDropList cdkDropListOrientation="mixed" [cdkDropListDisabled]="!editing() || !editor.canEdit()" (cdkDropListDropped)="drop($event)">
+  @for (view of views(); track view.widget.id; let index = $index) {
+    <app-home-widget-card cdkDrag [cdkDragData]="view.widget.id" [cdkDragDisabled]="!editing() || !editor.canEdit()" [view]="view" [editing]="editing()" [enabled]="editor.canEdit()" [index]="index" [count]="views().length" [shortcuts]="shortcuts()" (changed)="change($event)" (moved)="editor.moveWidget(view.widget.id, index + $event)" (removed)="editor.requestRemoveWidget(view.widget.id)"/>
+  } @empty { <p class="widget-empty">{{ editing() ? 'No widgets. Add a note, saved visualization, or internal shortcut.' : 'This dashboard has no visible widgets.' }}</p> }
+</div>

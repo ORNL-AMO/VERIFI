@@ -2,7 +2,7 @@
   @let session = editor.session();
   <header class="v1-section-header">
     <p class="v1-eyebrow">{{ home.owner()?.kind === 'facility' ? 'Facility Home' : 'Account Home' }} · {{ home.ownerName() }}</p>
-    <h1 id="home-title" tabindex="-1">{{ (session?.mode === 'edit' ? session?.definition?.name : home.definition()?.name) || 'Home' }}</h1>
+    <h1 id="home-title" tabindex="-1">{{ (!printing.active() && session?.mode === 'edit' ? session?.definition?.name : home.definition()?.name) || 'Home' }}</h1>
   </header>
   @if (editor.publicationMessage()) { <p class="home-panel" role="status">{{ editor.publicationMessage() }}</p> }
   @if (editor.pendingPublications().length) {
@@ -46,8 +46,8 @@
           @if (editor.conflictOwnerChoices(); as choices) { <p>Saved Home default: {{ choices.defaultName }}. Saved order: {{ choices.order.join(' → ') }}.</p> }
           <div class="home-conflict" aria-label="Saved and proposed dashboard versions">
             @let saved = editor.conflictDefinition();
-            <section><h2>Saved version</h2><p>{{ saved?.name || 'Dashboard unavailable, deleted, or owner preferences changed' }}</p>@for (widget of saved?.widgets || []; track widget.id) { <p>{{ widget.title || widget.kind }} · {{ widget.size }}@if (widget.kind === 'note') { : {{ widget.text }} }</p> }</section>
-            <section><h2>Your draft</h2><p>{{ session?.definition?.name || 'The reviewed dashboard action is retained.' }}</p>@for (widget of session?.definition?.widgets || []; track widget.id) { <p>{{ widget.title || widget.kind }} · {{ widget.size }}@if (widget.kind === 'note') { : {{ widget.text }} }</p> }</section>
+            <section><h2>Saved version</h2><p>{{ saved?.name || 'Dashboard unavailable, deleted, or owner preferences changed' }}</p>@for (view of editor.conflictSavedWidgets(); track view.widget.id) { <p>{{ view.title }} · {{ view.widget.size }} · {{ view.context || view.message }}@if (view.widget.kind === 'note') { : {{ view.widget.text }} }</p> }</section>
+            <section><h2>Your draft</h2><p>{{ session?.definition?.name || 'The reviewed dashboard action is retained.' }}</p>@for (view of editor.conflictDraftWidgets(); track view.widget.id) { <p>{{ view.title }} · {{ view.widget.size }} · {{ view.context || view.message }}@if (view.widget.kind === 'note') { : {{ view.widget.text }} }</p> }</section>
           </div>
         }
         @if (session?.proposal && session?.outcome?.state !== 'refresh-required') { <button type="button" class="v1-btn v1-btn--danger" [disabled]="editor.saving()" (click)="editor.requestDiscard()">Discard unsaved changes</button> }
@@ -71,18 +71,13 @@
         </div>
       </form>
     }
+    @if (session?.mode === 'edit' && !home.definition()) { <app-home-widget-board/> }
     @if (home.missing()) {
       <section class="v1-alert v1-alert--warning"><p>This dashboard is missing, hidden, or belongs to another owner.</p><a [routerLink]="home.defaultRoute()">Open this owner’s Home</a></section>
     } @else if (home.selected(); as entry) {
       @if (entry.read.state !== 'valid') { <p role="alert">{{ entry.read.message }} Your saved dashboard is preserved.</p> }
       @else {
-        @if (!home.widgets().length) { <p class="home-panel">This dashboard has no visible widgets. Use Edit dashboard to customize it.</p> }
-        @for (shell of home.widgetShells(); track shell.widget.id) {
-          @let widget = shell.widget;
-          <section class="home-widget" [attr.aria-label]="widget.title || widget.kind"><h2>{{ widget.title || widget.kind }}</h2>
-            @if (widget.kind === 'note') { <p class="home-note">{{ widget.text }}</p> } @else { <p>{{ shell.message }}</p> }
-          </section>
-        }
+        <app-home-widget-board/>
       }
     } @else {
       <section class="home-panel"><h2>No dashboards</h2><p>Create a Blank dashboard to start your own layout. Starter templates will be available when their complete recipes ship.</p></section>

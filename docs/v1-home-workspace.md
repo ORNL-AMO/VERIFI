@@ -20,4 +20,14 @@ A committed publication failure retains its receipt across departure. Pending sa
 
 ## Presentation boundary
 
-Known unavailable widget references and unsupported formats retain truthful placeholders; a coincident imported GUID does not verify blocked intent. Notes remain plain text. Home does not request widget calculations, embed charts, resolve reporting bindings, repair chart sources, or advertise overview-report creation. Widget structure and responsive interactions are the remaining Home3 slice.
+Known unavailable widget references and unsupported formats retain truthful placeholders; a coincident imported GUID does not verify blocked intent. Notes remain plain text. Home does not request widget calculations, embed charts, resolve reporting bindings, repair chart sources, or advertise overview-report creation. Home3 exposes note, existing saved-visualization and typed internal-shortcut additions. All supported persisted widget variants retain title, Half/Full size, order, settings and truthful states; later data widget renderers are not advertised as available additions.
+
+## Widget drafts, layout and accessibility
+
+Widget title, plain note text, typed shortcut choice, order and Half/Full size participate in the dashboard's protected draft. Add/remove never writes a saved visualization. Linked additions start with dashboard inheritance off and preserve source scope/settings. Duplication retains the same chart links while allocating independent widget/layout identities. Explicit shortcut selection may acknowledge only that widget's reviewed blocked paths; rename, movement and sizing never acknowledge references. Unfinished add-widget target choices survive workspace reload and block saving until added or cleared.
+
+Every widget has labeled Move earlier/Move later and Half/Full controls alongside pointer handles. Removal confirms draft-only consequences and preserves saved charts/source data; focus moves to the next widget or Add widget. Creation focuses the new editor, movement focuses its heading, and canceled confirmations restore the opener after the routed workspace becomes interactive.
+
+Array order drives DOM, reading, keyboard and grid order. Sparse row placement never backfills gaps or visually repacks the sequence. Two columns require at least `52rem + 4px` of container width, leaving each Half widget 24rem of content after padding and borders; otherwise every widget stacks. Controls wrap, long names/text break safely, and workbench borders connect with square outer corners and no vertical gaps. The main dashboard-order links remain available when the sidebar is collapsed.
+
+Print switches to committed widget order/content and the committed dashboard name, in one column, without changing the retained editing draft. Editing/navigation controls are omitted; notes, shortcut labels and truthful deferred/unavailable states remain readable.
