@@ -21,6 +21,7 @@ import { homeWidgetView } from './home-widget-view';
 import { EMPTY_HOME_WIDGET_CHOICE, HomeWidgetChoiceDraft } from './home-widget-editing';
 import { HomeContext } from './home-context.service';
 import { HomeTemplateCatalog } from './home-template-catalog.service';
+import { homeDefinitionChanges } from './home-definition-changes';
 
 export interface HomeEditSession {
   readonly key: string;
@@ -125,6 +126,7 @@ export class HomeEditor {
     const session = this.session(), snapshot = this.home.workspace.snapshot();
     return session?.definition && session.baseline && snapshot ? session.definition.widgets.map(widget => homeWidgetView(session.baseline!, widget, snapshot, session.repairPaths, this.home.shortcutChoices())) : [];
   });
+  readonly conflictFieldChanges = computed(() => homeDefinitionChanges(this.conflictDefinition(), this.session()?.definition));
   readonly conflictOwnerChoices = computed(() => {
     const session = this.session(), outcome = session?.outcome;
     const record = session?.conflictLoaded ? session.reviewedOwner : outcome?.state === 'conflict' ? outcome.error.currentOwner : undefined;
