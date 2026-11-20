@@ -33,7 +33,7 @@ export function resolveHomeViews(input: {
     return (ai < 0 ? Number.MAX_SAFE_INTEGER : ai) - (bi < 0 ? Number.MAX_SAFE_INTEGER : bi);
   });
   const visible = entries.filter(item => item.available && item.visible && !prefs?.hidden.some(ref => homeViewKey(ref) === homeViewKey(item.reference)));
-  const requested = prefs?.default ?? (input.legacyDefault ? { kind: 'saved' as const, dashboardGuid: input.legacyDefault } : undefined);
+  const requested = prefs ? prefs.default : input.legacyDefault ? { kind: 'saved' as const, dashboardGuid: input.legacyDefault } : undefined;
   return { entries, visible, default: visible.find(item => requested && homeViewKey(item.reference) === homeViewKey(requested))?.reference ?? visible[0]?.reference };
 }
 

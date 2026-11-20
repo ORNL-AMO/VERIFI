@@ -13,6 +13,7 @@ import { createVisualizationDefinition, createVisualizationSetupDefinition } fro
 import { IdbHomeDashboard } from '@data/models/idbModels/homeDashboard';
 import { IdbHomeOwner } from '@data/models/idbModels/homeOwner';
 import { HomeDashboardDefinition, HomeOwner, HomeOwnerState, HomeWidget } from '@domain/home/home-dashboard';
+import { resolveHomeViews } from '@domain/home/home-views';
 import { homeAccountOwner, homeDefinition } from '@domain/home/testing/home-fixtures';
 import { storageBlueprints } from '@data/home/testing/home-command-fixtures';
 import { readHomeDashboard, readHomeOwner, readHomeWidget } from '@data/home/home-record';
@@ -124,6 +125,9 @@ describe('Home atomic native commands and workspace publication', () => {
     const preferences = commands.ownerView(homeAccountOwner).state!.views!;
     expect(preferences.order).toEqual([builtIn, saved(second.guid)]);
     expect(preferences.default).toBeUndefined();
+    expect(resolveHomeViews({ initialization: 'initialized', preferences, legacyOrder: [],
+      legacyDefault: commands.ownerView(homeAccountOwner).state?.defaultDashboardGuid, deletedStarters: [],
+      candidates: [builtIn, saved(second.guid)].map(reference => ({ reference, available: true, visible: true })) }).default).toEqual(builtIn);
   });
 
   it('initializes once, shares starter charts, hydrates after restart and publishes one complete graph', async () => {

@@ -7,10 +7,12 @@ describe('Home template proposals', () => {
     const widget = { id: 'HOME.energy-trend', kind: 'built-in-chart' as const, size: 'half' as const, visibility: 'always' as const,
       reference: { kind: 'built-in' as const, recipe: 'reporting-energy-rolling', version: 1, owner: homeAccountOwner }, inherit: [], overrides: {} };
     const graph = prepareHomeGraph('account-a', homeAccountOwner, [{ ...storageBlueprints()[0],
-      dashboard: { ...storageBlueprints()[0].dashboard, widgets: [widget] }, charts: [] }]);
+      dashboard: { ...storageBlueprints()[0].dashboard, widgets: [widget,
+        { id: 'HOME.note', kind: 'note', visibility: 'always', size: 'full', text: 'Note' }] }, charts: [] }]);
     expect(graph.charts).toEqual([]);
     expect(graph.dashboards[0].definition.widgets[0]).toMatchObject({ templateKey: widget.id, reference: widget.reference });
     expect(graph.dashboards[0].definition.widgets[0].id).not.toBe(widget.id);
+    expect(graph.dashboards[0].definition.widgets[1]).toMatchObject({ templateKey: 'HOME.note' });
   });
   it('allocates fresh operation graphs and shares matching chart intent only within one operation', () => {
     const blueprint = storageBlueprints(), before = structuredClone(blueprint);
