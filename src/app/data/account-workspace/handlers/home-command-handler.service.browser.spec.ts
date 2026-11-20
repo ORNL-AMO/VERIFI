@@ -101,6 +101,18 @@ describe('Home atomic native commands and workspace publication', () => {
     expect(store.savedVisualizations()).toEqual([]);
     expect(await harness.getAll('homeOwners')).toEqual(store.homeOwners());
   });
+  it('removes verified view relationships on deletion and chooses the remaining visible default', async () => {
+    await initialize();
+    const view = commands.ownerView(homeAccountOwner), first = view.records[0], second = view.records[1];
+    const saved = (dashboardGuid: string) => ({ kind: 'saved' as const, dashboardGuid });
+    const state: HomeOwnerState = { ...view.state!, views: { version: 1, catalog: [], order: [saved(first.guid), saved(second.guid)],
+      default: saved(first.guid), hidden: [], deleted: [] } };
+    expect((await commands.submit(commands.prepareConfigure(homeAccountOwner, state))).state).toBe('committed');
+    expect((await commands.submit(commands.prepareDelete(first))).state).toBe('committed');
+    expect(commands.ownerView(homeAccountOwner).state?.views).toEqual({ version: 1, catalog: [], order: [saved(second.guid)], default: saved(second.guid), hidden: [], deleted: [] });
+    expect((await commands.submit(commands.prepareDelete(second))).state).toBe('committed');
+    expect(commands.ownerView(homeAccountOwner).state?.views).toEqual({ version: 1, catalog: [], order: [], hidden: [], deleted: [] });
+  });
 
   it('initializes once, shares starter charts, hydrates after restart and publishes one complete graph', async () => {
     const committed = vi.fn(); TestBed.inject(WorkspaceCommandBoundary).committedChange$.subscribe(committed);

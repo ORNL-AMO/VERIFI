@@ -48,6 +48,23 @@ describe('Home backup/copy/delete native acceptance', () => {
   });
   afterEach(async () => { vi.restoreAllMocks(); await harness.destroy(); });
 
+  it('does not turn intentional saved-dashboard deletion into an unavailable view during native backup restore', async () => {
+    for (const name of ['First', 'Second']) await commands.submit(commands.prepareCreate(homeAccountOwner,
+      { template: 'blank', version: 1, dashboard: { ...homeDefinition(), name }, charts: [] }));
+    const view = commands.ownerView(homeAccountOwner), [first, second] = view.records;
+    await commands.submit(commands.prepareConfigure(homeAccountOwner, { ...view.state!, views: { version: 1, catalog: [],
+      order: view.records.map(record => ({ kind: 'saved', dashboardGuid: record.guid })), default: { kind: 'saved', dashboardGuid: first.guid }, hidden: [], deleted: [] } }));
+    await commands.submit(commands.prepareDelete(first));
+    const source = await load(), service = writer();
+    const imported = await service.importAccountBackupFile(prepare(builder.buildAccountBackup(source)), 0);
+    const restored = await load(imported.guid);
+    expect(service.visualizationImportSummary()?.home).toMatchObject({ repairRequired: 0, locked: 0 });
+    expect(restored.homeDashboards).toHaveLength(1);
+    expect((restored.homeOwners[0].state as any).views.default).toEqual({ kind: 'saved', dashboardGuid: restored.homeDashboards[0].guid });
+    expect((restored.homeOwners[0].state as any).views.order).toEqual([{ kind: 'saved', dashboardGuid: restored.homeDashboards[0].guid }]);
+    expect(restored.homeDashboards[0].guid).not.toBe(second.guid);
+  });
+
   it.each(['Account', 'Facility'] as const)('round trips a %s graph with shared charts, settings, provenance and selected default through JSON/save/reopen', async kind => {
     const owner = kind === 'Account' ? homeAccountOwner : facilityOwner;
     await initialize(owner);
