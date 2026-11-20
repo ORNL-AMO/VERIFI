@@ -26,11 +26,11 @@ describe('Home actions', () => {
     expect(fixture.componentInstance.items()).toHaveLength(26);
     expect(fixture.componentInstance.items()[0].id).toBe('26');
     expect(fixture.componentInstance.visible()).toHaveLength(24);
-    const root = fixture.nativeElement as HTMLElement; root.className = 'v1-root';
-    const next = root.querySelector<HTMLButtonElement>('button[aria-label="Next page"]')!; next.focus();
+    const root = fixture.nativeElement as HTMLElement; root.className = 'v1-root'; root.style.background = 'var(--v1-surface)'; root.style.color = 'var(--v1-text)';
+    const next = root.querySelector<HTMLButtonElement>('button[aria-label="Page 2"]')!; next.focus();
     await userEvent.keyboard('{Enter}'); fixture.detectChanges(); expect(fixture.componentInstance.visible()).toHaveLength(2);
     expect(document.activeElement).toBe(next);
-    for (const dark of [false, true]) { root.classList.toggle('v1-theme-dark', dark); expect(textContrast(root.querySelector('strong')!)).toBeGreaterThanOrEqual(4.5); }
+    for (const dark of [false, true]) { root.classList.toggle('v1-theme-dark', dark); expect(textContrast(root.querySelector('strong')!, root)).toBeGreaterThanOrEqual(4.5); }
     await page.viewport(390, 850); expect(root.scrollWidth).toBeLessThanOrEqual(390);
     await (cdp() as any).send('Emulation.setEmulatedMedia', {media: 'print'});
     await vi.waitFor(() => { fixture.detectChanges(); expect(root.querySelectorAll('li > strong')).toHaveLength(26); });

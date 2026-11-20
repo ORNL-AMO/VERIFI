@@ -36,7 +36,8 @@ export class HomeGoalsComponent {
     effect(cleanup => {
       const contexts = this.contexts(), snapshot = this.home.workspace.snapshot(), revision = this.home.workspace.revision();
       const active = this.active();
-      const intent = JSON.stringify([this.widget(), this.home.owner(), this.home.selectedGuid(), this.retry()]);
+      const widget = this.widget();
+      const intent = JSON.stringify([widget.kind === 'goal' ? widget.binding : widget.kind === 'table' ? widget.settings : null, this.home.owner(), this.home.selectedGuid(), this.retry()]);
       const abort = new AbortController(); cleanup(() => abort.abort());
       if (snapshot !== this.previousSnapshot || intent !== this.previousIntent) this.results.set({});
       this.previousSnapshot = snapshot; this.previousIntent = intent;
