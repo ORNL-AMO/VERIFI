@@ -82,6 +82,8 @@ export function homeWidgetView(record: Readonly<Pick<IdbHomeDashboard, 'accountI
   const blockedPaths = (record.preservation?.references ?? []).filter(issue => !acknowledged.includes(issue.path)
     && references.some(ref => ref.path === issue.path)).map(issue => issue.path);
   if (blockedPaths.length) return { ...base, state: 'repair-required', blockedPaths, message: 'This widget has preserved unavailable relationships. Its saved intent is retained.' };
+  if (widget.kind === 'table' && widget.settings.view === 'facility-progress' && (widget.settings.period !== 'latest-result' || !widget.settings.categories && !['energy', 'water'].includes(widget.settings.measure))) return { ...base, state: 'unsupported', message: 'Facility progress requires latest reporting results and energy/water categories. Saved settings are preserved; replace this widget with a supported progress table.' };
+  if (widget.kind === 'actions' || widget.kind === 'goal' || widget.kind === 'table' && widget.settings.view === 'facility-progress') return { ...base, state: 'ready', message: '' };
   if (widget.kind === 'note') return { ...base, state: 'ready', message: '' };
   if (widget.kind === 'built-in-chart') {
     const built = buildHomeChart(widget.reference, snapshot.account.guid);

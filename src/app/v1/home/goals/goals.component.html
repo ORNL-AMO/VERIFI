@@ -1,0 +1,33 @@
+@if (widget().kind === 'table') { <p>Each facility follows its own reporting selection and through-date. These results are not a common-period ranking.</p> }
+@if (!contexts().length) { <p role="status">No eligible owner rows. Facility progress requires account scope and energy/water categories.</p> }
+<ng-template #details let-context>
+    @if (context.goal.state === 'ready') {
+      <p>Goal: {{ context.goal.target | number:'1.0-2' }}% reduction by {{ context.goal.year }} · Goal baseline {{ context.goal.baseline }} · {{ context.goal.absolute ? 'Absolute' : 'Intensity' }} target</p>
+    } @else { <p>{{ context.goal.state === 'missing' ? 'No goal set' : 'Goal settings need review' }}. <a [routerLink]="context.settingsRoute">Review owner goal settings</a></p> }
+    @if (context.analysis; as analysis) {
+      <p>{{ analysis.name }} · Analysis baseline {{ analysis.baselineYear }}</p>
+      @if (context.goal.state === 'ready' && context.goal.baseline !== analysis.baselineYear) { <p>Goal and analysis use different baseline years; their percentages have different baseline context.</p> }
+    }
+    @if (context.message) { <p role="status">{{ context.message }}</p> }
+    @if (results()[context.key]; as result) {
+      @if (result.state === 'ready') {
+        <dl><dt>Rolling 12-month improvement</dt><dd>{{ result.improvement | number:'1.0-2' }}%</dd>
+          <dt>Through</dt><dd>{{ result.through | date:'MMM yyyy' }}</dd><dt>Units / basis</dt><dd>{{ result.units }} · {{ result.basis }}</dd>
+          <dt>Rolling input months</dt><dd>{{ result.coveredMonths }} / 12 returned months · {{ result.partial ? 'Partial coverage' : 'Complete warning-free window' }}</dd><dt>Calculation</dt><dd>Current committed inputs · {{ result.partial ? 'Partial input coverage' : 'No missing-input warning' }}</dd>
+          @if (result.towardTarget !== undefined) { <dt>Percent toward target</dt><dd>{{ result.towardTarget | number:'1.0-2' }}%</dd> }
+        </dl>
+        @if (result.horizon && result.horizon.getTime() !== result.through.getTime()) { <p>Later returned months have no finite improvement; the latest eligible result is shown.</p> }
+      } @else { <p role="status">{{ result.message }}</p> }
+      @if (result.state === 'error') { <button type="button" class="v1-btn" (click)="retry.update(increment)">Retry current results</button> }
+    }
+    <a [routerLink]="context.analysisRoute" [queryParams]="context.query">{{ context.bindingKind === 'exact' ? 'Open named analysis' : 'Review owner reporting analysis' }}</a>
+</ng-template>
+@if (widget().kind === 'table') {
+  <div class="table-region" role="region" aria-label="Facility progress" tabindex="0"><table>
+    <caption>Latest reporting results, goals and readiness for every owned facility</caption>
+    <thead><tr><th scope="col">Facility / category</th><th scope="col">Goal, analysis and latest result</th></tr></thead>
+    <tbody>@for (context of contexts(); track context.key) { <tr><th scope="row"><a [routerLink]="context.analysisRoute" [queryParams]="context.query">{{ context.ownerName }}</a> · {{ context.category }}</th><td><ng-container [ngTemplateOutlet]="details" [ngTemplateOutletContext]="{ $implicit: context }"/></td></tr> }</tbody>
+  </table></div>
+} @else {
+  @for (context of contexts(); track context.key) { <section><h3>{{ context.ownerName }} · {{ context.category === 'water' ? 'Water' : 'Energy' }}</h3><ng-container [ngTemplateOutlet]="details" [ngTemplateOutletContext]="{ $implicit: context }"/></section> }
+}

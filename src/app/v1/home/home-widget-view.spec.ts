@@ -34,7 +34,7 @@ describe('Home widget presentation and typed destinations', () => {
       { ...base, kind: 'actions', settings: { scope: 'owner' } }, { ...base, kind: 'owner-summary', settings: { scope: 'owner' } },
       { ...base, kind: 'table', settings: { view: 'utility-detail', measure: 'energy', period: 'utility-window' } }, { ...base, kind: 'map', settings: { measure: 'water' } }
     ];
-    for (const widget of variants) { const view = homeWidgetView(record, widget, snapshot); expect(view.state).toBe('deferred'); expect(view.message).toContain('settings are preserved'); }
+    for (const widget of variants) { const view = homeWidgetView(record, widget, snapshot); expect(view.state).toBe(['actions', 'goal'].includes(widget.kind) ? 'ready' : 'deferred'); }
     expect(homeWidgetView(record, { ...base, kind: 'note', text: '<b>Literal</b>' }, snapshot)).toMatchObject({ state: 'ready', widget: { text: '<b>Literal</b>' } });
   });
 });

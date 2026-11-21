@@ -1,3 +1,4 @@
+import { CalculationQueue } from '@platform/web-workers/calculation-queue';
 import { presentFindings } from '@app/v1/status/status.catalog';
 import type { IdbAccountAnalysisItem } from '@data/models/idbModels/accountAnalysisItem';
 import { calculateAccountAnalysisResults } from '@domain/calculations/analysis-calculations/account-analysis-results-calculation';
@@ -35,15 +36,16 @@ export class AnalysisDataSession {
   private readonly cache = new Map<string, { readonly fingerprint: string; readonly value: AnalysisVisualizationResults }>();
   private readonly inFlight = new Map<string, { readonly abort: AbortController; readonly consumers: Set<symbol>; readonly result: Promise<unknown> }>();
   private readonly cancellations = new Set<() => void>();
+  private readonly queue = new CalculationQueue(2);
   private session = 0;
   private lastSnapshot?: AccountWorkspaceSnapshot;
   constructor() {
     let account = this.workspace.isReady() ? this.workspace.account()?.guid : undefined;
     effect(() => {
       const current = this.workspace.isReady() ? this.workspace.account()?.guid : undefined;
-      if (current !== account || !current) { account = current; this.session++; this.cache.clear(); for (const cancel of this.cancellations) cancel(); }
+      if (current !== account || !current) { account = current; this.session++; this.cache.clear(); for (const entry of this.inFlight.values()) entry.abort.abort(); for (const cancel of this.cancellations) cancel(); }
     });
-    inject(DestroyRef).onDestroy(() => { this.session++; for (const cancel of this.cancellations) cancel(); this.cache.clear(); });
+    inject(DestroyRef).onDestroy(() => { this.session++; for (const entry of this.inFlight.values()) entry.abort.abort(); for (const cancel of this.cancellations) cancel(); this.cache.clear(); });
   }
   acquire(request: VisualizationSourceRequest, signal: AbortSignal): Promise<AnalysisPreviewResult> {
     const snapshot = this.workspace.snapshot();
@@ -219,7 +221,7 @@ export class AnalysisDataSession {
     let pending = this.inFlight.get(key);
     if (!pending || pending.abort.signal.aborted) {
       const abort = new AbortController();
-      const entry = { abort, consumers: new Set<symbol>(), result: Promise.resolve().then(() => run(abort.signal)) as Promise<unknown> };
+      const entry = { abort, consumers: new Set<symbol>(), result: this.queue.run(abort.signal, () => run(abort.signal)) as Promise<unknown> };
       entry.result = entry.result.finally(() => { if (this.inFlight.get(key) === entry) this.inFlight.delete(key); });
       this.inFlight.set(key, pending = entry);
     }
