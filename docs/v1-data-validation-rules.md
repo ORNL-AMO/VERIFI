@@ -111,7 +111,7 @@ Generated regression groups require a selected model, model year, constant, and 
 | `report.data.incomplete` | Error / completeness | Facility cost-savings reports require complete source data; facility data-quality reports require a valid selection. |
 | `report.analysis.warning` | Warning / quality | A structurally valid report inherits a warning from its linked analysis. |
 
-Report findings contribute to their facility or account summary.
+Report findings contribute to their facility or account summary. Account and facility Emission Factors share period validation: both years must be integers from 1800 through 9999, and start must precede end. Account factors require years only, without month fields; their missing-year and invalid-period findings open account report Setup. Incomplete drafts remain saveable.
 
 Facility Data Quality selection completeness is derived from current owned records rather than trusting the saved `missingSelection` flag. Analysis mode requires an available facility analysis and available referenced production predictors; manual mode requires at least one selected meter or predictor with no unavailable selections. Statistical/model quality findings do not prevent inspecting data quality. Reading a report does not repair its settings; explicit setup saves maintain the existing compatibility flag. Missing selections can save as drafts while Continue remains disabled. No Data Checks or acknowledgment stage is added.
 

@@ -39,6 +39,14 @@ export interface FacilityEmissionFactorsResult {
   readonly other: readonly OtherFactorRow[];
 }
 
+/** Account reports retain facility identity and order; reference factors are never aggregated. */
+export function buildAccountEmissionFactorsInputs(snapshot: AccountWorkspaceSnapshot,
+  period: EmissionFactorsPeriod, rates: readonly SubregionEmissions[]): readonly EmissionFactorsInput[] {
+  if (!validEmissionFactorsPeriod(period)) throw new Error('Choose a start year earlier than the end year in Setup.');
+  return snapshot.facilities.filter(facility => facility.accountId === snapshot.account.guid)
+    .map(facility => buildEmissionFactorsInput(snapshot, facility.guid, period, rates));
+}
+
 /** Scope adapters supply a period and catalog; no report type or active selection is implicit. */
 export function buildEmissionFactorsInput(snapshot: AccountWorkspaceSnapshot, facilityGuid: string,
   period: EmissionFactorsPeriod, rates: readonly SubregionEmissions[]): EmissionFactorsInput {

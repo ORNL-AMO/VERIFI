@@ -21,6 +21,7 @@ import { FacilityReportSetupChanges, mergeFacilityAnalysisSettings, mergeFacilit
 import { IdbUtilityMeter } from '@data/models/idbModels/utilityMeter';
 import { IdbPredictor } from '@data/models/idbModels/predictor';
 import { resolveDataQualitySelection } from '@domain/reports/data-quality-report-selection';
+import { validEmissionFactorYear } from '@domain/reports/emission-factors/emission-factors-period';
 
 @Injectable({ providedIn: 'root' })
 export class ReportCommandHandler {
@@ -180,6 +181,15 @@ export class ReportCommandHandler {
       }
       if (changes.name !== undefined && !changes.name.trim()) throw new WorkspaceWriteError('validation-failed', 'Enter a nonblank report name.');
       let updated = { ...report, ...(changes.name !== undefined ? { name: changes.name.trim() } : {}) };
+      if (changes.startYear !== undefined || changes.endYear !== undefined) {
+        if (report.reportType !== 'accountEmissionFactors') throw new WorkspaceWriteError('validation-failed', 'These year settings belong to an account Emission Factors report.');
+        for (const field of ['startYear', 'endYear'] as const) {
+          const year = changes[field];
+          if (year === undefined) continue;
+          if (year !== null && !validEmissionFactorYear(year)) throw new WorkspaceWriteError('validation-failed', 'Enter a valid emission-factor year.');
+          updated = { ...updated, [field]: year ?? undefined };
+        }
+      }
       if (changes.reportYear !== undefined || changes.betterPlants !== undefined) {
         if (report.reportType !== 'betterPlants') throw new WorkspaceWriteError('validation-failed', 'These settings belong to a Better Plants report.');
         if (changes.reportYear !== undefined) {

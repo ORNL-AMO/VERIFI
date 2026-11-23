@@ -38,17 +38,18 @@ describe('account report workbench', () => {
     expect(harness.routeNativeElement!.querySelector('footer button[disabled]')?.textContent).toContain('Continue');
     workbench.editor.discard();
   });
-  it.each(ACCOUNT_REPORT_TYPES)('opens $value with applicable stages and pending content without writes', async ({ value }) => {
+  it.each(ACCOUNT_REPORT_TYPES)('opens $value with applicable stages and migrated or pending content without writes', async ({ value }) => {
     const snapshot = accountReportSnapshot(); snapshot.accountReports[0].reportType = value;
+    if (value === 'accountEmissionFactors') Object.assign(snapshot.accountReports[0], { startYear: 2022, endYear: 2024 });
     const { open, harness, updateSetup, store } = await setupAccountReportWorkbench(snapshot);
     const workbench = await open();
     expect(workbench.context.stages().map(stage => stage.id)).toEqual(['betterPlants', 'performance', 'accountSavings'].includes(value) ? ['setup', 'data-checks', 'report'] : ['setup', 'report']);
-    const icon = value === 'betterPlants' ? 'betterPlantsReport' : 'report';
+    const icon = value === 'betterPlants' ? 'betterPlantsReport' : value === 'accountEmissionFactors' ? 'emissionsFactorsReport' : 'report';
     expect(workbench.context.stages().find(stage => stage.id === 'report')?.icon).toBe(icon);
     expect(workbench.context.resources().find(resource => resource.id === 'account-report')?.icon).toBe(icon);
     expect(harness.routeDebugElement!.query(By.css('h1 app-ui-icon')).componentInstance.name).toBe(icon);
     expect(!!harness.routeNativeElement!.querySelector('#account-report-analysis')).toBe(['betterPlants', 'performance', 'analysis', 'accountSavings'].includes(value));
-    if (value !== 'betterPlants') {
+    if (!['betterPlants', 'accountEmissionFactors'].includes(value)) {
       const headings = [...harness.routeNativeElement!.querySelectorAll('.setup-section-heading')];
       expect(headings.map(heading => heading.textContent?.trim())).toEqual([
         'Report information', ...(['performance', 'analysis', 'accountSavings'].includes(value) ? ['Analysis *'] : []), 'Report-specific settings'
@@ -63,14 +64,17 @@ describe('account report workbench', () => {
     await open('account-report', 'report');
     expect(workbench.context.stage()).toBe('report');
     const outputs = harness.routeNativeElement!.querySelector('footer app-report-output-actions');
-    if (value === 'betterPlants') {
+    if (['betterPlants', 'accountEmissionFactors'].includes(value)) {
       const outputButtons = Array.from(outputs!.querySelectorAll<HTMLButtonElement>('button'));
-      expect(outputButtons.map(button => button.textContent?.trim())).toEqual(['PDF', 'Excel']);
+      expect(outputButtons.map(button => button.textContent?.trim())).toEqual(value === 'betterPlants' ? ['PDF', 'Excel'] : ['PDF']);
       expect(outputButtons.every(button => button.disabled && button.type === 'button')).toBe(true);
     } else expect(outputs).toBeNull();
     if (value === 'betterPlants') {
       expect(harness.routeNativeElement!.querySelector('app-better-plants-preview')).not.toBeNull();
       expect(harness.routeNativeElement!.querySelector('app-better-plants-preview table')).toBeNull();
+    } else if (value === 'accountEmissionFactors') {
+      expect(harness.routeNativeElement!.querySelector('app-account-emission-factors-report-preview')).not.toBeNull();
+      expect(harness.routeNativeElement!.textContent).not.toContain('Report content pending');
     } else {
       expect(harness.routeNativeElement!.textContent).toContain('Report content pending');
       expect(harness.routeNativeElement!.textContent).toContain('Setup readiness does not indicate');

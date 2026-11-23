@@ -1,0 +1,52 @@
+@let settings = editor.draft().settings;
+<section class="report-section report-setup" aria-label="Emission Factors report setup">
+  @if (!editor.canEdit()) {
+    <p class="setup-notice v1-alert v1-alert--warning" role="status">Report settings are read-only while workspace editing is unavailable. Your saved settings are preserved.</p>
+  }
+  <section class="report-setup-section" aria-labelledby="emission-factors-information">
+    <h2 id="emission-factors-information" class="setup-section-heading">Report information</h2>
+    <div class="report-setup-body report-setup-body--with-period">
+      <div class="report-setup-field report-setup-name">
+        <label for="report-workbench-name">Name <span class="report-setup-required" aria-hidden="true">*</span></label>
+        <input id="report-workbench-name" class="v1-input" [formControl]="editor.name" required autocomplete="off"
+          [attr.aria-invalid]="editor.name.invalid ? true : null" aria-describedby="emission-factors-name-help">
+        <p id="emission-factors-name-help" class="report-setup-help" [class.v1-field-error]="editor.name.invalid">
+          {{ editor.name.invalid ? 'Enter a nonblank report name.' : 'Changes save automatically, including incomplete periods.' }}
+        </p>
+      </div>
+      <div class="period-fields">
+        <div class="report-setup-fields">
+          <div class="report-setup-field">
+            <label for="emission-factors-start">Start year <span class="report-setup-required" aria-hidden="true">*</span></label>
+            <select id="emission-factors-start" class="v1-select" [formControl]="fields.startYear" required [attr.aria-describedby]="periodError() ? 'emission-factors-period-help' : null" [attr.aria-invalid]="periodError() ? true : null">
+              <option [ngValue]="null">Choose a year</option>
+              @if (startUnavailable()) { <option [ngValue]="settings.startYear" disabled>{{ settings.startYear }} (saved)</option> }
+              @for (year of report.years(); track year) { <option [ngValue]="year">{{ year }}</option> }
+            </select>
+          </div>
+          <div class="report-setup-field">
+            <label for="emission-factors-end">End year <span class="report-setup-required" aria-hidden="true">*</span></label>
+            <select id="emission-factors-end" class="v1-select" [formControl]="fields.endYear" required [attr.aria-describedby]="periodError() ? 'emission-factors-period-help' : null" [attr.aria-invalid]="periodError() ? true : null">
+              <option [ngValue]="null">Choose a year</option>
+              @if (endUnavailable()) { <option [ngValue]="settings.endYear" disabled>{{ settings.endYear }} (saved)</option> }
+              @for (year of report.years(); track year) { <option [ngValue]="year">{{ year }}</option> }
+            </select>
+          </div>
+        </div>
+        @if (periodError(); as error) {
+          <p id="emission-factors-period-help" class="report-setup-help v1-field-error" role="status">{{ error }}</p>
+        }
+        @if (report.calendarizationState() === 'error') {
+          <div class="v1-alert v1-alert--danger" role="alert">Year choices could not be prepared.
+            <button type="button" class="v1-btn v1-btn--secondary" (click)="report.retry()">Retry</button>
+          </div>
+        } @else if (report.calendarizationState() !== 'ready') {
+          <p class="report-setup-help" role="status">Preparing years from account meter history…</p>
+        } @else {
+          @if (!report.years().length) { <p class="report-setup-help" role="status">No complete years are available in this account’s meter history.</p> }
+          @if (startUnavailable() || endUnavailable()) { <p class="report-setup-help" role="status">Saved years outside the current complete meter history are retained. You can keep this period or choose available years.</p> }
+        }
+      </div>
+    </div>
+  </section>
+</section>

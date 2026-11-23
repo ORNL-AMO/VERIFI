@@ -5,10 +5,10 @@ describe('report catalog', () => {
     expect(reportDefinition('facility', 'modeling')).toMatchObject({ contentImplemented: true, hasDataChecks: false, supportsAnalysisReturn: true });
     expect(reportDefinition('account', 'analysis')?.contentImplemented).toBe(false);
   });
-  it('implements facility emission factors independently of the pending account report', () => {
+  it('implements both emission factor reports with shared icon and no checks', () => {
     expect(reportDefinition('facility', 'emissionFactors')).toMatchObject({ contentImplemented: true, hasDataChecks: false,
       supportsAnalysisReturn: false, requiresOtherImpacts: true });
-    expect(reportDefinition('account', 'accountEmissionFactors')?.contentImplemented).toBe(false);
+    expect(reportDefinition('account', 'accountEmissionFactors')).toMatchObject({ contentImplemented: true, icon: 'emissionsFactorsReport', hasDataChecks: false });
   });
   it('supports facility Data Quality analysis inspection without adding a data checks stage', () => {
     expect(reportDefinition('facility', 'dataQuality')).toMatchObject({

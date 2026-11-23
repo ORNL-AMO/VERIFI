@@ -5,7 +5,9 @@ import { BETTER_PLANTS_REPORT } from './better-plants/better-plants-report.defin
 import { ACCOUNT_ANALYSIS_EDITOR, AccountReportEditor } from './workbench/editing/account-report-editor.service';
 import { AccountReportSetupComponent } from './workbench/setup/account-report-setup.component';
 
-export const ACCOUNT_REPORT_FEATURES: readonly ReportFeatureDefinition[] = [BETTER_PLANTS_REPORT];
+import { ACCOUNT_EMISSION_FACTORS_REPORT } from './emission-factors/emission-factors-report.definition';
+
+export const ACCOUNT_REPORT_FEATURES: readonly ReportFeatureDefinition[] = [BETTER_PLANTS_REPORT, ACCOUNT_EMISSION_FACTORS_REPORT];
 export const PENDING_ACCOUNT_REPORT: ReportFeatureDefinition = {
   type: 'pending', providers: [AccountReportEditor,
     { provide: ACCOUNT_ANALYSIS_EDITOR, useExisting: AccountReportEditor },

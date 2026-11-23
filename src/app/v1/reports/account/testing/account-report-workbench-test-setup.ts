@@ -29,6 +29,8 @@ export async function setupAccountReportWorkbench(snapshot: AccountWorkspaceSnap
     const report = store.accountReports().find(item => item.guid === guid)!;
     const key = accountReportAnalysisSetupKey(report.reportType);
     const updated = { ...report, ...(changes.name !== undefined ? { name: changes.name } : {}),
+      ...(changes.startYear !== undefined ? { startYear: changes.startYear ?? undefined } : {}),
+      ...(changes.endYear !== undefined ? { endYear: changes.endYear ?? undefined } : {}),
       ...(key && changes.analysis !== undefined ? { [key]: { ...report[key], analysisItemId: changes.analysis?.analysisGuid } } : {}) };
     store.publishCommittedPatch({ collections: [{ collection: 'accountReports', upsert: [updated] }] }); return updated;
   });

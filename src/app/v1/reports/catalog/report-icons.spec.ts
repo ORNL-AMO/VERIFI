@@ -5,7 +5,7 @@ import { reportIcon } from './report-icons';
 
 describe('report icon selection', () => {
   it.each(ACCOUNT_REPORT_TYPES)('uses the custom icon or page fallback for account $value', ({ value }) => {
-    expect(reportIcon({ reportType: value })).toBe(value === 'betterPlants' ? 'betterPlantsReport' : 'report');
+    expect(reportIcon({ reportType: value })).toBe(value === 'betterPlants' ? 'betterPlantsReport' : value === 'accountEmissionFactors' ? 'emissionsFactorsReport' : 'report');
   });
   it.each(FACILITY_REPORT_TYPES)('uses the custom icon or page fallback for facility $value', ({ value }) => {
     expect(reportIcon({ facilityReportType: value })).toBe(value === 'analysis' ? 'facilityAnalysisReport' : value === 'modeling' ? 'modelingReport'

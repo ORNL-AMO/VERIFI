@@ -46,6 +46,8 @@ export function resolveReportStatusItem(item: StatusItem, snapshot: AccountWorks
   switch (item.code) {
     case 'report.configuration.invalid': {
       const reasons = item.evidence['reasons'];
+      if (accountReport?.reportType === 'accountEmissionFactors' && Array.isArray(reasons)
+        && reasons.every(reason => ['missingName', 'missingStartDate', 'missingEndDate'].includes(reason))) return available(setup, 'Review setup');
       if (facilityReport?.facilityReportType === 'emissionFactors' && Array.isArray(reasons)
         && reasons.every(reason => ['missingName', 'missingBaselineYear', 'missingReportYear'].includes(reason))) return available(setup, 'Review setup');
       if ((accountReport?.reportType === 'betterPlants' || facilityReport?.facilityReportType === 'analysis') && Array.isArray(reasons) && reasons.every(reason => ['missingName', 'missingReportYear'].includes(reason))) return available(setup, reasons.length === 1 && reasons[0] === 'missingName' ? 'Review name' : 'Review setup');
@@ -80,7 +82,7 @@ export function resolveReportStatusItem(item: StatusItem, snapshot: AccountWorks
       }
       return destination ? available(destination, 'Review linked analysis') : unavailable('The linked analysis is unavailable in this workspace.');
     }
-    case 'report.dates.invalid': return accountReport?.reportType === 'betterPlants' || ['analysis', 'emissionFactors'].includes(facilityReport?.facilityReportType) ? available(setup, 'Review reporting period') : unavailable('Report date settings are pending migration.');
+    case 'report.dates.invalid': return ['betterPlants', 'accountEmissionFactors'].includes(accountReport?.reportType) || ['analysis', 'emissionFactors'].includes(facilityReport?.facilityReportType) ? available(setup, 'Review reporting period') : unavailable('Report date settings are pending migration.');
     case 'report.data.incomplete': return unavailable('Report data selection is pending migration.');
     default: return unavailable('Fix workflow not yet available in v1');
   }
