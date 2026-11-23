@@ -1,0 +1,4 @@
+@import '../../../shared/workbench/report-workbench-stage.css';
+@import '../../../shared/editing/report-setup.css';
+.period-fields { display: grid; gap: .75rem; min-width: 0; }
+.setup-notice { margin: 1rem; }

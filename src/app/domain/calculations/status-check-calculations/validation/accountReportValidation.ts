@@ -1,6 +1,7 @@
 import { AccountReportErrors } from "@data/models/validation";
 import { IdbAccountReport } from "@data/models/idbModels/accountReport";
 import { AccountAnalysisSetupErrors } from "@data/models/accountAnalysis";
+import { validEmissionFactorYear, validEmissionFactorsPeriod } from '@domain/reports/emission-factors/emission-factors-period';
 
 export function getAccountReportErrors(accountReport: IdbAccountReport,
     accountAnalysisSetupErrors: Array<AccountAnalysisSetupErrors>): AccountReportErrors {
@@ -63,16 +64,9 @@ export function getAccountReportErrors(accountReport: IdbAccountReport,
             }
         }
     } else if (accountReport.reportType == 'accountEmissionFactors') {
-        if (
-            accountReport.startYear !== undefined && accountReport.endYear !== undefined &&
-            !isNaN(accountReport.startYear) && !isNaN(accountReport.endYear)
-        ) {
-            const startDate = new Date(accountReport.startYear, 0, 1);
-            const endDate = new Date(accountReport.endYear, 0, 1);
-            if (startDate.getTime() >= endDate.getTime()) {
-                errors.invalidDateRange = true;
-            }
-        }
+        errors.missingStartDate = !validEmissionFactorYear(accountReport.startYear);
+        errors.missingEndDate = !validEmissionFactorYear(accountReport.endYear);
+        errors.invalidDateRange = !validEmissionFactorsPeriod(accountReport);
     }
 
     // Baseline year vs report year (from compareBaselineYearToReportYear)

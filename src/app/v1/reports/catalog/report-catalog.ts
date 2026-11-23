@@ -20,7 +20,7 @@ const ACCOUNT_REPORT_CATALOG = {
   performance: { label: 'Performance', icon: 'report', requiresOtherImpacts: false, hasDataChecks: true, contentImplemented: false, supportsAnalysisReturn: true },
   betterClimate: { label: 'Emissions', icon: 'report', requiresOtherImpacts: true, hasDataChecks: false, contentImplemented: false, supportsAnalysisReturn: false },
   analysis: { label: 'Analysis', icon: 'report', requiresOtherImpacts: false, hasDataChecks: false, contentImplemented: false, supportsAnalysisReturn: true },
-  accountEmissionFactors: { label: 'Emission Factors', icon: 'report', requiresOtherImpacts: true, hasDataChecks: false, contentImplemented: false, supportsAnalysisReturn: false },
+  accountEmissionFactors: { label: 'Emission Factors', icon: 'emissionsFactorsReport', requiresOtherImpacts: true, hasDataChecks: false, contentImplemented: true, supportsAnalysisReturn: false },
   accountSavings: { label: 'Savings', icon: 'report', requiresOtherImpacts: false, hasDataChecks: true, contentImplemented: false, supportsAnalysisReturn: true }
 } as const satisfies Readonly<Record<ReportType, ReportDefinition>>;
 

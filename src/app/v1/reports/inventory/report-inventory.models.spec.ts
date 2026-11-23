@@ -51,7 +51,7 @@ describe('report inventory projections', () => {
     const data = snapshot(); data.accountReports[0].reportType = value as any;
     const entry = buildReportInventory(data, [], 'ready')[0];
     expect(entry.typeLabel).not.toBe('Unknown report type');
-    expect(entry.snapshot.contentPending).toBe(value !== 'betterPlants');
+    expect(entry.snapshot.contentPending).toBe(!['betterPlants', 'accountEmissionFactors'].includes(value));
     expect(entry.snapshot.facts.some(fact => fact.label === 'Reporting period')).toBe(true);
     expect(entry.snapshot.modified).toBeDefined();
     expect(entry.snapshot).not.toHaveProperty('outcomes');

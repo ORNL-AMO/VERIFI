@@ -14,6 +14,8 @@ export type ReportAnalysisSelection =
 /** Omitted fields are preserved; null explicitly clears the report's analysis link. */
 export interface AccountReportSetupChanges {
   readonly name?: string;
+  readonly startYear?: number | null;
+  readonly endYear?: number | null;
   readonly analysis?: ReportAnalysisSelection | null;
   readonly reportYear?: number | null;
   readonly betterPlants?: BetterPlantsSetupChanges;

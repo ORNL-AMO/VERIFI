@@ -1,3 +1,4 @@
+import { AccountEmissionFactorsReportModule } from './emission-factors/emission-factors-report.module';
 import { CommonModule } from '@angular/common';
 import { NgModule } from '@angular/core';
 import { ReactiveFormsModule } from '@angular/forms';
@@ -10,5 +11,5 @@ import { AccountReportWorkbenchComponent } from './workbench/account-report-work
 import { AccountReportSetupComponent } from './workbench/setup/account-report-setup.component';
 
 @NgModule({ declarations: [AccountReportWorkbenchComponent, AccountReportSetupComponent],
-  imports: [CommonModule, ReactiveFormsModule, RouterModule, ReportsSharedModule, ReportsInventoryModule, AccountReportSharedModule, BetterPlantsReportModule] })
+  imports: [CommonModule, ReactiveFormsModule, RouterModule, ReportsSharedModule, ReportsInventoryModule, AccountReportSharedModule, BetterPlantsReportModule, AccountEmissionFactorsReportModule] })
 export class AccountReportsModule { }
