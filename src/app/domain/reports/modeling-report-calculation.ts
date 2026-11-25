@@ -10,8 +10,9 @@ import { getDateFromPredictorData } from '@shared/dateHelperFunctions';
 
 /** Existing validation and monthly calculations, with compact per-group chart results. */
 export function calculateModelingReport(inputs: CheckedAnalysisReportInputs, reportYear: number,
-  meters: readonly CalanderizedMeter[]): ModelingReportChecks {
-  const detached = structuredClone(inputs), checks = calculateAnalysisDataChecks(detached, reportYear);
+  meters: readonly CalanderizedMeter[], includeModelDetails = true, availableYears?: readonly number[]): ModelingReportChecks {
+  const detached = structuredClone(inputs), checks = calculateAnalysisDataChecks(detached, reportYear, 'modeling', availableYears);
+  if (!includeModelDetails) return checks;
   const charts = checks.groups.filter(item => item.group.analysisType === 'regression').map((item): ModelingReportChart => {
     const analysis = detached.facilityAnalyses.find(analysis => analysis.guid === item.analysisGuid)!;
     const facility = detached.facilities.find(facility => facility.guid === item.facilityGuid)!;

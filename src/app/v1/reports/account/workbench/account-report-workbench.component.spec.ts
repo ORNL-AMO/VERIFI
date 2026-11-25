@@ -43,7 +43,7 @@ describe('account report workbench', () => {
     const { open, harness, updateSetup, store } = await setupAccountReportWorkbench(snapshot);
     const workbench = await open();
     expect(workbench.context.stages().map(stage => stage.id)).toEqual(['betterPlants', 'performance', 'accountSavings'].includes(value) ? ['setup', 'data-checks', 'report'] : ['setup', 'report']);
-    const icon = value === 'betterPlants' ? 'betterPlantsReport' : 'report';
+    const icon = value === 'betterPlants' ? 'betterPlantsReport' : value === 'analysis' ? 'modelingReport' : 'report';
     expect(workbench.context.stages().find(stage => stage.id === 'report')?.icon).toBe(icon);
     expect(workbench.context.resources().find(resource => resource.id === 'account-report')?.icon).toBe(icon);
     expect(harness.routeDebugElement!.query(By.css('h1 app-ui-icon')).componentInstance.name).toBe(icon);
@@ -51,7 +51,7 @@ describe('account report workbench', () => {
     if (value !== 'betterPlants') {
       const headings = [...harness.routeNativeElement!.querySelectorAll('.setup-section-heading')];
       expect(headings.map(heading => heading.textContent?.trim())).toEqual([
-        'Report information', ...(['performance', 'analysis', 'accountSavings'].includes(value) ? ['Analysis *'] : []), 'Report-specific settings'
+        'Report information', ...(['performance', 'analysis', 'accountSavings'].includes(value) ? ['Analysis *'] : []), value === 'analysis' ? 'Included content' : 'Report-specific settings'
       ]);
       for (const heading of headings) expect(heading.parentElement!.getAttribute('aria-labelledby')).toBe(heading.id);
       expect(harness.routeNativeElement!.querySelector('main > app-report-setup-delete')).not.toBeNull();
@@ -67,10 +67,14 @@ describe('account report workbench', () => {
       const outputButtons = Array.from(outputs!.querySelectorAll<HTMLButtonElement>('button'));
       expect(outputButtons.map(button => button.textContent?.trim())).toEqual(['PDF', 'Excel']);
       expect(outputButtons.every(button => button.disabled && button.type === 'button')).toBe(true);
+    } else if (value === 'analysis') {
+      expect(Array.from(outputs!.querySelectorAll('button')).map(button => button.textContent?.trim())).toEqual(['PDF', 'PowerPoint', 'Excel']);
     } else expect(outputs).toBeNull();
     if (value === 'betterPlants') {
       expect(harness.routeNativeElement!.querySelector('app-better-plants-preview')).not.toBeNull();
       expect(harness.routeNativeElement!.querySelector('app-better-plants-preview table')).toBeNull();
+    } else if (value === 'analysis') {
+      expect(harness.routeNativeElement!.querySelector('app-account-modeling-report-preview')).not.toBeNull();
     } else {
       expect(harness.routeNativeElement!.textContent).toContain('Report content pending');
       expect(harness.routeNativeElement!.textContent).toContain('Setup readiness does not indicate');

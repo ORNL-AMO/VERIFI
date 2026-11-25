@@ -22,6 +22,13 @@ async function setup(scope: 'account' | 'facility' = 'account', facilities = 2) 
 }
 
 describe('progressive report creation', () => {
+  it('defaults a new account analysis-type report to Modeling report and retains its saved type', async () => {
+    const { choose, lifecycle, accountActions, root } = await setup();
+    choose('Account Report'); choose('Modeling');
+    expect(root.querySelector<HTMLInputElement>('#report-name')!.value).toBe('Modeling report');
+    await lifecycle.submit();
+    expect(accountActions.create).toHaveBeenCalledWith('Modeling report', 'analysis');
+  });
   it('starts with just scope cards, pins each selection, and creates only after naming', async () => {
     const { root, fixture, lifecycle, choose, button, accountActions, navigate } = await setup();
     expect([...root.querySelectorAll('.report-choice')].map(item => item.textContent)).toEqual(['Account Report', 'Facility Report']);
@@ -84,7 +91,7 @@ describe('progressive report creation', () => {
 
   it('updates suggestions and retains an edited name when pinned selections change', async () => {
     const { root, fixture, lifecycle, choose, edit } = await setup();
-    choose('Account Report'); choose('AnalysisPreview pending'); edit('Analysis'); choose('Better Plants');
+    choose('Account Report'); choose('Modeling'); edit('Modeling'); choose('Better Plants');
     expect(lifecycle.form.controls.name.value).toBe('Better Plants report');
     const name = root.querySelector<HTMLInputElement>('#report-name')!;
     name.value = 'Quarterly review'; name.dispatchEvent(new Event('input')); fixture.detectChanges();

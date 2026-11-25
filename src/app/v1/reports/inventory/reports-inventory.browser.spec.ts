@@ -341,7 +341,7 @@ describe('report inventory browser journeys and presentation', () => {
     view.dashboard().inventory.selectPage(1); await settle(view.fixture);
     const entry = view.dashboard().inventory.visibleTiles()[0];
     view.dashboard().inventory.setTileDetail({ guid: entry.guid, level: 'detailed' }); await settle(view.fixture);
-    const actionLabel = scope === 'facility' ? 'Review setup' : 'Review name';
+    const actionLabel = 'Review setup';
     const action = [...view.root.querySelectorAll<HTMLAnchorElement>('.portfolio-inventory app-report-snapshot a')].find(link => link.textContent === actionLabel)!;
     expect(action.textContent).toContain(actionLabel); action.focus(); view.root.scrollTop = 160;
     let scroll = 0;
@@ -350,7 +350,7 @@ describe('report inventory browser journeys and presentation', () => {
     expect(scroll).toBeGreaterThan(0);
     expect(view.router.url).toContain(scope === 'account' ? '/account/account-a/reports/workbench/' : '/facility/facility-a/reports/workbench/');
     expect(view.root.querySelector<HTMLInputElement>(scope === 'account' ? '#account-report-name' : '#report-workbench-name')?.value).toBe('');
-    expect(view.root.textContent).toContain(scope === 'facility' ? 'Reporting period' : 'Report-specific settings');
+    expect(view.root.textContent).toContain(scope === 'facility' ? 'Reporting period' : 'Included content');
     view.coverage.next({ state: 'evaluating', meters: [] });
     TestBed.inject(Location).back(); await vi.waitFor(() => expect(view.router.url).toBe(dashboardUrl)); await settle(view.fixture);
     expect(view.dashboard().browseReady()).toBe(false);
@@ -444,12 +444,15 @@ describe('report inventory browser journeys and presentation', () => {
   });
   it('edits common setup, keeps account reports accessible for single facilities, and fits practical themed windows', async () => {
     await page.viewport(1200, 900);
-    const view = setup(1), snapshot = accountReportSnapshot(true); view.store.publish(snapshot);
+    const view = setup(1), snapshot = accountReportSnapshot(true);
+    snapshot.accountReports[0].reportType = 'performance';
+    snapshot.accountReports[0].performanceReportSetup.analysisItemId = snapshot.accountAnalyses[0].guid;
+    view.store.publish(snapshot);
     await view.router.navigateByUrl(dashboardUrl); await settle(view.fixture);
     await view.router.navigateByUrl('/v1/workspace/account/account-a/reports/workbench/account-report/setup'); await settle(view.fixture);
     expect(view.root.querySelector('#account-report-analysis input:checked')?.closest('label')?.textContent).toContain('Energy analysis');
     await page.getByRole('textbox', { name: /^Name/ }).fill('A long account report name that remains readable in a narrow window');
-    await page.getByRole('link', { name: 'Continue', exact: true }).click(); await settle(view.fixture);
+    await view.router.navigateByUrl('/v1/workspace/account/account-a/reports/workbench/account-report/report'); await settle(view.fixture);
     expect(view.accountActions.updateSetup).toHaveBeenCalledExactlyOnceWith('account-report', { name: 'A long account report name that remains readable in a narrow window' });
     expect(view.root.textContent).toContain('Report content pending');
     for (const palette of PORTFOLIO_PALETTES) for (const dark of [false, true]) {
@@ -460,6 +463,7 @@ describe('report inventory browser journeys and presentation', () => {
         expect(view.root.scrollWidth).toBeLessThanOrEqual(view.root.clientWidth + 1);
       }
     }
+    await page.getByRole('link', { name: 'Back', exact: true }).click(); await settle(view.fixture);
     await page.getByRole('link', { name: 'Back', exact: true }).click(); await settle(view.fixture);
     const name = view.root.querySelector<HTMLInputElement>('#account-report-name')!; name.focus(); await userEvent.keyboard('{Tab}');
     expect(document.activeElement?.id).toBe('account-report-analysis-baseline');
@@ -520,7 +524,7 @@ describe('report inventory browser journeys and presentation', () => {
         expect(scope.left).toBeCloseTo(bounds.left + parseFloat(getComputedStyle(tile).borderLeftWidth), 0);
         expect(scope.right).toBeCloseTo(bounds.right - parseFloat(getComputedStyle(tile).borderRightWidth), 0);
         if (tile.dataset['reportScope'] === 'facility') expect(tile.textContent).not.toContain('Report content pending');
-        else expect(tile.textContent).toContain('Report content pending');
+        else expect(tile.textContent).not.toContain('Report content pending');
         if (tile.dataset['reportScope'] === 'facility') {
           expect(tile.querySelector('app-inventory-card-header .portfolio-tile__owner')).not.toBeNull();
           expect(tile.querySelector('.portfolio-tile__ownership .portfolio-tile__owner')).toBeNull();

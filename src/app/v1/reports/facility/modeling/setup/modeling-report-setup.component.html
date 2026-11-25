@@ -13,13 +13,13 @@
       <div class="report-period">
         <div class="report-setup-field">
           <label for="modeling-report-year">Report year <span class="report-setup-required" aria-hidden="true">*</span></label>
-          <select id="modeling-report-year" class="v1-select" [formControl]="fields.reportYear" required [attr.aria-invalid]="unavailableYear() ? true : null" aria-describedby="modeling-year-help">
+          <select id="modeling-report-year" class="v1-select" [formControl]="fields.reportYear" required [attr.aria-invalid]="unavailableYear() ? true : null" [attr.aria-describedby]="unavailableYear() ? 'modeling-year-help' : null">
             <option [ngValue]="null">Not selected</option>
             @if (retainedYear()) { <option [ngValue]="fields.reportYear.value">{{ fields.reportYear.value }} — {{ unavailableYear() ? 'saved year unavailable' : 'saved year' }}</option> }
             @for (year of editor.periods(); track year) { <option [ngValue]="year">{{ context.facility()?.fiscalYear === 'nonCalendarYear' ? 'FY ' : '' }}{{ year }}</option> }
           </select>
         </div>
-        <p id="modeling-year-help" class="report-setup-help" [class.v1-field-error]="unavailableYear()">{{ unavailableYear() ? 'Choose an available report year at or after the analysis baseline.' : 'Partial reporting years are included.' }}</p>
+        @if (unavailableYear()) { <p id="modeling-year-help" class="report-setup-help v1-field-error">Choose an available report year at or after the analysis baseline.</p> }
         @if (base.state !== 'error' && !editor.periodsCurrent()) { <p role="status">Finding available reporting years…</p> }
         @if (base.state === 'error') { <p class="v1-field-error" role="alert">Reporting years could not be loaded.</p><button type="button" class="v1-btn v1-btn--secondary" (click)="editor.retryPeriods()">Retry reporting years</button> }
         @if (editor.periodsCurrent() && !editor.periods().length) { <p class="v1-alert v1-alert--warning" role="status">No reporting years are available at or after the analysis baseline.</p> }

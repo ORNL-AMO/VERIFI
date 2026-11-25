@@ -11,7 +11,7 @@ import { FacilityReportActionsService } from '@app/v1/reports/facility/facility-
 import { WorkspaceNavigationService } from '@app/v1/shell/workspace-navigation.service';
 import { UnsavedChangesService } from '@app/v1/shared/navigation/unsaved-changes.service';
 import { ReportInventoryEntry } from '../report-inventory.models';
-import { ACCOUNT_REPORT_TYPES, FACILITY_REPORT_TYPES, reportDefinition } from '@app/v1/reports/catalog/report-catalog';
+import { ACCOUNT_REPORT_TYPES, FACILITY_REPORT_TYPES, reportDefaultName, reportDefinition } from '@app/v1/reports/catalog/report-catalog';
 import type { IconName } from '@app/v1/shared/icons/icon-registry';
 import type { ReportScope } from '@app/v1/reports/shared/report.models';
 import { reportTypeAvailable } from '../../catalog/report-availability';
@@ -125,7 +125,7 @@ export class ReportLifecycleService {
     const typeSubscription = this.form.controls.type.valueChanges.subscribe(type => {
       if (this.editor()?.entry) return;
       const scope = this.form.controls.scope.value;
-      const suggestion = scope && type ? `${reportDefinition(scope, type)?.label ?? 'New'} report` : '';
+      const suggestion = scope && type ? reportDefaultName(scope, type) : '';
       if (!this.form.controls.name.dirty && this.form.controls.name.value === this.suggestedName) this.form.controls.name.setValue(suggestion);
       this.suggestedName = suggestion;
     });

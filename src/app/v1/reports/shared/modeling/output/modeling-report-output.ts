@@ -6,7 +6,7 @@ import { MODELING_REGRESSION_HEADERS, MODELING_DETAILS_HEADERS, modelingDetailsC
 export type ModelingOutputChart = ChartSection & { readonly modelComparison: AnalysisModelComparisonData };
 export type ModelingOutputSection = Exclude<ReportSection, ChartSection> | ModelingOutputChart;
 
-/** Detached presentation data; future account adapters supply the same scope-neutral contract. */
+/** Detached presentation data shared by account and facility Modeling output adapters. */
 export interface ModelingReportExportSnapshot {
   readonly identity: string;
   readonly name: string;

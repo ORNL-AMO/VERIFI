@@ -19,7 +19,7 @@ const ACCOUNT_REPORT_CATALOG = {
   dataOverview: { label: 'Data Overview', icon: 'report', requiresOtherImpacts: false, hasDataChecks: false, contentImplemented: false, supportsAnalysisReturn: false },
   performance: { label: 'Performance', icon: 'report', requiresOtherImpacts: false, hasDataChecks: true, contentImplemented: false, supportsAnalysisReturn: true },
   betterClimate: { label: 'Emissions', icon: 'report', requiresOtherImpacts: true, hasDataChecks: false, contentImplemented: false, supportsAnalysisReturn: false },
-  analysis: { label: 'Analysis', icon: 'report', requiresOtherImpacts: false, hasDataChecks: false, contentImplemented: false, supportsAnalysisReturn: true },
+  analysis: { label: 'Modeling', icon: 'modelingReport', requiresOtherImpacts: false, hasDataChecks: false, contentImplemented: true, supportsAnalysisReturn: true },
   accountEmissionFactors: { label: 'Emission Factors', icon: 'report', requiresOtherImpacts: true, hasDataChecks: false, contentImplemented: false, supportsAnalysisReturn: false },
   accountSavings: { label: 'Savings', icon: 'report', requiresOtherImpacts: false, hasDataChecks: true, contentImplemented: false, supportsAnalysisReturn: true }
 } as const satisfies Readonly<Record<ReportType, ReportDefinition>>;
@@ -42,6 +42,11 @@ export const FACILITY_REPORT_TYPES: ReadonlyArray<{ readonly value: FacilityRepo
 export function reportDefinition(scope: ReportScope, type: string): ReportDefinition | undefined {
   const catalog: Readonly<Record<string, ReportDefinition>> = scope === 'account' ? ACCOUNT_REPORT_CATALOG : FACILITY_REPORT_CATALOG;
   return Object.hasOwn(catalog, type) ? catalog[type] : undefined;
+}
+
+/** Saved type identifiers are storage keys; new names follow the user-facing report label. */
+export function reportDefaultName(scope: ReportScope, type: string): string {
+  return `${reportDefinition(scope, type)?.label ?? 'New'} report`;
 }
 
 /** Other Impacts is stored as the account's existing displayEmissions preference. */

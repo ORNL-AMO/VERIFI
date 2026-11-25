@@ -54,11 +54,11 @@ describe('facility report workbench navigation', () => {
     expect(store.committedRevision()).toBeUndefined();
   });
 
-  it('qualifies the single-facility header format while retaining plain report-type labels in its stages', async () => {
+  it('keeps the distinct facility Analysis name unqualified in single-facility workspaces', async () => {
     const { open, harness } = await setupReportWorkbench();
     vi.spyOn(TestBed.inject(WorkspaceNavigationService), 'isSingleSiteWorkspace').mockReturnValue(true);
     const workbench = await open();
-    expect(workbench.context.typeLabel()).toBe('Analysis — Facility format');
+    expect(workbench.context.typeLabel()).toBe('Analysis');
     const setup = harness.routeNativeElement!.querySelector('app-analysis-report-setup')!;
     expect(setup).not.toBeNull();
     expect(setup.textContent).not.toContain('Facility format');

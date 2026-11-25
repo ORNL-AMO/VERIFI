@@ -6,7 +6,8 @@ import { CalanderizedMeter } from '@data/models/calanderization';
 
 export type AnalysisReportWorkerRequest =
   | { readonly operation: 'checks'; readonly inputs: CheckedAnalysisReportInputs; readonly years: readonly number[] }
-  | { readonly operation: 'modeling'; readonly inputs: CheckedAnalysisReportInputs; readonly years: readonly number[]; readonly chartMeters: readonly CalanderizedMeter[] }
+  | { readonly operation: 'modeling'; readonly inputs: CheckedAnalysisReportInputs; readonly years: readonly number[]; readonly chartMeters: readonly CalanderizedMeter[];
+      readonly includeModelDetails?: boolean; readonly availableYears?: readonly number[] }
   | { readonly operation: 'better-plants'; readonly inputs: AnalysisReportInputs; readonly years: readonly number[] };
 export type AnalysisReportWorkerResponse =
   | { readonly ok: true; readonly operation: 'checks'; readonly value: readonly AnalysisDataChecks[] }

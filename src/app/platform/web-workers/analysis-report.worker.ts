@@ -8,11 +8,12 @@ import { calculateModelingReport } from '@domain/reports/modeling-report-calcula
 addEventListener('message', ({ data }: MessageEvent<AnalysisReportWorkerRequest>) => {
   let response: AnalysisReportWorkerResponse;
   try {
-    assertAnalysisReportYears(data.inputs, data.years);
+    assertAnalysisReportYears(data.inputs, data.years, data.operation === 'modeling' ? 'modeling' : 'review',
+      data.operation === 'modeling' ? data.availableYears : undefined);
     response = data.operation === 'checks'
       ? { ok: true, operation: 'checks', value: data.years.map(year => calculateAnalysisDataChecks(data.inputs, year)) }
       : data.operation === 'modeling'
-        ? { ok: true, operation: 'modeling', value: data.years.map(year => calculateModelingReport(data.inputs, year, data.chartMeters)) }
+        ? { ok: true, operation: 'modeling', value: data.years.map(year => calculateModelingReport(data.inputs, year, data.chartMeters, data.includeModelDetails, data.availableYears)) }
         : { ok: true, operation: 'better-plants', value: calculateBetterPlantsReport(data.inputs, data.years) };
   } catch (error) {
     response = { ok: false, message: error instanceof Error ? error.message : 'The report calculation failed.' };
