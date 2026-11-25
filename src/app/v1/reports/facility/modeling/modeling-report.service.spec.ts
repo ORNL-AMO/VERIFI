@@ -16,7 +16,7 @@ describe('Modeling report result session', () => {
     const snapshot = signal(modelingSnapshot()), stage = signal('setup'), pending = signal(false), saved = signal('saved');
     const report = computed(() => snapshot().facilityReports[0]);
     const execute = vi.fn((request: AnalysisReportWorkerRequest) => of<AnalysisReportWorkerResponse>(request.operation === 'modeling'
-      ? { ok: true, operation: 'modeling', value: request.years.map(year => calculateModelingReport(request.inputs, year, request.chartMeters)) }
+      ? { ok: true, operation: 'modeling', value: request.years.map(year => calculateModelingReport(request.inputs, year, request.chartMeters, request.includeModelDetails)) }
       : { ok: true, operation: 'checks', value: request.years.map(year => calculateAnalysisDataChecks(request.inputs, year)) }));
     const editor = { context: { report, stage, facility: computed(() => snapshot().facilities[0]), key: () => 'account:facility:modeling-report',
       workspace: { status: () => 'ready', isReady: () => true, hasPending: pending, snapshot,
@@ -71,7 +71,7 @@ describe('Modeling report result session', () => {
       ...report, modelingReportSettings: { ...report.modelingReportSettings, includeDataValidationTables: enabled }
     })) }));
     details(false); stage.set('report'); await ready(service);
-    expect(execute.mock.calls.at(-1)![0].operation).toBe('checks');
+    expect(execute.mock.calls.at(-1)![0]).toMatchObject({ operation: 'modeling', includeModelDetails: false, chartMeters: [] });
     expect(service.view()!.regression[0].chart).toBeUndefined();
     details(true); await ready(service);
     expect(execute.mock.calls.at(-1)![0].operation).toBe('modeling');

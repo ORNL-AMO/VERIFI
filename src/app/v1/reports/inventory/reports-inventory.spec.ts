@@ -13,7 +13,7 @@ describe('ReportsInventoryComponent', () => {
     const { fixture, dashboard } = await setup();
     expect(dashboard.entries()).toHaveLength(2); expect(dashboard.filteredEntries().map(entry => entry.scope)).toEqual(['account', 'facility']);
     expect(fixture.nativeElement.querySelectorAll('.portfolio-inventory app-inventory-tile')).toHaveLength(2);
-    expect(dashboard.inventory.detail()).toBe('simple'); expect(fixture.nativeElement.textContent).toContain('Report content pending');
+    expect(dashboard.inventory.detail()).toBe('simple'); expect(fixture.nativeElement.textContent).not.toContain('Report content pending');
     dashboard.filtersForm.controls.scope.setValue('facility'); fixture.detectChanges(); expect(dashboard.filteredEntries()).toHaveLength(1);
     expect(dashboard.filteredEntries()[0].scope).toBe('facility');
   });

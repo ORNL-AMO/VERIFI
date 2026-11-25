@@ -9,7 +9,7 @@ import { AnalysisUsageReport, AnalysisUsageSource, AnalysisUsageTarget, analysis
 import { WorkspaceCommandBoundary } from '@data/account-workspace/workspace-command-boundary.service';
 import { WorkspaceWriteError } from '@data/account-workspace/workspace-commands.models';
 import { getNewIdbEntry } from '@data/models/idbModels/idbEntry';
-import { reportDefinition, reportTypeChoices } from '@app/v1/reports/catalog/report-catalog';
+import { reportDefaultName, reportDefinition, reportTypeChoices } from '@app/v1/reports/catalog/report-catalog';
 import { accountAnalysisWorkbenchRoute, accountReportWorkbenchRoute, facilityReportWorkbenchRoute } from '@app/v1/routing/workspace-route';
 import { UnsavedChangesService } from '@app/v1/shared/navigation/unsaved-changes.service';
 import { IconName } from '@app/v1/shared/icons/icon-registry';
@@ -121,7 +121,10 @@ export class AnalysisUsageService {
     if (!this.canChoose() || !this.reportTypes().some(item => item.value === value)) return;
     const changed = this.form.controls.type.value !== value;
     this.form.controls.type.setValue(value); this.error.set(undefined);
-    if (changed || !this.form.controls.name.value.trim()) this.form.controls.name.setValue(`${this.selectedType()!.typeLabel} report`);
+    if (changed || !this.form.controls.name.value.trim()) {
+      const selected = this.selectedType()!;
+      this.form.controls.name.setValue(reportDefaultName(selected.scope, selected.type));
+    }
     this.refreshReview();
   }
   editSelection(step: UsageStep): void { if (this.canChoose()) this.step.set(step); }

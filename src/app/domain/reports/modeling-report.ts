@@ -43,7 +43,7 @@ export function modelingReportContent(inputs: CheckedAnalysisReportInputs, repor
       .map(variable => [variable.id, variable.name])]);
 }
 
-/** Scope-neutral content, usable by facility Modeling and account Analysis reports. */
+/** Scope-neutral content shared by facility and account Modeling reports. */
 export function buildModelingReport(checks: ModelingReportChecks, settings: Pick<ModelingReportSettings,
   'includeIssuesSummary' | 'includeExecutiveSummary' | 'includeDataValidationTables'>,
   names: { readonly facilities: Readonly<Record<string, string>>; readonly groups: Readonly<Record<string, string>>;

@@ -1,0 +1,36 @@
+@let fields = editor.form.controls.settings.controls;
+@let base = editor.base();
+<section class="report-section report-setup" aria-label="Modeling report setup">
+  @if (!editor.canEdit()) { <p class="v1-alert v1-alert--warning" role="status">Report settings are read-only while workspace editing is unavailable. Your saved settings are preserved.</p> }
+  <section class="report-setup-section" aria-labelledby="account-modeling-information-heading">
+    <h2 id="account-modeling-information-heading" class="setup-section-heading">Report information</h2>
+    <div class="report-setup-body report-setup-body--with-period">
+      <div class="report-setup-field report-setup-name">
+        <label for="account-report-name">Name <span class="report-setup-required" aria-hidden="true">*</span></label>
+        <input id="account-report-name" class="v1-input" [formControl]="editor.name" required autocomplete="off" [attr.aria-invalid]="editor.name.invalid ? true : null" aria-describedby="account-modeling-name-help">
+        <p id="account-modeling-name-help" class="report-setup-help" [class.v1-field-error]="editor.name.invalid">{{ editor.name.invalid ? 'Enter a nonblank report name.' : 'Changes save automatically, including incomplete selections.' }}</p>
+      </div>
+      <div class="report-period">
+        <div class="report-setup-field">
+          <label for="account-modeling-report-year">Report year <span class="report-setup-required" aria-hidden="true">*</span></label>
+          <select id="account-modeling-report-year" class="v1-select" [formControl]="fields.reportYear" required [attr.aria-invalid]="unavailableYear() ? true : null" [attr.aria-describedby]="unavailableYear() ? 'account-modeling-year-help' : null">
+            <option [ngValue]="null">Not selected</option>
+            @if (retainedYear()) { <option [ngValue]="fields.reportYear.value">{{ fields.reportYear.value }} — {{ unavailableYear() ? 'saved year unavailable' : 'saved year' }}</option> }
+            @for (year of editor.periods(); track year) { <option [ngValue]="year">{{ context.workspace.account()?.fiscalYear === 'nonCalendarYear' ? 'FY ' : '' }}{{ year }}</option> }
+          </select>
+        </div>
+        @if (unavailableYear()) { <p id="account-modeling-year-help" class="report-setup-help v1-field-error">Choose an available report year at or after the analysis baseline.</p> }
+        @if (base.state !== 'error' && !editor.periodsCurrent()) { <p role="status">Finding available reporting years…</p> }
+        @if (base.state === 'error') { <p class="v1-field-error" role="alert">Reporting years could not be loaded.</p><button type="button" class="v1-btn v1-btn--secondary" (click)="editor.retryPeriods()">Retry reporting years</button> }
+        @if (editor.periodsCurrent() && !editor.periods().length) { <p class="v1-alert v1-alert--warning" role="status">No reporting years are available at or after the analysis baseline.</p> }
+      </div>
+    </div>
+  </section>
+  <app-account-report-analysis-selection [sectioned]="true"/>
+  <section class="report-setup-section" aria-labelledby="account-modeling-content-heading">
+    <h2 id="account-modeling-content-heading" class="setup-section-heading">Included content</h2>
+    <div class="report-setup-body">
+      @for (section of content; track section.key) { <label class="report-setup-option modeling-option"><input type="checkbox" [formControl]="fields[section.key]"><span>{{ section.label }}</span></label> }
+    </div>
+  </section>
+</section>

@@ -14,6 +14,21 @@ describe('report calculation lifecycle', () => {
     expect(await firstValueFrom(new AnalysisReportCalculationService().execute({ operation: 'modeling', inputs,
       years: [2023], chartMeters: [] }))).toEqual({ ok: true, operation: 'modeling', value: [calculateModelingReport(inputs, 2023, [])] });
   });
+  it('supports baseline-only account Modeling diagnostics in the synchronous fallback', async () => {
+    vi.stubGlobal('Worker', undefined);
+    const inputs = buildAnalysisReportInputs(analysisReportFixture(), 'account-analysis');
+    expect(await firstValueFrom(new AnalysisReportCalculationService().execute({ operation: 'modeling', inputs,
+      years: [2022], chartMeters: [], includeModelDetails: false }))).toEqual({ ok: true, operation: 'modeling',
+      value: [calculateModelingReport(inputs, 2022, [], false)] });
+    expect(() => calculateModelingReport(inputs, 2021, [], false)).toThrow();
+  });
+  it('honors canonical account Modeling periods beyond the selected facilities in the fallback', async () => {
+    vi.stubGlobal('Worker', undefined);
+    const inputs = buildAnalysisReportInputs(analysisReportFixture(), 'account-analysis');
+    expect(await firstValueFrom(new AnalysisReportCalculationService().execute({ operation: 'modeling', inputs,
+      years: [2026], chartMeters: [], includeModelDetails: false, availableYears: [2022, 2023, 2026] }))).toEqual({
+      ok: true, operation: 'modeling', value: [calculateModelingReport(inputs, 2026, [], false, [2022, 2023, 2026])] });
+  });
   it('terminates a timed-out facility report Worker using the same timeout contract', async () => {
     vi.useFakeTimers(); const terminate = vi.fn();
     vi.stubGlobal('Worker', class { addEventListener = vi.fn(); postMessage = vi.fn(); terminate = terminate; });

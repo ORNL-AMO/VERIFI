@@ -37,6 +37,7 @@ describe('report status destinations', () => {
   });
   it('labels partially implemented findings precisely and leaves dates, data and facility selectors pending', () => {
     const snapshot = accountReportSnapshot();
+    snapshot.accountReports[0].reportType = 'performance';
     const mixed = resolveReportStatusItem(finding('account', 'report.configuration.invalid', ['missingName', 'missingReportYear']), snapshot);
     expect(mixed.actionLabel).toBe('Review name'); expect(mixed.description).toContain('Other report settings are pending migration.');
     expect(resolveReportStatusItem(mixed, snapshot)).toEqual(mixed);
@@ -47,6 +48,15 @@ describe('report status destinations', () => {
     ] as const) {
       const resolved = resolveReportStatusItem(finding(scope, code, [...reasons]), snapshot);
       expect(resolved.destination.kind).toBe('unavailable'); expect(resolved.unavailableReason).toContain('pending migration');
+    }
+  });
+  it('routes account Modeling year and analysis findings to its migrated Setup', () => {
+    const snapshot = accountReportSnapshot();
+    for (const item of [finding('account', 'report.configuration.invalid', ['missingName', 'missingReportYear']),
+      finding('account', 'report.dates.invalid'), finding('account', 'report.analysis.invalid')]) {
+      const resolved = resolveReportStatusItem(item, snapshot);
+      expect(resolved.destination.kind).toBe('account-report-setup');
+      expect(resolved.description).not.toContain('pending migration');
     }
   });
   it('opens migrated facility analysis and period controls', () => {

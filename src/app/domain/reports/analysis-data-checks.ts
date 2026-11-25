@@ -22,8 +22,9 @@ export interface AnalysisDataChecks {
 }
 
 /** Use the same model validation as v0, on detached inputs and at the requested year. */
-export function calculateAnalysisDataChecks(inputs: CheckedAnalysisReportInputs, reportYear: number): AnalysisDataChecks {
-  assertAnalysisReportYears(inputs, [reportYear]);
+export function calculateAnalysisDataChecks(inputs: CheckedAnalysisReportInputs, reportYear: number,
+  purpose: 'review' | 'modeling' = 'review', availableModelingYears?: readonly number[]): AnalysisDataChecks {
+  assertAnalysisReportYears(inputs, [reportYear], purpose, availableModelingYears);
   const detached = structuredClone(inputs);
   const groups: AnalysisDataCheckGroup[] = [];
   for (const link of analysisReportLinks(detached)) {

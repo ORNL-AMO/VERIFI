@@ -135,14 +135,26 @@ export function reportYears(baselineYear: number, reportYear: number, includeAll
 }
 
 /** Bound total work by the loaded history, including a fiscal/backward-reading boundary year. */
-export function assertAnalysisReportYears(inputs: CheckedAnalysisReportInputs, years: readonly number[]): void {
+export function assertAnalysisReportYears(inputs: CheckedAnalysisReportInputs, years: readonly number[], purpose: 'review' | 'modeling' = 'review',
+  availableModelingYears?: readonly number[]): void {
+  // Account Modeling can diagnose a period present only in an unselected facility.
+  // Its scope adapter supplies current canonical periods without sending unrelated readings.
+  if (purpose === 'modeling' && availableModelingYears !== undefined) {
+    if (!years.length || new Set(years).size !== years.length || !Number.isInteger(inputs.analysis.baselineYear)
+      || inputs.analysis.baselineYear < 1800 || inputs.analysis.baselineYear > 9999
+      || years.some(year => !Number.isInteger(year) || year < inputs.analysis.baselineYear || year > 9999
+        || !availableModelingYears.includes(year))) {
+      throw new Error('The reporting periods fall outside the available meter history. Review the analysis baseline and report year.');
+    }
+    return;
+  }
   const dataYears = inputs.meterData.map(item => item.year).filter(year => Number.isInteger(year) && year >= 1800 && year <= 9999);
   const first = dataYears.reduce((value, year) => Math.min(value, year), Infinity);
   const last = dataYears.reduce((value, year) => Math.max(value, year), -Infinity);
   if (!years.length || new Set(years).size !== years.length || !dataYears.length
     || inputs.analysis.baselineYear < first - 1 || years.length > last - first + 2
     || years.some(year => !Number.isInteger(year) || year < inputs.analysis.baselineYear
-      || (inputs.kind !== 'facility' && year === inputs.analysis.baselineYear) || year > last + 1)) {
+      || (purpose !== 'modeling' && inputs.kind !== 'facility' && year === inputs.analysis.baselineYear) || year > last + 1)) {
     throw new Error('The reporting periods fall outside the available meter history. Review the analysis baseline and report year.');
   }
 }

@@ -216,6 +216,33 @@ describe('account report setup transactions in Chromium', () => {
     const cleared = await actions.updateSetup('account-report', { analysis: null });
     expect(cleared.analysisReportSetup.analysisItemId).toBeUndefined(); expect(cleared.performanceReportSetup.analysisItemId).toBe('unrelated-saved-reference');
   });
+  it('merges Modeling flags and years without rewriting durable links or unrelated settings', async () => {
+    const snapshot = accountReportSnapshot();
+    const { actions, transactions } = await setup(snapshot);
+    await transactions.runTransaction(['accountReports'], 'readwrite', tx => tx.put('accountReports', {
+      ...snapshot.accountReports[0], analysisReportSetup: { ...snapshot.accountReports[0].analysisReportSetup,
+        analysisItemId: 'unavailable-saved-link', includeExecutiveSummary: false, compatibilityOption: 'preserved' }
+    }));
+    const saved = await actions.updateSetup('account-report', { reportYear: 2024,
+      modeling: { includeProblemsInformation: false, includeDataValidationTables: false } });
+    expect(saved.reportType).toBe('analysis'); expect(saved.reportYear).toBe(2024);
+    expect(saved.analysisReportSetup).toEqual({ analysisItemId: 'unavailable-saved-link', includeProblemsInformation: false,
+      includeExecutiveSummary: false, includeDataValidationTables: false, compatibilityOption: 'preserved' });
+    const copy = await actions.copy(saved.guid); await harness.reopen();
+    const stored = (await harness.getAll('accountReports')).find(report => report.guid === copy.guid)!;
+    expect(stored['analysisReportSetup']).toEqual(saved.analysisReportSetup);
+    expect(stored['reportType']).toBe('analysis'); expect(stored['reportYear']).toBe(2024);
+    await expect(actions.updateSetup('account-report', { modeling: { includeProblemsInformation: null } as never })).rejects.toMatchObject({ code: 'validation-failed' });
+    await expect(actions.updateSetup('account-report', { betterPlants: { includeAllYears: true } })).rejects.toMatchObject({ code: 'validation-failed' });
+    await expect(actions.updateSetup('account-report', { reportYear: 2024.5 })).rejects.toMatchObject({ code: 'validation-failed' });
+    expect((await harness.getAll('accountReports')).find(report => report.guid === saved.guid)!['analysisReportSetup']).toEqual(saved.analysisReportSetup);
+  });
+  it('rejects Modeling patches on other account report formats', async () => {
+    const snapshot = accountReportSnapshot(); snapshot.accountReports[0].reportType = 'betterPlants';
+    const { actions } = await setup(snapshot);
+    await expect(actions.updateSetup('account-report', { name: 'Not committed', modeling: { includeExecutiveSummary: false } })).rejects.toMatchObject({ code: 'validation-failed' });
+    expect((await harness.getAll('accountReports'))[0]['name']).toBe(snapshot.accountReports[0].name);
+  });
   it('merges Better Plants edits with durable settings and rejects invalid option patches', async () => {
     const snapshot = accountReportSnapshot(); snapshot.accountReports[0].reportType = 'betterPlants';
     const { actions, transactions } = await setup(snapshot);

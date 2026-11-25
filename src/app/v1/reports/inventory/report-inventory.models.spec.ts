@@ -14,12 +14,12 @@ function snapshot() {
     accountAnalyses: [{ guid: 'account-analysis', accountId: reportAccount.guid, name: 'Linked account analysis', facilityAnalysisItems: [] }] as any };
 }
 describe('report inventory projections', () => {
-  it('removes the pending-content label for facility Data Quality while retaining pending account Analysis content', () => {
+  it('removes pending-content labels for facility Data Quality and account Modeling', () => {
     const data = snapshot();
     const entries = buildReportInventory({ ...data,
       facilityReports: data.facilityReports.map(report => ({ ...report, facilityReportType: 'dataQuality' as const })) }, [], 'ready');
     expect(entries.find(entry => entry.scope === 'facility')!.snapshot.contentPending).toBe(false);
-    expect(entries.find(entry => entry.scope === 'account')!.snapshot.contentPending).toBe(true);
+    expect(entries.find(entry => entry.scope === 'account')!.snapshot.contentPending).toBe(false);
   });
   it('projects scope-qualified status actions and explicit pending reasons into report cards', () => {
     const data = snapshot();
@@ -30,11 +30,10 @@ describe('report inventory projections', () => {
     const entries = buildReportInventory(data, findings, 'ready');
     for (const entry of entries) {
       const config = entry.snapshot.findings.find(item => item.action)!;
-      expect(config.action!.label).toBe(entry.scope === 'facility' ? 'Review setup' : 'Review name');
+      expect(config.action!.label).toBe('Review setup');
       expect(config.action!.route).toEqual(['/v1', 'workspace', entry.scope, entry.scope === 'account' ? 'account-a' : 'facility-a', 'reports', 'workbench', 'report-a', 'setup']);
-      if (entry.scope === 'account') expect(config.description).toContain('Other report settings are pending migration.');
-      if (entry.scope === 'account') expect(entry.snapshot.findings.find(item => !item.action)?.unavailableReason).toBe('Report date settings are pending migration.');
-      else expect(entry.snapshot.findings.every(item => !!item.action)).toBe(true);
+      expect(config.description).not.toContain('Other report settings are pending migration.');
+      expect(entry.snapshot.findings.every(item => !!item.action)).toBe(true);
     }
   });
   it('keeps matching GUIDs distinct across scopes and includes only owned records', () => {
@@ -51,7 +50,7 @@ describe('report inventory projections', () => {
     const data = snapshot(); data.accountReports[0].reportType = value as any;
     const entry = buildReportInventory(data, [], 'ready')[0];
     expect(entry.typeLabel).not.toBe('Unknown report type');
-    expect(entry.snapshot.contentPending).toBe(value !== 'betterPlants');
+    expect(entry.snapshot.contentPending).toBe(!['betterPlants', 'analysis'].includes(value));
     expect(entry.snapshot.facts.some(fact => fact.label === 'Reporting period')).toBe(true);
     expect(entry.snapshot.modified).toBeDefined();
     expect(entry.snapshot).not.toHaveProperty('outcomes');
@@ -154,15 +153,15 @@ describe('single-facility report choices', () => {
       ...ACCOUNT_REPORT_TYPES.map(item => `account:${item.value}`),
       ...FACILITY_REPORT_TYPES.map(item => `facility:${item.value}`)
     ]));
-    for (const type of ['Analysis', 'Data Overview', 'Emission Factors', 'Savings']) {
+    for (const type of ['Modeling', 'Data Overview', 'Emission Factors', 'Savings']) {
       const formats = choices.filter(item => item.typeLabel === type);
       expect(formats.map(item => item.formatLabel).sort()).toEqual(['Account format', 'Facility format']);
       expect(formats.every(item => item.label === `${type} — ${item.formatLabel}`)).toBe(true);
     }
     expect(choices.find(item => item.type === 'betterPlants')?.label).toBe('Better Plants');
-    expect(choices.find(item => item.type === 'modeling')?.formatLabel).toBeUndefined();
+    expect(choices.find(item => item.type === 'modeling')?.formatLabel).toBe('Facility format');
     expect(reportTypePresentation('facility', 'overview', true).label).toBe('Data Overview — Facility format');
-    expect(reportTypePresentation('account', 'analysis', false).label).toBe('Analysis');
+    expect(reportTypePresentation('account', 'analysis', false).label).toBe('Modeling');
     expect(reportTypeChoices(true, false).some(item => ['betterClimate', 'accountEmissionFactors', 'emissionFactors'].includes(item.type))).toBe(false);
   });
 });

@@ -29,6 +29,13 @@ function setup(scope: 'facility' | 'account' = 'facility') {
 }
 
 describe('Analysis Used By action sessions', () => {
+  it('defaults account Modeling creation to Modeling report while retaining the analysis storage type', async () => {
+    const f = setup('account'); await f.service.open('report'); f.service.chooseType('account:analysis');
+    expect(f.service.form.controls.name.value).toBe('Modeling report');
+    await f.service.submit();
+    expect(f.commands.saveReport).toHaveBeenCalledWith(expect.objectContaining({
+      report: { scope: 'account', type: 'analysis' }, target: expect.objectContaining({ name: 'Modeling report' }) }));
+  });
   it('steps through new report choices and opens the saved report without requiring results', async () => {
     const f = setup();
     await f.service.open('report');

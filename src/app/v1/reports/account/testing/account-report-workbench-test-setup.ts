@@ -28,8 +28,9 @@ export async function setupAccountReportWorkbench(snapshot: AccountWorkspaceSnap
   const updateSetup = vi.fn(async (guid: string, changes: AccountReportSetupChanges) => {
     const report = store.accountReports().find(item => item.guid === guid)!;
     const key = accountReportAnalysisSetupKey(report.reportType);
-    const updated = { ...report, ...(changes.name !== undefined ? { name: changes.name } : {}),
-      ...(key && changes.analysis !== undefined ? { [key]: { ...report[key], analysisItemId: changes.analysis?.analysisGuid } } : {}) };
+    const updated = { ...report, ...(changes.reportYear !== undefined ? { reportYear: changes.reportYear ?? undefined } : {}),
+      ...(changes.modeling ? { analysisReportSetup: { ...report.analysisReportSetup, ...changes.modeling } } : {}), ...(changes.name !== undefined ? { name: changes.name } : {}),
+      ...(key && changes.analysis !== undefined ? { [key]: { ...report[key], ...(key === 'analysisReportSetup' ? changes.modeling : {}), analysisItemId: changes.analysis?.analysisGuid } } : {}) };
     store.publishCommittedPatch({ collections: [{ collection: 'accountReports', upsert: [updated] }] }); return updated;
   });
   const deleteReport = vi.fn(async (guid: string) => {

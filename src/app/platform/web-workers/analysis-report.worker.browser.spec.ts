@@ -11,6 +11,25 @@ import { regressionAnalysisReportFixture } from '@domain/reports/testing/analysi
 import { getCalanderizedMeterData } from '@domain/calculations/calanderization/calanderizeMeters';
 
 describe('analysis report Worker', () => {
+  it('uses account Modeling periods independently of selected-facility history, retaining review bounds', async () => {
+    const inputs = buildAnalysisReportInputs(regressionAnalysisReportFixture(), 'account-analysis');
+    const worker = await createWorker();
+    expect(await run(worker, { operation: 'modeling', inputs, years: [2026], chartMeters: [],
+      includeModelDetails: false, availableYears: [2022, 2023, 2024, 2026] })).toEqual({ ok: true, operation: 'modeling',
+      value: [calculateModelingReport(inputs, 2026, [], false, [2022, 2023, 2024, 2026])] });
+    expect((await run(await createWorker(), { operation: 'modeling', inputs, years: [2027], chartMeters: [],
+      includeModelDetails: false, availableYears: [2022, 2023, 2024, 2026] })).ok).toBe(false);
+    expect((await run(await createWorker(), { operation: 'checks', inputs, years: [2026] })).ok).toBe(false);
+  });
+  it.each([false, true])('accepts account Modeling baseline years with model details %s without relaxing review years', async includeModelDetails => {
+    const inputs = buildAnalysisReportInputs(regressionAnalysisReportFixture(), 'account-analysis');
+    const worker = await createWorker();
+    const response = await run(worker, { operation: 'modeling', inputs, years: [2022], chartMeters: [], includeModelDetails });
+    expect(response).toEqual({ ok: true, operation: 'modeling', value: [calculateModelingReport(inputs, 2022, [], includeModelDetails)] });
+    const review = await run(await createWorker(), { operation: 'checks', inputs, years: [2022] });
+    expect(review.ok).toBe(false);
+    expect((await run(await createWorker(), { operation: 'better-plants', inputs, years: [2022] })).ok).toBe(false);
+  });
   it('round-trips detached modeling charts with the same values as synchronous execution', async () => {
     const snapshot = regressionAnalysisReportFixture(), inputs = buildFacilityAnalysisReportInputs(snapshot, 'facility', 'facility-analysis');
     const chartMeters = getCalanderizedMeterData([...snapshot.meters], [...snapshot.meterData], snapshot.facilities[0], false,

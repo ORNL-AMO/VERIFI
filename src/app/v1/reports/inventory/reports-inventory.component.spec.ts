@@ -45,7 +45,7 @@ describe('report browse state', () => {
     expect(host.lifecycle.canSave()).toBe(false);
   });
 
-  it('uses custom Better Plants and facility analysis icons while retaining the account analysis page icon', async () => {
+  it('uses custom icons for Better Plants, facility Analysis, and account Modeling', async () => {
     const { store } = await setupReportInventory();
     const saved = store.snapshot()!;
     store.publish({ ...saved, accountReports: [
@@ -56,13 +56,11 @@ describe('report browse state', () => {
     const tiles = fixture.componentInstance.tiles();
     expect(tiles.filter(tile => tile.icon === 'betterPlantsReport')).toHaveLength(1);
     expect(tiles.filter(tile => tile.icon === 'facilityAnalysisReport')).toHaveLength(1);
-    expect(tiles.filter(tile => tile.icon === 'report')).toHaveLength(1);
+    expect(tiles.filter(tile => tile.icon === 'modelingReport')).toHaveLength(1);
     for (const level of ['simple', 'summary', 'detailed'] as const) {
       fixture.componentInstance.inventory.detailControl.setValue(level); fixture.detectChanges();
       for (const tile of fixture.nativeElement.querySelectorAll('.portfolio-inventory .portfolio-tile') as NodeListOf<HTMLElement>) {
-        const name = tile.querySelector('.portfolio-tile__name')?.textContent?.trim();
-        const implemented = name !== 'Account analysis report';
-        expect(!!tile.querySelector('.portfolio-tile__report-pending')).toBe(!implemented);
+        expect(tile.querySelector('.portfolio-tile__report-pending')).toBeNull();
       }
     }
     expect(store.committedRevision()).toBeUndefined();
@@ -188,7 +186,8 @@ describe('report browse state', () => {
 describe('single-facility combined reports', () => {
   it('ignores remembered level filters, hides ownership and retains both formats', async () => {
     const { store } = await setupReportInventory();
-    store.publish({ ...store.snapshot()!, account: { ...store.account()!, isSingleFacilityCompany: true } });
+    store.publish({ ...store.snapshot()!, account: { ...store.account()!, isSingleFacilityCompany: true },
+      facilityReports: store.facilityReports().map(report => ({ ...report, facilityReportType: 'modeling' as const })) });
     const fixture = TestBed.createComponent(ReportsInventoryComponent); fixture.detectChanges();
     const host = fixture.componentInstance;
     host.filtersForm.controls.scope.setValue('facility'); fixture.detectChanges();
@@ -200,7 +199,7 @@ describe('single-facility combined reports', () => {
     expect(fixture.nativeElement.textContent).toContain('Account format');
     expect(fixture.nativeElement.textContent).toContain('Facility format');
     expect([...fixture.nativeElement.querySelectorAll('.portfolio-tile__name')].map((link: HTMLAnchorElement) => link.getAttribute('aria-label'))).toEqual(expect.arrayContaining([expect.stringContaining('Account format'), expect.stringContaining('Facility format')]));
-    expect(host.typeOptions().filter(item => item.label.startsWith('Analysis')).map(item => item.value).sort()).toEqual(['account:analysis', 'facility:analysis']);
+    expect(host.typeOptions().filter(item => item.label.startsWith('Modeling')).map(item => item.value).sort()).toEqual(['account:analysis', 'facility:modeling']);
     expect(store.committedRevision()).toBeUndefined();
     store.publish({ ...store.snapshot()!, account: { ...store.account()!, isSingleFacilityCompany: false } }); fixture.detectChanges();
     expect(fixture.nativeElement.querySelector('[formControlName="scope"]')).not.toBeNull();

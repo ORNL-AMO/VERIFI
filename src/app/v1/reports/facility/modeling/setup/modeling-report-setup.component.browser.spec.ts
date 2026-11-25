@@ -140,7 +140,7 @@ describe('Facility Modeling report Chromium journey', () => {
     await reportReady(coordinator); view.harness.detectChanges();
     expect(root.querySelector('#modeling-issues')).toBeNull(); expect(root.querySelector('#modeling-validation')).toBeNull();
     expect(execute).toHaveBeenCalledTimes(2);
-    expect(execute.mock.calls[1][0].operation).toBe('checks');
+    expect(execute.mock.calls[1][0]).toMatchObject({ operation: 'modeling', includeModelDetails: false, chartMeters: [] });
     await view.open('modeling-report', 'data-checks');
     await view.harness.fixture.whenStable(); view.harness.detectChanges();
     expect(view.router.url).toContain('/setup');

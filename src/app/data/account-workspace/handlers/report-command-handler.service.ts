@@ -181,7 +181,9 @@ export class ReportCommandHandler {
       if (changes.name !== undefined && !changes.name.trim()) throw new WorkspaceWriteError('validation-failed', 'Enter a nonblank report name.');
       let updated = { ...report, ...(changes.name !== undefined ? { name: changes.name.trim() } : {}) };
       if (changes.reportYear !== undefined || changes.betterPlants !== undefined) {
-        if (report.reportType !== 'betterPlants') throw new WorkspaceWriteError('validation-failed', 'These settings belong to a Better Plants report.');
+        if (report.reportType !== 'betterPlants' && (report.reportType !== 'analysis' || changes.betterPlants !== undefined)) {
+          throw new WorkspaceWriteError('validation-failed', 'These settings do not belong to this report type.');
+        }
         if (changes.reportYear !== undefined) {
           if (changes.reportYear !== null && (!Number.isInteger(changes.reportYear) || changes.reportYear < 1800 || changes.reportYear > 9999)) {
             throw new WorkspaceWriteError('validation-failed', 'Enter a valid report year.');
@@ -203,6 +205,18 @@ export class ReportCommandHandler {
           }
           updated = { ...updated, betterPlantsReportSetup: options };
         }
+      }
+      if (changes.modeling !== undefined) {
+        if (report.reportType !== 'analysis') throw new WorkspaceWriteError('validation-failed', 'These settings belong to a Modeling report.');
+        const options = { ...updated.analysisReportSetup };
+        for (const [key, value] of Object.entries(changes.modeling)) {
+          if (value === undefined) continue;
+          if (!['includeProblemsInformation', 'includeExecutiveSummary', 'includeDataValidationTables'].includes(key) || typeof value !== 'boolean') {
+            throw new WorkspaceWriteError('validation-failed', 'A Modeling setting is invalid.');
+          }
+          options[key] = value;
+        }
+        updated = { ...updated, analysisReportSetup: options };
       }
       const selectedAnalyses: IdbAccountAnalysisItem[] = [];
       if (changes.analysis !== undefined) {

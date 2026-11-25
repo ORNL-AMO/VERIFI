@@ -25,7 +25,7 @@ export class AnalysisReportCalculationService {
       return of<AnalysisReportWorkerResponse>(request.operation === 'checks'
         ? { ok: true, operation: 'checks', value: request.years.map(year => calculateAnalysisDataChecks(request.inputs, year)) }
         : request.operation === 'modeling'
-          ? { ok: true, operation: 'modeling', value: request.years.map(year => calculateModelingReport(request.inputs, year, request.chartMeters)) }
+          ? { ok: true, operation: 'modeling', value: request.years.map(year => calculateModelingReport(request.inputs, year, request.chartMeters, request.includeModelDetails, request.availableYears)) }
           : { ok: true, operation: 'better-plants', value: calculateBetterPlantsReport(request.inputs, request.years) });
     }).pipe(timeout(CALCULATION_WORKER_TIMEOUT_MS));
   }
